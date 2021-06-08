@@ -15,6 +15,7 @@ plugins {
 
     // Apply the application plugin to add support for building a CLI application.
     id 'application'
+
 }
 
 repositories {
@@ -29,15 +30,28 @@ dependencies {
 
     // Use JUnit test framework
     testImplementation 'junit:junit:4.13'
+    // https://projectlombok.org
+    compileOnly 'org.projectlombok:lombok:1.18.20'
+    annotationProcessor 'org.projectlombok:lombok:1.18.20'
+
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.8.8'
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.8.8'
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.8.8'
+    compile 'com.googlecode.json-simple:json-simple:1.1.1'
 }
 
 application {
     // Define the main class for the application.
-    mainClassName = 'tientn.easynews.reader.gui.ReaderGUI'
+    mainClassName = 'tientn.easynews.reader.gui.AppGUI'
 }
 
 //<----- and here
+//javafx has several bugs, we should use latest release: https://en.wikipedia.org/wiki/JavaFX
 javafx {
-    version = '11'
+    version = '16'
     modules = [ 'javafx.controls', 'javafx.fxml' ]
+}
+
+test {
+    testLogging.showStandardStreams = true
 }
