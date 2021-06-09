@@ -220,14 +220,22 @@
 #build-word-ja-content {
   -fx-font-size: 13pt; 
   -fx-font-family: Verdana;
-  -fx-background-color: gray;
+  text-area-background: #EFE1CE;
   -fx-text-fill: black;
+}
+
+#build-word-ja-content .content {
+    -fx-background-color: text-area-background ;
 }
 
 #build-word-en-content {
   -fx-font-size: 9pt; 
   -fx-font-family: Verdana;  
-  -fx-background-color: derive(gray,100%);
+  text-area-background: #9A8B4F;
+  -fx-text-fill: white;
+}
+#build-word-en-content .content {
+    -fx-background-color: text-area-background ;
 }
 
 #build-word-kanji,
@@ -238,7 +246,17 @@
   -fx-font-family: Verdana;
 }
 
+#build-word-detail-kanji {
+  -fx-font-size:40pt; 
+  -fx-text-fill: darkred;
+  -fx-font-family: Arial;
+}
+
 #build-word-kanji-meaning {
   -fx-font-size: 9pt; 
   -fx-font-family: Verdana;
+  text-area-background: #ffffcc;
+}
+#build-word-kanji-meaning .content {
+  -fx-background-color: text-area-background ;
 }

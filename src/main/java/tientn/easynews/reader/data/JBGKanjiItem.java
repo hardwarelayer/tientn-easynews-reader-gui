@@ -63,6 +63,16 @@ public class JBGKanjiItem implements Serializable {
     }
   }
 
+  public JBGKanjiItem cloneItem() {
+    JBGKanjiItem clone = new JBGKanjiItem(
+        this.kanji,
+        this.hiragana,
+        this.hv,
+        this.meaning
+      );
+    return clone;
+  }
+
   @Override
   public String toString() {
     return new StringBuilder(

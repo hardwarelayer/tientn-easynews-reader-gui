@@ -43,6 +43,8 @@ import tientn.easynews.reader.data.JBGConstants;
 
 public class ReaderModel {
 
+  @Getter @Setter private int currentWorkMode = JBGConstants.TEST_WORD_IN_MAJOR_LIST;
+
   @Getter
   private List<JBGKanjiItem> dataKanjiItems;
   @Getter
@@ -189,6 +191,36 @@ public class ReaderModel {
     return false;
   }
 
+
+  //used for article word build, lookup existing content for auto fill
+  private JBGKanjiItem getKanjiContentFromMainKanjiList(final String kanji) {
+    for (JBGKanjiItem item: this.dataKanjiItems) {
+      if (item.getKanji().equals(kanji)) {
+        return item;
+      }
+    }
+    return null;
+  }
+
+  public List<JBGKanjiItem> getSimilarKanjiFromMainKanjiList(final String kanji) {
+    List<JBGKanjiItem> lst = new ArrayList<JBGKanjiItem>();
+    for (JBGKanjiItem item: this.dataKanjiItems) {
+      if (item.getKanji().equals(kanji) || item.getKanji().contains(kanji) || kanji.contains(item.getKanji())) {
+        lst.add(item.cloneItem());
+      }
+    }
+    return lst;
+  }
+
+  private boolean isKanjiInList(final String kanji, List<JBGKanjiItem> lst) {
+    for (JBGKanjiItem item: lst) {
+      if (item.getKanji().equals(kanji)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   //kanji subset build for load in WordMatch game
   // 
   private void sortKanjisByCorrectCount(List<JBGKanjiItem> lst, boolean bReverse) {
@@ -283,12 +315,12 @@ public class ReaderModel {
 
   }
 
-  private void buildSpecificRecords(final List<String> lstKanjiWords) {
+  private void buildSpecificRecords(final List<String> lstKanjiWords, List<JBGKanjiItem> lst) {
     int iTotalSpecificItems = lstKanjiWords.size();
 
     this.subsetRecords = new ArrayList<>();
 
-    for (JBGKanjiItem item: this.dataKanjiItems) {
+    for (JBGKanjiItem item: lst) {
       if (lstKanjiWords.contains(item.getKanji())) {
         this.subsetRecords.add(item);
         if (this.subsetRecords.size() >= iTotalSpecificItems)
@@ -299,21 +331,56 @@ public class ReaderModel {
   }
 
   public List<JBGKanjiItem> getNormalKJSubset() {
-    //System.out.println("total rows: " + String.valueOf(dataKanjiItems.size()));
-    buildSubSetRecords(JBGConstants.KANJI_MIN_TEST_CORRECT);
-    return this.subsetRecords;
+    if (this.currentWorkMode == JBGConstants.TEST_WORD_IN_MAJOR_LIST) {
+      //System.out.println("total rows: " + String.valueOf(dataKanjiItems.size()));
+      buildSubSetRecords(JBGConstants.KANJI_MIN_TEST_CORRECT);
+      return this.subsetRecords;
+    }
+    else if (this.currentWorkMode == JBGConstants.TEST_WORD_IN_ARTICLE) {
+      TFMTTNAData currentTNA = getSelectedTNA();
+      if (currentTNA != null) {
+        this.subsetRecords = currentTNA.getKanjisForTest();
+        return this.subsetRecords;
+      }
+    }
+    return null;
+
   }
 
   public List<JBGKanjiItem> getNewKJSubset() {
-    //System.out.println("total rows: " + String.valueOf(dataKanjiItems.size()));
-    buildSubSetRecords(5); //lay cac tu dung tu 5 lan tro xuong cho toi 0 (chua hoc)
-    return this.subsetRecords;
+
+    if (this.currentWorkMode == JBGConstants.TEST_WORD_IN_MAJOR_LIST) {
+      //System.out.println("total rows: " + String.valueOf(dataKanjiItems.size()));
+      buildSubSetRecords(5); //lay cac tu dung tu 5 lan tro xuong cho toi 0 (chua hoc)
+      return this.subsetRecords;
+    }
+    else if (this.currentWorkMode == JBGConstants.TEST_WORD_IN_ARTICLE) {
+      TFMTTNAData currentTNA = getSelectedTNA();
+      if (currentTNA != null) {
+        this.subsetRecords = currentTNA.getKanjisForTest();
+        return this.subsetRecords;
+      }
+    }
+
+    return null;
+
   }
 
   public List<JBGKanjiItem> getSpecificKJSubset(List<String> lstKanjiWords) {
-    //only load the kanjis in the string list
-    buildSpecificRecords(lstKanjiWords);
-    return this.subsetRecords;
+    if (this.currentWorkMode == JBGConstants.TEST_WORD_IN_MAJOR_LIST) {
+      //only load the kanjis in the string list
+      buildSpecificRecords(lstKanjiWords, this.dataKanjiItems);
+      return this.subsetRecords;
+    }
+    else if (this.currentWorkMode == JBGConstants.TEST_WORD_IN_ARTICLE) {
+      TFMTTNAData currentTNA = getSelectedTNA();
+      if (currentTNA != null) {
+        buildSpecificRecords(lstKanjiWords, currentTNA.getKanjisForTest());
+        return this.subsetRecords;
+      }
+    }
+
+    return null;
   }
 
   public void printCurrentKanjisWithTest() {
@@ -470,7 +537,7 @@ public class ReaderModel {
           }
         }
 
-        List<JBGKanjiItem> lstKanjisForTest = new ArrayList<JBGKanjiItem>();
+        List<JBGKanjiItem> lstBuiltWordForTest = new ArrayList<JBGKanjiItem>();
         if (lstBuiltWords != null) {
           for (Object kObj: lstBuiltWords) {
             JSONObject wordItem = (JSONObject) kObj;
@@ -485,13 +552,23 @@ public class ReaderModel {
               int iWeightValue = getIntFromJson(wordItem, "weightValue");
 
               JBGKanjiItem kjItem = new JBGKanjiItem(sId, sKanji, sHiragana, sHv, sMeaning, iTestCount, iCorrectCount, iWeightValue);
-              lstKanjisForTest.add(kjItem);
+              lstBuiltWordForTest.add(kjItem);
             }
           }
 
         }
 
-        TFMTTNAData tna = new TFMTTNAData(sArticleId, sArticleTitle, lstTNASentences, lstArticleKanjis, lstKanjisForTest);
+        //rescan lstArticleKanjis and lstKanjiForTest
+        //neu nhu kanji nao nam trong lstArticleKanjis, da co san trong dataKanjiItems
+        // ma chua duoc add vao lstKanjiForTest thi tu dong add vao lstKanjiForTest
+        for (TFMTTNAKanjiData articleWord: lstArticleKanjis) {
+          JBGKanjiItem kItem = getKanjiContentFromMainKanjiList(articleWord.getKanji());
+          if (kItem != null && !isKanjiInList(articleWord.getKanji(), lstBuiltWordForTest) ) {
+            lstBuiltWordForTest.add(kItem.cloneItem());
+          }
+        }
+
+        TFMTTNAData tna = new TFMTTNAData(sArticleId, sArticleTitle, lstTNASentences, lstArticleKanjis, lstBuiltWordForTest);
         this.dataTNAItems.add(tna);
 
       }
@@ -606,7 +683,7 @@ public class ReaderModel {
         }
       }
 
-      List<JBGKanjiItem> lstKanjisForTest = new ArrayList<JBGKanjiItem>();
+      List<JBGKanjiItem> lstBuiltWordForTest = new ArrayList<JBGKanjiItem>();
       if (lstBuiltWords != null) {
         for (Object kObj: lstBuiltWords) {
           JSONObject wordItem = (JSONObject) kObj;
@@ -621,13 +698,23 @@ public class ReaderModel {
             int iWeightValue = getIntFromJson(wordItem, "weightValue");
 
             JBGKanjiItem kjItem = new JBGKanjiItem(sId, sKanji, sHiragana, sHv, sMeaning, iTestCount, iCorrectCount, iWeightValue);
-            lstKanjisForTest.add(kjItem);
+            lstBuiltWordForTest.add(kjItem);
           }
         }
 
       }
 
-      TFMTTNAData tna = new TFMTTNAData(sArticleId, sArticleTitle, lstTNASentences, lstArticleKanjis, lstKanjisForTest);
+      //rescan lstArticleKanjis and lstKanjiForTest
+      //neu nhu kanji nao nam trong lstArticleKanjis, da co san trong dataKanjiItems
+      // ma chua duoc add vao lstKanjiForTest thi tu dong add vao lstKanjiForTest
+      for (TFMTTNAKanjiData articleWord: lstArticleKanjis) {
+        JBGKanjiItem kItem = getKanjiContentFromMainKanjiList(articleWord.getKanji());
+        if (kItem != null && !isKanjiInList(articleWord.getKanji(), lstBuiltWordForTest) ) {
+          lstBuiltWordForTest.add(kItem.cloneItem());
+        }
+      }
+
+      TFMTTNAData tna = new TFMTTNAData(sArticleId, sArticleTitle, lstTNASentences, lstArticleKanjis, lstBuiltWordForTest);
       this.dataTNAItems.add(tna);
 
       return true;
@@ -651,6 +738,23 @@ public class ReaderModel {
     }
 
     return false;
+  }
+
+  public TFMTTNAData getSelectedTNA() {
+    if (this.selectedArticleId == null) return null;
+    return getTNAById(this.selectedArticleId);
+  }
+
+  public TFMTTNAData getTNAById(final String sSelTNAId) {
+    TFMTTNAData currentTNA = null;
+    for (int i = 0; i < dataTNAItems.size(); i++) {
+        currentTNA = dataTNAItems.get(i);
+        String sId = currentTNA.getId().toString();
+        if (sId.equals(sSelTNAId)) {
+          return currentTNA;
+        }
+    }
+    return null;
   }
 
 }

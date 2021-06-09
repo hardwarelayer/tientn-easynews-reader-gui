@@ -532,7 +532,11 @@ public class ManagementWindowTab extends GridPaneBase {
 
     private void processKanjiTableViewDblClick(ManagementKanjiTableViewItem rowData) {
         System.out.println(rowData.toString());
-        this.parentPane.switchToTab(1);
+
+        if (this.dataModel.isTestStarted()) return;
+
+        this.dataModel.setCurrentWorkMode(JBGConstants.TEST_WORD_IN_MAJOR_LIST);
+        this.parentPane.switchToTab(2);
       /*
         if (this.lblSelectedName != null)
           System.out.println(rowData.getFirstName() + " " + rowData.getLastName());
@@ -546,7 +550,7 @@ public class ManagementWindowTab extends GridPaneBase {
         System.out.println(rowData.toString());
         String sTNAId = rowData.getId().toString();
         this.dataModel.setSelectedArticleId(sTNAId);
-        this.parentPane.switchToTab(2);
+        this.parentPane.switchToTab(1);
       /*
         if (this.lblSelectedName != null)
           System.out.println(rowData.getFirstName() + " " + rowData.getLastName());
@@ -589,7 +593,7 @@ public class ManagementWindowTab extends GridPaneBase {
                 if (event.getClickCount() == 2 && (! row.isEmpty()) ) {
                     ManagementStatusTableViewItem rowData = row.getItem();
                     processStatusTableViewDblClick(rowData);
-                    System.out.println("Double click on: "+rowData.toString());
+                    //System.out.println("Double click on: "+rowData.toString());
                 }
             });
             return row ;
@@ -614,7 +618,7 @@ public class ManagementWindowTab extends GridPaneBase {
                 if (event.getClickCount() == 2 && (! row.isEmpty()) ) {
                     ManagementKanjiTableViewItem rowData = row.getItem();
                     processKanjiTableViewDblClick(rowData);
-                    System.out.println("Double click on: "+rowData.toString());
+                    //System.out.println("Double click on: "+rowData.toString());
                 }
             });
             return row ;

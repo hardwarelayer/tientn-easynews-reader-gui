@@ -248,4 +248,8 @@ public interface JBGConstants {
   //turn news
   static final String JBGTURN_NEWS_SMALLATTACK_PREFIX = "JTN_SMALL_ATTK_PREFX";
   static final String JBGTURN_NEWS_PAPER_NAME = "Tien's World War Edition";
+
+  static final int TEST_WORD_IN_MAJOR_LIST = 0;
+  static final int TEST_WORD_IN_ARTICLE = 1;
+
 }

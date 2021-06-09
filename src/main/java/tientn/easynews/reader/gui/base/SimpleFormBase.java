@@ -5,9 +5,15 @@ import javafx.scene.Scene;
 import javafx.scene.control.Control;
 import javafx.scene.control.Label;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.TilePane;
+import javafx.scene.layout.Pane;
+import javafx.scene.control.Alert;
+import javafx.scene.control.DialogPane;
+import javafx.scene.control.Alert.AlertType;
 
+import java.util.Optional;
 import javafx.stage.Stage;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
@@ -92,12 +98,20 @@ public class SimpleFormBase extends VBox {
   protected void processKeyPress(final KeyEvent ke) {
   }
 
+  public void addHeaderPane(final Pane pane, final int col, final int row) {
+    this.headerPane.add(pane, col, row);
+  }
+
   public void addHeaderCtl(final Control ctl, final int col, final int row) {
     this.headerPane.add(ctl, col, row);
   }
 
   public void addHeaderText(final Text txt, final int col, final int row) {
     this.headerPane.add(txt, col, row);
+  }
+
+  public void addBodyPane(final Pane pane, final int col, final int row) {
+    this.bodyPane.add(pane, col, row);
   }
 
   public void addBodyCtl(final Control ctl, final int col, final int row) {
@@ -127,6 +141,24 @@ public class SimpleFormBase extends VBox {
   }
 
   protected void initForm() {
+  }
+
+  protected boolean showQuestion(final String title, final String header, final String msg) {
+      Alert alert = new Alert(AlertType.CONFIRMATION);
+      alert.setTitle(title);
+      alert.setHeaderText(header);
+      alert.setContentText(msg);
+
+      DialogPane dialogPane = alert.getDialogPane();
+      dialogPane.getStylesheets().add(
+              getClass().getResource("/css/dialog.css").toExternalForm());
+
+      Optional<ButtonType> result = alert.showAndWait();
+      if (result.get() == ButtonType.OK){
+          return true;
+      } else {
+          return false;
+      }
   }
 
 }

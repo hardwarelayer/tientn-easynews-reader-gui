@@ -88,13 +88,13 @@ public final class MainTabbedPane extends TabPaneBase {
     public void initTabs() {
 
         paneManagement = new ManagementWindowTab("Management", getDesktop(), primaryStage, this.dataModel, this);
+        paneTNAWordBuilder = new ArticleWordBuildWindowTab(1000, 900, getDesktop(), primaryStage, this.dataModel, this);
         paneWordMatch = new WordMatchWindowTab(1000, 900, getDesktop(), primaryStage, this.dataModel);
-        paneTNAWordBuilder = new ArticleWordBuildWindowTab(1000, 900, getDesktop(), primaryStage, this.dataModel);
         tblViewTab = new TableViewTab("TableView", getDesktop(), primaryStage);
 
         this.addPaneAsTab("Management", paneManagement);
-        this.addSimpleFormAsTab("WordMatch", paneWordMatch);
         this.addSimpleFormAsTab("ArticleWords", paneTNAWordBuilder);
+        this.addSimpleFormAsTab("WordMatch", paneWordMatch);
         this.addPaneAsTab("Articles", tblViewTab);
 
     }

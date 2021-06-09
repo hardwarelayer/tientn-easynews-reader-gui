@@ -229,6 +229,15 @@ public class WordMatchWindowTab extends SimpleFormBase {
     }
 
     private void refreshKanjiStats() {
+        if (this.getDataModel().isTestStarted()) return;
+
+        if (this.getDataModel().getCurrentWorkMode() == JBGConstants.TEST_WORD_IN_MAJOR_LIST) {
+            lblTestStatus.setText("All KJs");
+        }
+        else if (this.getDataModel().getCurrentWorkMode() == JBGConstants.TEST_WORD_IN_ARTICLE) {
+            lblTestStatus.setText("TNA KJs");
+        }
+
         if (!this.getDataModel().isNeedRefresh()) {
             return;
         }
@@ -268,8 +277,8 @@ public class WordMatchWindowTab extends SimpleFormBase {
         }
 
         //unset it
-        btnReloadKanjis.setDisable(true);
         this.getDataModel().setNeedRefresh(false);
+        //btnReloadKanjis.setDisable(true); no need to disable
     }
 
     private void clearLists() {
