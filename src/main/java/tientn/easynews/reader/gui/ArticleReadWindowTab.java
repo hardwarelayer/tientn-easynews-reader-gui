@@ -110,7 +110,7 @@ public class ArticleReadWindowTab extends SimpleFormBase {
         lblJCoinAmount = new Label("0");
         lblJCoinAmount.setId("read-article-coin-amount");
 
-        Label lblSentenceVal = new Label("Current Sentence Value:");
+        Label lblSentenceVal = new Label("  Current Sentence Value:");
         lblCurrentSentenceValue = new Label("0");
         lblCurrentSentenceValue.setId("read-article-sentence-value");
 
@@ -121,7 +121,7 @@ public class ArticleReadWindowTab extends SimpleFormBase {
         HBox coinRow = new HBox(lblCoin, lblJCoinAmount, lblSentenceVal, lblCurrentSentenceValue);
 
         tafArticleContent = new TextArea();
-        tafArticleContent.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.5));
+        tafArticleContent.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.6));
         tafArticleContent.prefWidthProperty().bind(getPrimaryStage().widthProperty().multiply(1));
         tafArticleContent.setId("read-article-content");
         tafArticleContent.setWrapText(true);
@@ -132,6 +132,7 @@ public class ArticleReadWindowTab extends SimpleFormBase {
         tafSentenceInput.prefWidthProperty().bind(getPrimaryStage().widthProperty().multiply(1));
         tafSentenceInput.setId("read-article-sentence-input");
         tafSentenceInput.setWrapText(true);
+        tafSentenceInput.setEditable(false);
         tafSentenceInput.setPromptText("Input highlighed sentence above, and press Shift+ENTER to check");
 
         this.addHeaderText(txtFormTitle, 0, 0);
@@ -339,6 +340,8 @@ public class ArticleReadWindowTab extends SimpleFormBase {
         if (!stepUpTestSentence()) return;
         lblCurrentSentenceValue.setText(String.valueOf(this.currentTestSentenceVal));
         appendTextToContent(this.currentTestSentence, true);
+
+        tafSentenceInput.setEditable(true);
         tafSentenceInput.requestFocus();
 
         this.btnLoadArticle.setDisable(true);
@@ -350,6 +353,8 @@ public class ArticleReadWindowTab extends SimpleFormBase {
         if (!this.testStarted) return;
         tafSentenceInput.clear();
         tafArticleContent.selectRange(0,0);
+        tafSentenceInput.setEditable(false);
+
         this.testStarted = false;
         this.currentTestSentenceIdx = 0;
         this.currentTestSentenceVal = 0;
