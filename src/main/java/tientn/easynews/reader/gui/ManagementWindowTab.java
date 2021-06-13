@@ -64,7 +64,9 @@ public class ManagementWindowTab extends GridPaneBase {
     private ReaderModel dataModel;
     private String currentKJFilePath;
     private String currentTFMTSaveFile;
+    private String currentJCoinSaveFile;
     private String DEFAULT_TFMT_SAVE_FILE_NAME = "current_work.tfmt";
+    private String DEFAULT_JCOIN_EXPORT_FILE_NAME = "current_point.tfmt";
 
     TableView<ManagementStatusTableViewItem> statusTableView;
     TableView<ManagementKanjiTableViewItem> kanjiTableView;
@@ -128,7 +130,14 @@ public class ManagementWindowTab extends GridPaneBase {
                 processSaveTFMTButtonEvent();
             }
         };
-        Button btnKJWorkSave = createButton("Save TFMT", fncSaveTFMTButtonClick);
+        Button btnTFMTSave = createButton("Save TFMT", fncSaveTFMTButtonClick);
+
+        EventHandler<ActionEvent> fncExportJCoinButtonClick = new EventHandler<ActionEvent>() {
+            @Override public void handle(ActionEvent e) {
+                processExportJCoinButtonEvent();
+            }
+        };
+        Button btnExportJCoin = createButton("Export JCoin", fncExportJCoinButtonClick);
 
         paneLeft.add(lblCSVLoad, 0, 1);
         paneLeft.add(btnCSVLoad, 1, 1);
@@ -143,7 +152,10 @@ public class ManagementWindowTab extends GridPaneBase {
         paneLeft.add(btnTNALoad, 1, 4);
 
         paneLeft.add(new Label("Save Work"), 0, 5);
-        paneLeft.add(btnKJWorkSave, 1, 5);
+        paneLeft.add(btnTFMTSave, 1, 5);
+
+        paneLeft.add(new Label("Export jCoin"), 0, 6);
+        paneLeft.add(btnExportJCoin, 1, 6);
 
         statusTableView = createStatusTableView(0.3);
         statusTableView.setId("management-status-list");
@@ -201,6 +213,15 @@ public class ManagementWindowTab extends GridPaneBase {
         final String sContent = this.dataModel.getJsonDataAsString();
         System.out.println(sContent);
         saveTFMTToFile(this.currentTFMTSaveFile, sContent);
+    }
+
+    private void processExportJCoinButtonEvent() {
+        exportJCoinToFile(this.currentJCoinSaveFile, this.dataModel.getJCoin());
+
+        this.dataModel.setJCoin(0);
+        statusTableView.getItems().add(new ManagementStatusTableViewItem("Reset JCoin to: ", "0"));
+
+        processSaveTFMTButtonEvent();
     }
 
     private void processCSVLoadEvent() {
@@ -264,12 +285,28 @@ public class ManagementWindowTab extends GridPaneBase {
               PrintWriter pw = new PrintWriter(fOutputFile, Charset.forName("UTF-8"));
               pw.println(content);
               pw.flush(); //if not, PrintWriter may not write the whole data 
-              statusTableView.getItems().add(new ManagementStatusTableViewItem("Saved " + String.valueOf(content.length()) + " bytes to: ", this.currentTFMTSaveFile));
+              statusTableView.getItems().add(new ManagementStatusTableViewItem("Saved " + String.valueOf(content.length()) + " bytes to: ", fileName));
           } catch (FileNotFoundException e) {
             System.out.println(e.getMessage());
           }
           catch (IOException e) {
-            System.out.println("saveKanjiToFile error: " + e.getMessage());
+            System.out.println("saveTFMTToFile error: " + e.getMessage());
+          }
+    }
+
+    private void exportJCoinToFile(final String fileName, final int iCoin) {
+          System.out.println("Saving to file " + fileName);
+          File fOutputFile = new File(fileName);
+          try {
+              PrintWriter pw = new PrintWriter(fOutputFile, Charset.forName("UTF-8"));
+              pw.println(String.valueOf(iCoin));
+              pw.flush(); //if not, PrintWriter may not write the whole data 
+              statusTableView.getItems().add(new ManagementStatusTableViewItem("Saved " + String.valueOf(iCoin) + " jCoin to: ", fileName));
+          } catch (FileNotFoundException e) {
+            System.out.println(e.getMessage());
+          }
+          catch (IOException e) {
+            System.out.println("exportPointToFile error: " + e.getMessage());
           }
     }
 
@@ -453,7 +490,9 @@ public class ManagementWindowTab extends GridPaneBase {
 
             this.currentKJFilePath = file.getParent();
             this.currentTFMTSaveFile = this.currentKJFilePath + "/" + DEFAULT_TFMT_SAVE_FILE_NAME;
+            this.currentJCoinSaveFile = this.currentKJFilePath + "/" + DEFAULT_JCOIN_EXPORT_FILE_NAME;
             statusTableView.getItems().add(new ManagementStatusTableViewItem("TFMT Target File", this.currentTFMTSaveFile));
+            statusTableView.getItems().add(new ManagementStatusTableViewItem("JCoin Target File", this.currentJCoinSaveFile));
 
         } catch (Exception ex) {
             System.out.println("ERROR openFile: " + ex.getMessage());
@@ -464,8 +503,14 @@ public class ManagementWindowTab extends GridPaneBase {
         try {
             if (this.dataModel.loadTFMTJsonFromFile(file.getPath())) {
                 this.currentTFMTSaveFile = file.getPath();
+
+                this.currentKJFilePath = file.getParent();
+                this.currentJCoinSaveFile = this.currentKJFilePath + "/" + DEFAULT_JCOIN_EXPORT_FILE_NAME;
+
                 statusTableView.getItems().add(new ManagementStatusTableViewItem("TFMT Target File", this.currentTFMTSaveFile));
+                statusTableView.getItems().add(new ManagementStatusTableViewItem("JCoin Target File", this.currentJCoinSaveFile));
                 statusTableView.getItems().add(new ManagementStatusTableViewItem("TFMT loaded:", String.valueOf(this.dataModel.getDataKanjiItems().size()) + " kanjis"));
+                statusTableView.getItems().add(new ManagementStatusTableViewItem("JCoin loaded:", String.valueOf(this.dataModel.getJCoin())));
 
                 reloadKanjiList();
                 reloadTNAList();
