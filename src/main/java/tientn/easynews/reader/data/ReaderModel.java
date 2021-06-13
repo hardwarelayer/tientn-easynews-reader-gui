@@ -627,9 +627,9 @@ public class ReaderModel {
           String sSentence = (String) jsonSObj.get("sentence");
           String sEnglishMeaning = (String) jsonSObj.get("english_meaning");
 
-          System.out.println(sSentence);
-          if (sEnglishMeaning != null)
-            System.out.println(sEnglishMeaning);
+          //System.out.println(sSentence);
+          //if (sEnglishMeaning != null)
+            //System.out.println(sEnglishMeaning);
 
           List<String> lstSentenceKanjis = new ArrayList<String>();
           JSONArray lstKanjisOfSentence = (JSONArray) jsonSObj.get("kanjis");

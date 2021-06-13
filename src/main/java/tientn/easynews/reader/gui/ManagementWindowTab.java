@@ -79,8 +79,8 @@ public class ManagementWindowTab extends GridPaneBase {
     @Override
     protected void initForm() {
 
-        this.setMinWidth(1000);
-        this.setMaxWidth(900);
+        //this.setMinWidth(1000);
+        //this.setMaxWidth(900);
 
         Text txtFormTitle = new Text("Learning Material Management");
 
@@ -147,8 +147,8 @@ public class ManagementWindowTab extends GridPaneBase {
 
         statusTableView = createStatusTableView(0.3);
         statusTableView.setId("management-status-list");
-        createStatusTableViewColumn("Category", 0.3);
-        createStatusTableViewColumn("Value", 0.7);
+        createStatusTableViewColumn("Category", 0.15);
+        createStatusTableViewColumn("Value", 0.85);
         //this.setVgrow(tableView, Priority.ALWAYS);
 
         kanjiTableView = createKanjiTableView(0.7);
@@ -161,11 +161,11 @@ public class ManagementWindowTab extends GridPaneBase {
         articleTableView = createArticleTableView(0.7);
         articleTableView.setId("management-article-list");
         createArticleTableViewColumn("Id", 0.05);
-        createArticleTableViewColumn("Title", 0.55);
-        createArticleTableViewColumn("Sentences", 0.1);
-        createArticleTableViewColumn("Kanjis", 0.1);
-        createArticleTableViewColumn("Test", 0.1);
-        createArticleTableViewColumn("Correct", 0.1);
+        createArticleTableViewColumn("Title", 0.75);
+        createArticleTableViewColumn("Sentences", 0.05);
+        createArticleTableViewColumn("Kanjis", 0.05);
+        createArticleTableViewColumn("Test", 0.05);
+        createArticleTableViewColumn("Correct", 0.05);
 
         //this.add(mainBox, 0, 1);
         this.add(paneLeft, 0, 1);

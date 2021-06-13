@@ -48,6 +48,8 @@ import java.util.concurrent.ThreadLocalRandom;
 import lombok.Getter;
 import lombok.Setter;
 
+import tientn.easynews.reader.data.JBGConstants;
+
 import tientn.easynews.reader.data.ReaderModel;
 import tientn.easynews.reader.gui.base.TabPaneBase;
 import tientn.easynews.reader.gui.base.TabbedAppBase;
@@ -62,6 +64,7 @@ public final class MainTabbedPane extends TabPaneBase {
     ManagementWindowTab paneManagement;
     WordMatchWindowTab paneWordMatch;
     ArticleWordBuildWindowTab paneTNAWordBuilder;
+    ArticleReadWindowTab paneArticleRead;
     TableViewTab tblViewTab;
 
     public MainTabbedPane(Desktop desktop, Stage primStage, final ReaderModel model) {
@@ -88,13 +91,18 @@ public final class MainTabbedPane extends TabPaneBase {
     public void initTabs() {
 
         paneManagement = new ManagementWindowTab("Management", getDesktop(), primaryStage, this.dataModel, this);
-        paneTNAWordBuilder = new ArticleWordBuildWindowTab(1000, 900, getDesktop(), primaryStage, this.dataModel, this);
-        paneWordMatch = new WordMatchWindowTab(1000, 900, getDesktop(), primaryStage, this.dataModel);
+        paneManagement.setMinWidth(JBGConstants.MIN_WIDTH);
+        paneManagement.setMaxWidth(JBGConstants.MIN_HEIGHT);
+
+        paneTNAWordBuilder = new ArticleWordBuildWindowTab(JBGConstants.MIN_WIDTH, JBGConstants.MIN_HEIGHT, getDesktop(), primaryStage, this.dataModel, this);
+        paneWordMatch = new WordMatchWindowTab(JBGConstants.MIN_WIDTH, JBGConstants.MIN_HEIGHT, getDesktop(), primaryStage, this.dataModel);
+        paneArticleRead = new ArticleReadWindowTab(JBGConstants.MIN_WIDTH, JBGConstants.MIN_HEIGHT, getDesktop(), primaryStage, this.dataModel);
         tblViewTab = new TableViewTab("TableView", getDesktop(), primaryStage);
 
         this.addPaneAsTab("Management", paneManagement);
         this.addSimpleFormAsTab("ArticleWords", paneTNAWordBuilder);
         this.addSimpleFormAsTab("WordMatch", paneWordMatch);
+        this.addSimpleFormAsTab("ArticleRead", paneArticleRead);
         this.addPaneAsTab("Articles", tblViewTab);
 
     }

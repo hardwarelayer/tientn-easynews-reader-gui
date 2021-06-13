@@ -106,10 +106,10 @@ public class WordMatchWindowTab extends SimpleFormBase {
 
     private void createBodyElements() {
 
-        this.addBodyColumn(15);
-        this.addBodyColumn(19);
-        this.addBodyColumn(36);
-        this.addBodyColumn(30);
+        this.addBodyColumn(17);
+        this.addBodyColumn(20);
+        this.addBodyColumn(31);
+        this.addBodyColumn(31);
 
         Label lblLoaded = new Label("Total Kanjis");
         lblTotalStats = createLabel("0/0");
@@ -396,6 +396,7 @@ public class WordMatchWindowTab extends SimpleFormBase {
         if (lv != null) {
             if (kc == KeyCode.ENTER) {
                 sItem = getListSelectedString(lv);
+                if (sItem == null) return;
 
                 if (lvFirstCol.isFocused()) {
                     if (!sItem.isEmpty()) {
@@ -583,9 +584,9 @@ public class WordMatchWindowTab extends SimpleFormBase {
     }
 
     public void onShow() {
-        System.out.println("OnShow WordMatch");
+        //System.out.println("OnShow WordMatch");
         if (this.getDataModel().isNeedRefresh()) {
-            System.out.println("data is dirty");
+            //System.out.println("data is dirty");
             btnReloadKanjis.setDisable(false);
         }
         else {

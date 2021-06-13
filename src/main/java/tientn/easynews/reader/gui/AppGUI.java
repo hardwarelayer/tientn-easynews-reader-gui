@@ -48,6 +48,8 @@ import java.util.concurrent.ThreadLocalRandom;
 import lombok.Getter;
 import lombok.Setter;
 
+import tientn.easynews.reader.data.JBGConstants;
+
 import tientn.easynews.reader.data.ReaderModel;
 import tientn.easynews.reader.gui.base.TabPaneBase;
 import tientn.easynews.reader.gui.base.TabbedAppBase;
@@ -64,7 +66,7 @@ public final class AppGUI extends TabbedAppBase {
     @Override
     protected TabPaneBase initSceneElements(Stage primaryStage) {
 
-        setDefaultArgs("EasyNews Learn and Read", 1000, 900);
+        setDefaultArgs("EasyNews Learn and Read", JBGConstants.MIN_WIDTH, JBGConstants.MIN_HEIGHT);
 
         this.dataModel = new ReaderModel();
         System.out.println(this.dataModel.toString());

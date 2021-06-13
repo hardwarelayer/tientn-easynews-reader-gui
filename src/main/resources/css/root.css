@@ -23,12 +23,12 @@
 }
 
 #management-kanji-list {
-  -fx-font-size: 8pt; 
+  -fx-font-size: 12pt; 
   -fx-font-family: Courier New;
 }
 
 #management-article-list {
-  -fx-font-size: 8pt; 
+  -fx-font-size: 12pt; 
   -fx-font-family: Courier New;
 }
 
@@ -87,7 +87,7 @@
 }
 
 #kanji-column {
- -fx-font-size: 16pt; 
+ -fx-font-size: 19pt; 
  -fx-font-family: Verdana;
 }
 #hiragana-column {
@@ -95,11 +95,11 @@
  -fx-font-family: Verdana;
 }
 #hv-column {
- -fx-font-size: 10pt; 
+ -fx-font-size: 12pt; 
  -fx-font-family: Verdana;
 }
 #meaning-column {
- -fx-font-size: 10pt; 
+ -fx-font-size: 12pt; 
  -fx-font-family: Verdana;
 }
 
@@ -238,11 +238,16 @@
     -fx-background-color: text-area-background ;
 }
 
+#build-word-list {
+  -fx-font-size: 15pt; 
+  -fx-font-family: Verdana;
+}
+
 #build-word-kanji,
 #build-word-hiragana,
 #build-word-hanviet,
 #build-word-meaning {
-  -fx-font-size: 10pt; 
+  -fx-font-size: 12pt; 
   -fx-font-family: Verdana;
 }
 
@@ -259,4 +264,45 @@
 }
 #build-word-kanji-meaning .content {
   -fx-background-color: text-area-background ;
+}
+
+/* Article read */
+#read-article-content {
+  -fx-font-size: 14pt; 
+  -fx-font-family: Verdana;
+  text-area-background: #EFE1CE;
+  -fx-text-fill: black;
+  -fx-highlight-fill: #ADFF2F; 
+  -fx-highlight-text-fill: #B22222;
+}
+
+#read-article-content .content {
+    -fx-background-color: text-area-background ;
+}
+
+#read-article-sentence-input {
+  -fx-font-size: 13pt; 
+  -fx-font-family: Verdana;
+  text-area-background: lightgray;
+  -fx-text-fill: black;
+}
+
+#read-article-sentence-input .content {
+    -fx-background-color: text-area-background ;
+}
+
+#read-article-coin-amount {
+  -fx-font-weight: bold;
+  -fx-background-color: blue;
+  -fx-text-fill: yellow; 
+  -fx-font-family: Courier New;
+  -fx-background-radius: 15px;
+}
+
+#read-article-sentence-value {
+  -fx-font-weight: bold;
+  -fx-background-color: yellow;
+  -fx-text-fill: black; 
+  -fx-font-family: Courier New;
+  -fx-background-radius: 10px;
 }

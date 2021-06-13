@@ -89,6 +89,7 @@ public class ArticleWordBuildWindowTab extends SimpleFormBase {
     private Button btnLoadArticle;
     private Button btnBuildSelectedWord;
     private Button btnStartWordMatchTest;
+    private Button btnStartArticleRead;
 
     private ListView<String> lvTNAKanjiWords;
     private ListView<String> lvTNAKanjis;
@@ -148,9 +149,9 @@ public class ArticleWordBuildWindowTab extends SimpleFormBase {
     private void createBodyElements() {
 
         this.addBodyColumn(13);
-        this.addBodyColumn(14);
-        this.addBodyColumn(28);
-        this.addBodyColumn(45);
+        this.addBodyColumn(10);
+        this.addBodyColumn(25);
+        this.addBodyColumn(52);
 
         tfSelectedWord = new TextField();
         tfSelectedHiragana = new TextField();
@@ -170,7 +171,7 @@ public class ArticleWordBuildWindowTab extends SimpleFormBase {
             //on select, distribute the values to related fields
             processSelectWordKanjiCombo((String)cbSelectedWord.getValue());
         });
-        cbSelectedWord.setOnKeyPressed(e -> {
+        tfSelectedWord.setOnKeyPressed(e -> {
             if (e.getCode() == KeyCode.ENTER) { 
                 //System.out.println(cbSelectedWord.getValue());
                 //load reference combo based on entered text
@@ -207,7 +208,16 @@ public class ArticleWordBuildWindowTab extends SimpleFormBase {
         };
         btnStartWordMatchTest = createButton("WordMatch", fncStartWordMatchButtonClick);
 
+        EventHandler<ActionEvent> fncStartArticleReadButtonClick = new EventHandler<ActionEvent>() {
+            @Override 
+            public void handle(ActionEvent e) {
+                processStartArticleReadButtonClick();
+            }
+        };
+        btnStartArticleRead = createButton("ArticleRead", fncStartArticleReadButtonClick);
+
         lvTNAKanjiWords = createSingleSelectStringListView(0);
+        lvTNAKanjiWords.setId("build-word-list");
         lvTNAKanjis = createSingleSelectStringListView(1);
         lvTNAKanjis.setId("build-word-detail-kanji");
         tafKanjiMeaning = new TextArea();
@@ -216,7 +226,7 @@ public class ArticleWordBuildWindowTab extends SimpleFormBase {
 
         tvBuiltWords = createKanjiTableView(0.5);
         tvBuiltWords.setId("management-kanji-list");
-        createKanjiTableViewColumn("Kanji", 0.2);
+        createKanjiTableViewColumn("Kanji", 0.15);
         createKanjiTableViewColumn("Hiragana", 0.2);
         createKanjiTableViewColumn("Hv", 0.25);
         createKanjiTableViewColumn("Meaning", 0.25);
@@ -239,7 +249,7 @@ public class ArticleWordBuildWindowTab extends SimpleFormBase {
         this.addBodyCtl(tfMeaning, 3, 1);
 
         this.addBodyCtl(cbSelectedWord, 0, 2);
-        HBox wordCmdPane = new HBox(btnBuildSelectedWord, btnStartWordMatchTest);
+        HBox wordCmdPane = new HBox(btnBuildSelectedWord, btnStartWordMatchTest, btnStartArticleRead);
         this.addBodyPane(wordCmdPane, 3, 2);
 
         this.addBodyCtl(lvTNAKanjiWords, 0, 3);
@@ -309,7 +319,7 @@ public class ArticleWordBuildWindowTab extends SimpleFormBase {
             btnBuildSelectedWord.setDisable(false);
         }
     }
-    
+
     private void reloadBuiltWordList() {
         if (currentTNA == null) return;
         tvBuiltWords.getItems().clear();
@@ -364,6 +374,7 @@ public class ArticleWordBuildWindowTab extends SimpleFormBase {
             tfSelectedHiragana.setText(sItemParts[1]);
             tfHv.setText(sItemParts[2]);
             tfMeaning.setText(sItemParts[3]);
+            checkEnoughForWordBuild();
         }
     }
 
@@ -377,6 +388,9 @@ public class ArticleWordBuildWindowTab extends SimpleFormBase {
                     );
                 cbSelectedWord.getItems().add(sb.toString());
             }
+        }
+        if (cbSelectedWord.getItems().size() > 0) {
+            cbSelectedWord.show();
         }
     }
 
@@ -393,6 +407,13 @@ public class ArticleWordBuildWindowTab extends SimpleFormBase {
         btnBuildSelectedWord.setDisable(false);
 
         //System.out.println(rowData.toString());
+    }
+
+    private void processStartArticleReadButtonClick() {
+        String sItem = getListSelectedString(lvTNAKanjiWords);
+        if (currentTNA == null) return;
+
+        this.parentPane.switchToTab(3);
     }
 
     private void processArticleWordListClick() {

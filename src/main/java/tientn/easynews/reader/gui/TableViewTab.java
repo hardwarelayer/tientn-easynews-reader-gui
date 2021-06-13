@@ -54,9 +54,6 @@ public class TableViewTab extends GridPaneBase {
     @Override
     protected void initForm() {
 
-        this.setMinWidth(900);
-        this.setMaxWidth(900);
-
         Text txtFormTitle = new Text("Form Title");
         this.setValignment(txtFormTitle, VPos.TOP);
 

@@ -252,4 +252,7 @@ public interface JBGConstants {
   static final int TEST_WORD_IN_MAJOR_LIST = 0;
   static final int TEST_WORD_IN_ARTICLE = 1;
 
+  static final int MIN_WIDTH=1200;
+  static final int MIN_HEIGHT=1000;
+
 }
