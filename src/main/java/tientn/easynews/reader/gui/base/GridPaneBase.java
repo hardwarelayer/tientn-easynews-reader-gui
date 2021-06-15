@@ -21,6 +21,10 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.DialogPane;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.layout.ColumnConstraints;
+import javafx.scene.input.KeyCode;
+import javafx.event.EventHandler;
+import javafx.event.ActionEvent;
+import javafx.scene.input.KeyEvent;
 
 import javafx.stage.FileChooser;
 import java.io.File;
@@ -61,6 +65,20 @@ public class GridPaneBase extends GridPane {
         this.setPadding(new Insets(4, 4, 4, 4));
 
         initForm();
+
+        this.addEventFilter(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {
+            //or scene.setOnKeyPressed((KeyEvent ke) -> {}
+            public void handle(KeyEvent ke) {
+                if (!(ke.getCode() == KeyCode.W) && !(ke.isMetaDown() || ke.isControlDown())) {
+                    //System.out.println("SimpleFormBase KeyPressed event: " + ke.getCode());
+                    processKeyPress(ke);
+                }
+            }
+          });
+
+    }
+
+    protected void processKeyPress(final KeyEvent ke) {
     }
 
     protected void showBorder() {

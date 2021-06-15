@@ -16,6 +16,8 @@ import javafx.scene.effect.DropShadow;
 import javafx.scene.input.MouseEvent;
 import javafx.event.EventHandler;
 import javafx.event.ActionEvent;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.input.KeyCode;
 
 import javafx.stage.FileChooser;
 import java.io.File;
@@ -216,6 +218,10 @@ public class ManagementWindowTab extends GridPaneBase {
     }
 
     private void processExportJCoinButtonEvent() {
+        if (!showQuestion("Export JCoin", "JCoin export and reset JCoin in current work", "Are you sure to export JCoin from to existing work?")) {
+            return;
+        }
+
         exportJCoinToFile(this.currentJCoinSaveFile, this.dataModel.getJCoin());
 
         this.dataModel.setJCoin(0);
@@ -556,8 +562,8 @@ public class ManagementWindowTab extends GridPaneBase {
                 aItem.getId().toString(),
                 aItem.getArticleTitle(),
                 aItem.getArticleSentences().size(),
-                aItem.getArticleKanjis().size(),
-                aItem.getTotalTests(),
+                aItem.getKanjisForTest().size(),
+                aItem.getTestTotalOfKanjiForTest(),
                 aItem.getTotalCorrectTests()
                 );
             articleTableView.getItems().add(showItem);
@@ -566,13 +572,6 @@ public class ManagementWindowTab extends GridPaneBase {
 
     private void processStatusTableViewDblClick(ManagementStatusTableViewItem rowData) {
         System.out.println(rowData.toString());
-      /*
-        if (this.lblSelectedName != null)
-          System.out.println(rowData.getFirstName() + " " + rowData.getLastName());
-          //this.lblSelectedName.setText(rowData.getFirstName() + " " + rowData.getLastName());
-        else
-          System.out.println("label is null");
-      */
     }
 
     private void processKanjiTableViewDblClick(ManagementKanjiTableViewItem rowData) {
@@ -581,28 +580,18 @@ public class ManagementWindowTab extends GridPaneBase {
         if (this.dataModel.isTestStarted()) return;
 
         this.dataModel.setCurrentWorkMode(JBGConstants.TEST_WORD_IN_MAJOR_LIST);
+
+        //unset it
+        this.dataModel.setNeedRefresh(true);
+
         this.parentPane.switchToTab(2);
-      /*
-        if (this.lblSelectedName != null)
-          System.out.println(rowData.getFirstName() + " " + rowData.getLastName());
-          //this.lblSelectedName.setText(rowData.getFirstName() + " " + rowData.getLastName());
-        else
-          System.out.println("label is null");
-      */
     }
 
     private void processArticleTableViewDblClick(ManagementArticleTableViewItem rowData) {
         System.out.println(rowData.toString());
         String sTNAId = rowData.getId().toString();
-        this.dataModel.setSelectedArticleId(sTNAId);
+        this.dataModel.setSelectedArticleId(sTNAId); //this will also set needRefresh
         this.parentPane.switchToTab(1);
-      /*
-        if (this.lblSelectedName != null)
-          System.out.println(rowData.getFirstName() + " " + rowData.getLastName());
-          //this.lblSelectedName.setText(rowData.getFirstName() + " " + rowData.getLastName());
-        else
-          System.out.println("label is null");
-      */
     }
 
     private void createStatusTableViewColumn(final String title, final double width)
@@ -703,6 +692,38 @@ public class ManagementWindowTab extends GridPaneBase {
         tableView.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(height));
 
         return tableView;        
+    }
+
+    private void removeArticleFromList() {
+
+        ManagementArticleTableViewItem item = articleTableView.getSelectionModel().getSelectedItem();
+        System.out.println(item.toString());
+        String sTNAId = item.getId().toString();
+
+        if (item != null) {
+
+            if (!this.showQuestion("Delete?", "Do you want to delete this article?", item.getTitle()))
+                return;
+        }
+
+        if (this.dataModel.deleteTNAById(sTNAId)) {
+            reloadTNAList();
+        }
+        else {
+            System.out.println("ERROR: cannot delete item!");
+        }
+    }
+
+    @Override
+    protected void processKeyPress(final KeyEvent ke) {
+        KeyCode kc = ke.getCode(); 
+        switch (kc) {
+            case DELETE:
+                if (articleTableView.isFocused()) {
+                    removeArticleFromList();
+                }
+                break;
+        }
     }
 
     public void onShow() {}

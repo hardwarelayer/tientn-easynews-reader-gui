@@ -84,6 +84,7 @@ public class WordMatchWindowTab extends SimpleFormBase {
     private final String sWordMatchEmptyValue = "...";
     private static final String MATCH_WORD_OK = "OK";
     private static final String MATCH_WORD_NG = "NG";
+    private static final int BONUS_ON_COMPLETE = 5;
 
     List<String> lstProblematicWords;
 
@@ -196,7 +197,7 @@ public class WordMatchWindowTab extends SimpleFormBase {
 
         this.addBodyCtl(lblTestStatus, 0, 0);
         this.addBodyCtl(btnReloadKanjis, 1, 0);
-        this.addBodyCtl(new Label("JCoin"), 2, 0);
+        this.addBodyCtl(new Label("Current JCoin"), 2, 0);
         this.addBodyCtl(lblJCoinAmount, 3, 0);
 
         this.addBodyCtl(lblLoaded, 0, 1);
@@ -231,6 +232,7 @@ public class WordMatchWindowTab extends SimpleFormBase {
     private void refreshKanjiStats() {
         if (this.getDataModel().isTestStarted()) return;
 
+        clearLists();
         if (this.getDataModel().getCurrentWorkMode() == JBGConstants.TEST_WORD_IN_MAJOR_LIST) {
             lblTestStatus.setText("All KJs");
         }
@@ -238,12 +240,7 @@ public class WordMatchWindowTab extends SimpleFormBase {
             lblTestStatus.setText("TNA KJs");
         }
 
-        if (!this.getDataModel().isNeedRefresh()) {
-            return;
-        }
-
-        int totalJCoin = this.getDataModel().getJCoin();
-        lblJCoinAmount.setText(String.valueOf(totalJCoin));
+        lblJCoinAmount.setText(String.valueOf(this.getDataModel().getJCoin()));
 
         List<JBGKanjiItem> lstKj = this.getDataModel().getDataKanjiItems();
         int iTotalKanjis = lstKj.size();
@@ -276,8 +273,6 @@ public class WordMatchWindowTab extends SimpleFormBase {
             btnLoadNormalForTest.setDisable(false);
         }
 
-        //unset it
-        this.getDataModel().setNeedRefresh(false);
         //btnReloadKanjis.setDisable(true); no need to disable
     }
 
@@ -306,6 +301,8 @@ public class WordMatchWindowTab extends SimpleFormBase {
                 fillItemToLists(item);
             }
         }
+
+        refreshStartButton();
     }
 
     private void loadNewKanjisForTest() {
@@ -319,6 +316,8 @@ public class WordMatchWindowTab extends SimpleFormBase {
                 fillItemToLists(item);
             }
         }
+
+        refreshStartButton();
     }
 
     private void loadWrongKanjisForTest() {
@@ -333,6 +332,8 @@ public class WordMatchWindowTab extends SimpleFormBase {
                 fillItemToLists(item);
             }
         }
+
+        refreshStartButton();
     }
 
     private void startTest() {
@@ -584,12 +585,19 @@ public class WordMatchWindowTab extends SimpleFormBase {
     }
 
     public void onShow() {
-        //System.out.println("OnShow WordMatch");
         if (this.getDataModel().isNeedRefresh()) {
+
+            //unset it
+            this.getDataModel().setNeedRefresh(false);
+
             //System.out.println("data is dirty");
+            if (this.getDataModel().isTestStarted()) return;
             btnReloadKanjis.setDisable(false);
+            refreshKanjiStats();
+            loadNewKanjisForTest();
         }
         else {
+            //System.out.println("data is NOT dirty");
             btnReloadKanjis.setDisable(true);
         }
         List<JBGKanjiItem> lstKj = this.getDataModel().getDataKanjiItems();
@@ -623,9 +631,19 @@ public class WordMatchWindowTab extends SimpleFormBase {
         lvFourthCol.getSelectionModel().clearSelection();
     }
 
+    private void refreshStartButton() {
+        if (lvFirstCol.getItems().size() < 1) {
+            btnStartTest.setDisable(true);
+            return;
+        }
+        btnStartTest.setDisable(false);
+    }
+
     private void doStartGame() {
         if (this.getDataModel().isTestStarted())
           return;
+
+        if (lvFirstCol.getItems().size() < 1) return;
 
         lblTestStatus.setText("Started!");
 
@@ -636,8 +654,7 @@ public class WordMatchWindowTab extends SimpleFormBase {
         btnStartTest.setDisable(true);
         clearWordListSelection();
 
-        int totalJCoin = this.getDataModel().getJCoin();
-        lblJCoinAmount.setText(String.valueOf(totalJCoin));
+        lblJCoinAmount.setText(String.valueOf(this.getDataModel().getJCoin()));
 
         chooseKanjiList();
 
@@ -651,11 +668,8 @@ public class WordMatchWindowTab extends SimpleFormBase {
         btnLoadNormalForTest.setDisable(false);
         btnLoadNewForTest.setDisable(false);
         btnLoadWrongForTest.setDisable(false);
-        btnStartTest.setDisable(false);
+        btnStartTest.setDisable(true);
         clearWordListSelection();
-
-        int totalJCoin = this.getDataModel().getJCoin();
-        lblJCoinAmount.setText(String.valueOf(totalJCoin));
 
         this.getDataModel().setTestStarted(false);
     }
@@ -716,10 +730,8 @@ public class WordMatchWindowTab extends SimpleFormBase {
 
         setSneekpeekFields(contentRes[0], contentRes[1], contentRes[2], contentRes[3]);
 
-        int totalJCoin = this.getDataModel().getJCoin();
-        if (totalJCoin > 0) totalJCoin--;
-        this.getDataModel().setJCoin(totalJCoin); //set back to parent
-        lblJCoinAmount.setText(String.valueOf(totalJCoin));
+        this.getDataModel().decreaseJCoin(1); //set back to parent
+        lblJCoinAmount.setText(String.valueOf(this.getDataModel().getJCoin()));
 
         noteWord(kanjiWord);
 
@@ -816,6 +828,7 @@ public class WordMatchWindowTab extends SimpleFormBase {
               else {
                 //no more word
                 doEndGame();
+                totalJCoin += BONUS_ON_COMPLETE;
               }
             }
             else {

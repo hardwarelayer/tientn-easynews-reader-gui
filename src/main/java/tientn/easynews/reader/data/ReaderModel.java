@@ -52,11 +52,12 @@ public class ReaderModel {
   @Getter private List<JBGKanjiItem> subsetRecords = null;
   @Getter @Setter private boolean needRefresh;
   @Getter @Setter private boolean testStarted;
+  @Getter @Setter private boolean readStarted;
   @Getter private int totalKanjis = 0;
   @Getter private int totalMatchedKanjis = 0;
   @Getter private int totalKanjiTests = 0;
   @Getter private boolean tfmtLoaded = false;
-  @Getter @Setter private String selectedArticleId;
+  @Getter private String selectedArticleId;
 
   @Getter @Setter private int jCoin = 0;
 
@@ -89,6 +90,13 @@ public class ReaderModel {
       sb.append("\n");
     }
     return sb.toString();
+  }
+
+  public void setSelectedArticleId(final String s) {
+    if (!s.equals(this.selectedArticleId)) {
+      this.needRefresh = true;
+    }
+    this.selectedArticleId = s;
   }
 
   private InputStreamReader getInputStream(final File f) {
@@ -414,6 +422,20 @@ public class ReaderModel {
     return lVal.intValue();
   }
 
+
+  private void addBuiltWordToGrandKanjiList(JBGKanjiItem kItem) {
+    boolean wordExists = false;
+    for (JBGKanjiItem item: this.dataKanjiItems) {
+      if (item.getKanji().equals(kItem.getKanji())) {
+        wordExists = true;
+        break;
+      }
+    }
+    if (!wordExists) {
+      this.dataKanjiItems.add(kItem);
+    }
+  }
+
   public boolean loadTFMTJsonFromFile(final String fileName) {
     if (this.testStarted) return false;
 
@@ -424,9 +446,9 @@ public class ReaderModel {
       JSONArray kanjiList = (JSONArray) jsonObject.get("kanjiWorks");
       JSONArray articleList = (JSONArray) jsonObject.get("articleWorks");
 
-      System.out.println("Total load kanjis: " + String.valueOf(kanjiList.size()));
-      System.out.println("Total load articles: " + String.valueOf(articleList.size()));
-      System.out.println("Open with jcoin " + String.valueOf(jsonObject.get("jcoin")));
+      //System.out.println("Total load kanjis: " + String.valueOf(kanjiList.size()));
+      //System.out.println("Total load articles: " + String.valueOf(articleList.size()));
+      //System.out.println("Open with jcoin " + String.valueOf(jsonObject.get("jcoin")));
 
       if (kanjiList.size() < 1) return false;
 
@@ -553,6 +575,9 @@ public class ReaderModel {
 
               JBGKanjiItem kjItem = new JBGKanjiItem(sId, sKanji, sHiragana, sHv, sMeaning, iTestCount, iCorrectCount, iWeightValue);
               lstBuiltWordForTest.add(kjItem);
+
+              //if this word is not in grand kanji list yet, add it
+              addBuiltWordToGrandKanjiList(kjItem);
             }
           }
 
@@ -757,4 +782,28 @@ public class ReaderModel {
     return null;
   }
 
+  public boolean deleteTNAById(final String sSelTNAId) {
+    boolean deleted = false;
+    TFMTTNAData currentTNA = null;
+    for (int i = 0; i < dataTNAItems.size(); i++) {
+        currentTNA = dataTNAItems.get(i);
+        String sId = currentTNA.getId().toString();
+        if (sId.equals(sSelTNAId)) {
+          dataTNAItems.remove(i);
+          deleted = true;
+          break;
+        }
+    }
+    return deleted;
+  }
+
+  public void increaseJCoin(final int step) {
+    this.jCoin += step;
+  }
+
+  public boolean decreaseJCoin(final int step) {
+    if (this.jCoin - step < 0) return false;
+    this.jCoin -= step;
+    return true;
+  }
 }

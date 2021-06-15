@@ -111,4 +111,12 @@ public class TFMTTNAData {
     this.totalCorrectTests = 0;
   }
 
+  public int getTestTotalOfKanjiForTest() {
+    int iRes = 0;
+    for (JBGKanjiItem item: this.kanjisForTest) {
+      iRes += item.getTestCount();
+    }
+    return iRes;
+  }
+
 }

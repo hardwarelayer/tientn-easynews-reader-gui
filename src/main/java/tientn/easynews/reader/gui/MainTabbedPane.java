@@ -81,9 +81,13 @@ public final class MainTabbedPane extends TabPaneBase {
             paneManagement.onShow();
             break;
         case 1:
-            paneWordMatch.onShow();
+            paneTNAWordBuilder.onShow();
             break;
         case 2:
+            paneWordMatch.onShow();
+            break;
+        case 3:
+            paneArticleRead.onShow();
             break;
         }
     }

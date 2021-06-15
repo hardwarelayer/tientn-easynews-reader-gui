@@ -80,6 +80,10 @@ public class ArticleReadWindowTab extends SimpleFormBase {
     private int currentTestSentenceIdx;
     private int currentTestSentenceVal;
 
+    private String[] arrSingleByteNumArray = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"};
+    private String[] arrDoubleByteNumArray = {"０", "１", "２", "３", "４", "５", "６", "７", "８", "９"};
+
+
     static final String SENTENCE_DOT = "。";
 
     public ArticleReadWindowTab(final int width, final int height, Desktop desktop, Stage primStage, ReaderModel model) {
@@ -215,11 +219,16 @@ public class ArticleReadWindowTab extends SimpleFormBase {
     private void appendTextToContent(final String sText, final boolean highlight) {
         int iStartSel = 0;
         int iEndSel = 0;
+
+        if (sText.length() < 1) return;
+
         String sContent = tafArticleContent.getText();
         iStartSel = sContent.length();
         StringBuilder sb = new StringBuilder(sContent + "\n" + sText.trim().replace("、", "、\n").replace(SENTENCE_DOT, "") + SENTENCE_DOT);
         tafArticleContent.setText(sb.toString());
         iEndSel = tafArticleContent.getText().length();
+
+        tafArticleContent.setScrollTop(9999); //always scroll to end
 
         if (highlight) {
             //System.out.println("highlighting ..." + String.valueOf(iStartSel) + " " + String.valueOf(iEndSel));
@@ -244,7 +253,7 @@ public class ArticleReadWindowTab extends SimpleFormBase {
 
         if (sText.equals(currentTestSentence)) {
             //System.out.println("valid match!");
-            this.getDataModel().setJCoin(this.getDataModel().getJCoin() + this.currentTestSentenceVal);
+            this.getDataModel().increaseJCoin(this.currentTestSentenceVal);
             lblJCoinAmount.setText(String.valueOf(this.getDataModel().getJCoin()));
             if (stepUpTestSentence()) {
                 //System.out.println("stepped up!");
@@ -293,6 +302,16 @@ public class ArticleReadWindowTab extends SimpleFormBase {
         return false;
     }
 
+    private String preprocessSentence(String s) {
+        String sRes = s.replace(SENTENCE_DOT, "");
+        if (!sRes.matches(".*\\d.*")) return sRes;
+
+        for (int i = 0; i < 10; i ++) {
+            sRes = sRes.replace(arrSingleByteNumArray[i], arrDoubleByteNumArray[i]);
+        }
+        return sRes;
+    }
+
     private void refreshData() {
         if (this.testStarted) return;
 
@@ -318,11 +337,11 @@ public class ArticleReadWindowTab extends SimpleFormBase {
                 String[] subSentences = sSentence.split(SENTENCE_DOT);
                 for (String s: subSentences) {
                     if (skipSentence(s)) continue;
-                    this.arrSentences.add(s.replace(SENTENCE_DOT, ""));
+                    this.arrSentences.add(preprocessSentence(s));
                 }
             }
             else {
-                this.arrSentences.add(sSentence.replace(SENTENCE_DOT, ""));
+                this.arrSentences.add(preprocessSentence(sSentence));
             }
         }
 
@@ -334,6 +353,7 @@ public class ArticleReadWindowTab extends SimpleFormBase {
         if (this.testStarted) return;
 
         this.testStarted = true;
+        this.getDataModel().setReadStarted(true);
         clearFields();
 
         this.currentTestSentenceIdx = 0;
@@ -351,6 +371,15 @@ public class ArticleReadWindowTab extends SimpleFormBase {
 
     private void doEndTest() {
         if (!this.testStarted) return;
+        if (currentTNA == null) return;
+
+        this.getDataModel().setReadStarted(false);
+
+        this.getDataModel().increaseJCoin(5); //bonus in end game
+        lblJCoinAmount.setText(String.valueOf(this.getDataModel().getJCoin()));
+
+        currentTNA.setTotalCorrectTests(currentTNA.getTotalCorrectTests() + 1);
+
         tafSentenceInput.clear();
         tafArticleContent.selectRange(0,0);
         tafSentenceInput.setEditable(false);
@@ -386,6 +415,20 @@ public class ArticleReadWindowTab extends SimpleFormBase {
             }
         }
         return iTotal;
+    }
+
+    public void onShow() {
+        if (this.getDataModel().isNeedRefresh()) {
+
+            //unset it
+            this.getDataModel().setNeedRefresh(false);
+
+            if (this.getDataModel().isReadStarted()) {
+                return;
+            }
+
+            refreshData();
+        }
     }
 
 }

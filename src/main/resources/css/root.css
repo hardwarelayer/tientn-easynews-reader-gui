@@ -218,7 +218,7 @@
 
 /* ------------------------ ArticleWord -------------------------*/
 #build-word-ja-content {
-  -fx-font-size: 13pt; 
+  -fx-font-size: 16pt; 
   -fx-font-family: Verdana;
   text-area-background: #EFE1CE;
   -fx-text-fill: black;
@@ -268,7 +268,7 @@
 
 /* Article read */
 #read-article-content {
-  -fx-font-size: 14pt; 
+  -fx-font-size: 17pt; 
   -fx-font-family: Verdana;
   text-area-background: #EFE1CE;
   -fx-text-fill: black;
@@ -281,7 +281,7 @@
 }
 
 #read-article-sentence-input {
-  -fx-font-size: 13pt; 
+  -fx-font-size: 16pt; 
   -fx-font-family: Verdana;
   text-area-background: lightgray;
   -fx-text-fill: black;
