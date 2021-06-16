@@ -93,6 +93,16 @@ public class TFMTTNAData {
     this.totalCorrectTests = 0;
   }
 
+  public TFMTTNAData(final String id, final String title, final List<TFMTTNASentenceData> lstSentences, final List<TFMTTNAKanjiData> lstKanjis, final List<JBGKanjiItem> lstBuiltWords, final int ttlTest, final int ttlCorrect) {
+    this.id = UUID.fromString(id);
+    this.articleSentences = lstSentences;
+    this.articleKanjis = lstKanjis;
+    this.kanjisForTest = lstBuiltWords;
+    this.articleTitle = title;
+    this.totalTests = ttlTest;
+    this.totalCorrectTests = ttlCorrect;
+  }
+
   public void setData(final String title, final List<TFMTTNASentenceData> lstSentences, final List<TFMTTNAKanjiData> lstKanjis, final List<JBGKanjiItem> lstKanjisForTest, final int ttlTest, final int ttlCorrect) {
     this.articleTitle = title;
     this.articleSentences = lstSentences;

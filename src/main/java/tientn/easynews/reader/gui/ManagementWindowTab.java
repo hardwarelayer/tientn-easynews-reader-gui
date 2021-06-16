@@ -515,7 +515,9 @@ public class ManagementWindowTab extends GridPaneBase {
 
                 statusTableView.getItems().add(new ManagementStatusTableViewItem("TFMT Target File", this.currentTFMTSaveFile));
                 statusTableView.getItems().add(new ManagementStatusTableViewItem("JCoin Target File", this.currentJCoinSaveFile));
-                statusTableView.getItems().add(new ManagementStatusTableViewItem("TFMT loaded:", String.valueOf(this.dataModel.getDataKanjiItems().size()) + " kanjis"));
+                statusTableView.getItems().add(new ManagementStatusTableViewItem("TFMT Kanjis:", String.valueOf(this.dataModel.getDataKanjiItems().size()) + " kanjis"));
+                statusTableView.getItems().add(new ManagementStatusTableViewItem("TFMT Kanji Tests:", String.valueOf(this.dataModel.getTotalKanjiTests()) + " done"));
+                statusTableView.getItems().add(new ManagementStatusTableViewItem("TFMT Kanji Corrects:", String.valueOf(this.dataModel.getTotalMatchedKanjis()) + " qualified"));
                 statusTableView.getItems().add(new ManagementStatusTableViewItem("JCoin loaded:", String.valueOf(this.dataModel.getJCoin())));
 
                 reloadKanjiList();

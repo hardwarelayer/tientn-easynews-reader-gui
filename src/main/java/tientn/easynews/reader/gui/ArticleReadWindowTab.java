@@ -228,7 +228,9 @@ public class ArticleReadWindowTab extends SimpleFormBase {
         tafArticleContent.setText(sb.toString());
         iEndSel = tafArticleContent.getText().length();
 
-        tafArticleContent.setScrollTop(9999); //always scroll to end
+        tafArticleContent.selectPositionCaret(tafArticleContent.getLength()); 
+        tafArticleContent.deselect(); 
+        tafArticleContent.setScrollTop(Double.MAX_VALUE);
 
         if (highlight) {
             //System.out.println("highlighting ..." + String.valueOf(iStartSel) + " " + String.valueOf(iEndSel));
@@ -267,7 +269,7 @@ public class ArticleReadWindowTab extends SimpleFormBase {
                 doEndTest();
             }
         }
-        System.out.println(sText);
+        //System.out.println(sText);
     }
 
     private void loadArticle() {
@@ -378,6 +380,7 @@ public class ArticleReadWindowTab extends SimpleFormBase {
         this.getDataModel().increaseJCoin(5); //bonus in end game
         lblJCoinAmount.setText(String.valueOf(this.getDataModel().getJCoin()));
 
+        currentTNA.setTotalTests(currentTNA.getTotalTests() + 1);
         currentTNA.setTotalCorrectTests(currentTNA.getTotalCorrectTests() + 1);
 
         tafSentenceInput.clear();

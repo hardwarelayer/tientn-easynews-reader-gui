@@ -422,11 +422,33 @@ public class ReaderModel {
     return lVal.intValue();
   }
 
+  private void recountGrandKanjiTests() {
+    this.totalKanjis = 0;
+    this.totalMatchedKanjis = 0;
+    this.totalKanjiTests = 0;
+    totalKanjis = this.dataKanjiItems.size();
 
-  private void addBuiltWordToGrandKanjiList(JBGKanjiItem kItem) {
+    for (JBGKanjiItem item: this.dataKanjiItems) {
+      //2nd purpose
+      if (item.getCorrectCount() >= JBGConstants.KANJI_MIN_TEST_CORRECT) {
+        totalMatchedKanjis += 1;
+      }
+      totalKanjiTests += item.getTestCount();
+    }
+  }
+
+  private boolean addBuiltWordToGrandKanjiList(JBGKanjiItem kItem) {
     boolean wordExists = false;
     for (JBGKanjiItem item: this.dataKanjiItems) {
       if (item.getKanji().equals(kItem.getKanji())) {
+        //update the test count from article kanji for test
+        //not exact if we test in both grand list and TNA, but acceptable for now
+        if (item.getTestCount() < kItem.getTestCount()) {
+          item.setTestCount(kItem.getTestCount());
+        }
+        if (item.getCorrectCount() < kItem.getCorrectCount()) {
+          item.setCorrectCount(kItem.getCorrectCount());
+        }
         wordExists = true;
         break;
       }
@@ -434,6 +456,7 @@ public class ReaderModel {
     if (!wordExists) {
       this.dataKanjiItems.add(kItem);
     }
+    return (!wordExists);
   }
 
   public boolean loadTFMTJsonFromFile(final String fileName) {
@@ -451,6 +474,8 @@ public class ReaderModel {
       //System.out.println("Open with jcoin " + String.valueOf(jsonObject.get("jcoin")));
 
       if (kanjiList.size() < 1) return false;
+
+      boolean hasNewKanjiFromTNA = false;
 
       this.totalKanjis = 0;
       this.totalMatchedKanjis = 0;
@@ -487,6 +512,9 @@ public class ReaderModel {
         JSONArray sentenceList = (JSONArray) articleItem.get("articleSentences");
         JSONArray articleKanjiList = (JSONArray) articleItem.get("articleKanjis");
         JSONArray lstBuiltWords = (JSONArray) articleItem.get("kanjisForTest");
+        int ttlTNATests = getIntFromJson(articleItem, "totalTests");
+        int ttlTNATestCorrects = getIntFromJson(articleItem, "totalCorrectTests");
+        int ttlTNAKanjiTests = getIntFromJson(articleItem, "testTotalOfKanjiForTest");
 
         System.out.println("  Loading article " + sArticleId + " " + sArticleTitle);
         System.out.println("    Total sentences: " + String.valueOf(sentenceList.size()));
@@ -502,9 +530,11 @@ public class ReaderModel {
             String sSentence = (String) jsonSObj.get("sentence");
             String sEnglishMeaning = (String) jsonSObj.get("englishMeaning");
 
+            /*
             System.out.println(sSentence);
             if (sEnglishMeaning != null)
               System.out.println(sEnglishMeaning);
+              */
 
             List<String> lstSentenceKanjis = new ArrayList<String>();
             JSONArray lstKanjisOfSentence = (JSONArray) jsonSObj.get("sentenceKanjis");
@@ -577,7 +607,9 @@ public class ReaderModel {
               lstBuiltWordForTest.add(kjItem);
 
               //if this word is not in grand kanji list yet, add it
-              addBuiltWordToGrandKanjiList(kjItem);
+              if (addBuiltWordToGrandKanjiList(kjItem)) {
+                hasNewKanjiFromTNA = true;
+              }
             }
           }
 
@@ -593,9 +625,14 @@ public class ReaderModel {
           }
         }
 
-        TFMTTNAData tna = new TFMTTNAData(sArticleId, sArticleTitle, lstTNASentences, lstArticleKanjis, lstBuiltWordForTest);
+        TFMTTNAData tna = new TFMTTNAData(sArticleId, sArticleTitle, lstTNASentences, lstArticleKanjis, lstBuiltWordForTest,
+          ttlTNATests, ttlTNATestCorrects); //not use ttlTNAKanjiTests
         this.dataTNAItems.add(tna);
 
+      }
+
+      if (hasNewKanjiFromTNA) {
+        recountGrandKanjiTests();
       }
 
       this.tfmtLoaded = true;
@@ -637,6 +674,9 @@ public class ReaderModel {
       JSONArray sentenceList = (JSONArray) dataPart.get("sentences");
       JSONObject kanjiDict = (JSONObject) dataPart.get("kanjis");
       JSONArray lstBuiltWords = (JSONArray) dataPart.get("kanjisForTest");
+      int ttlTNATests = getIntFromJson(dataPart, "totalTests");
+      int ttlTNATestCorrects = getIntFromJson(dataPart, "totalCorrectTests");
+      int ttlTNAKanjiTests = getIntFromJson(dataPart, "testTotalOfKanjiForTest");
 
       System.out.println(sArticleTitle); 
       System.out.println("Total loaded kanjis: " + String.valueOf(kanjiDict.size()));
@@ -739,7 +779,9 @@ public class ReaderModel {
         }
       }
 
-      TFMTTNAData tna = new TFMTTNAData(sArticleId, sArticleTitle, lstTNASentences, lstArticleKanjis, lstBuiltWordForTest);
+      TFMTTNAData tna = new TFMTTNAData(sArticleId, sArticleTitle, lstTNASentences, lstArticleKanjis, lstBuiltWordForTest,
+        ttlTNATests, ttlTNATestCorrects); //not use ttlTNAKanjiTests yet
+
       this.dataTNAItems.add(tna);
 
       return true;
