@@ -245,6 +245,18 @@ public class ArticleReadWindowTab extends SimpleFormBase {
         validateSentence();
     }
 
+    private int getIndexOfDifferent(final String sEnter, final String sTrial) {
+        int minLen = Math.min(sEnter.length(), sTrial.length());
+        for (int i = 0 ; i != minLen ; i++) {
+            char chA = sEnter.charAt(i);
+            char chB = sTrial.charAt(i);
+            if (chA != chB) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
     private void validateSentence() {
         String sText = tafSentenceInput.getText();
         if (sText == null) return;
@@ -267,6 +279,14 @@ public class ArticleReadWindowTab extends SimpleFormBase {
             else {
                 //System.out.println("can't stepped up, end test!");
                 doEndTest();
+            }
+        }
+        else {
+            int iDiffPos = getIndexOfDifferent(sText, currentTestSentence);
+            if (iDiffPos >= 0) {
+                int iRemainLength = sText.length() - iDiffPos;
+                tafSentenceInput.positionCaret(iDiffPos);
+                tafSentenceInput.selectRange(iDiffPos, iDiffPos+1);
             }
         }
         //System.out.println(sText);

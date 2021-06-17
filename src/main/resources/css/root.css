@@ -101,6 +101,7 @@
 #meaning-column {
  -fx-font-size: 12pt; 
  -fx-font-family: Verdana;
+ -fx-text-wrap: true;
 }
 
 #wordmatch-kanji-test {
