@@ -85,6 +85,7 @@ public class ArticleReadWindowTab extends SimpleFormBase {
 
 
     static final String SENTENCE_DOT = "。";
+    static final String DOUBLE_SPACE = "　";
 
     public ArticleReadWindowTab(final int width, final int height, Desktop desktop, Stage primStage, ReaderModel model) {
         super(width, height, desktop, primStage, model);
@@ -325,7 +326,7 @@ public class ArticleReadWindowTab extends SimpleFormBase {
     }
 
     private String preprocessSentence(String s) {
-        String sRes = s.replace(SENTENCE_DOT, "");
+        String sRes = s.replace(SENTENCE_DOT, "").replace(DOUBLE_SPACE, "");
         if (!sRes.matches(".*\\d.*")) return sRes;
 
         for (int i = 0; i < 10; i ++) {

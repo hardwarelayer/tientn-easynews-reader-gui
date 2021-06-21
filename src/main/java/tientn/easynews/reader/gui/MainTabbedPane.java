@@ -105,7 +105,7 @@ public final class MainTabbedPane extends TabPaneBase {
 
         this.addPaneAsTab("Management", paneManagement);
         this.addSimpleFormAsTab("ArticleWords", paneTNAWordBuilder);
-        this.addSimpleFormAsTab("WordMatch", paneWordMatch);
+        this.addSimpleStackedFormAsTab("WordMatch", paneWordMatch);
         this.addSimpleFormAsTab("ArticleRead", paneArticleRead);
         this.addPaneAsTab("Articles", tblViewTab);
 

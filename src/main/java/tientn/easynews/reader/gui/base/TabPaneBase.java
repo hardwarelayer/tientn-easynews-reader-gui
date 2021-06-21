@@ -38,6 +38,7 @@ import lombok.Getter;
 
 import tientn.easynews.reader.gui.base.GridPaneBase;
 import tientn.easynews.reader.gui.base.SimpleFormBase;
+import tientn.easynews.reader.gui.base.SimpleStackedFormBase;
 
 public class TabPaneBase extends TabPane {
 
@@ -69,6 +70,12 @@ public class TabPaneBase extends TabPane {
 
   public Tab addSimpleFormAsTab(final String tabTitle, final SimpleFormBase frm) {
     Tab tabCtl = new Tab(tabTitle, frm);
+    this.getTabs().add(tabCtl);
+    return tabCtl;
+  }
+
+  public Tab addSimpleStackedFormAsTab(final String tabTitle, final SimpleStackedFormBase stkFrm) {
+    Tab tabCtl = new Tab(tabTitle, stkFrm);
     this.getTabs().add(tabCtl);
     return tabCtl;
   }

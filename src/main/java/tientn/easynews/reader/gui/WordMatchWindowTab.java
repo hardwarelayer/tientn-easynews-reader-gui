@@ -42,13 +42,13 @@ import javafx.scene.control.SelectionMode;
 import javafx.collections.ObservableList;
 import javafx.scene.input.KeyCode;
 
-import tientn.easynews.reader.gui.base.SimpleFormBase;
+import tientn.easynews.reader.gui.base.SimpleStackedFormBase;
 import tientn.easynews.reader.data.ReaderModel;
 import tientn.easynews.reader.data.JBGKanjiItem;
 import tientn.easynews.reader.data.JBGConstants;
 
 // SimpleFormBase derived class
-public class WordMatchWindowTab extends SimpleFormBase {
+public class WordMatchWindowTab extends SimpleStackedFormBase {
 
     private List<JBGKanjiItem> kanjiList;
 
@@ -91,6 +91,8 @@ public class WordMatchWindowTab extends SimpleFormBase {
     public WordMatchWindowTab(final int width, final int height, Desktop desktop, Stage primStage, ReaderModel model) {
         super(width, height, desktop, primStage, model);
         lstProblematicWords = new ArrayList<String>();
+
+        this.getTopBodyLabel().setId("wordmatch-top-kanji-label");
     }
 
     @Override
@@ -402,6 +404,7 @@ public class WordMatchWindowTab extends SimpleFormBase {
                 if (lvFirstCol.isFocused()) {
                     if (!sItem.isEmpty()) {
                         lblFirstCol.setText(sItem);
+                        this.getTopBodyLabel().setText(sItem);
                         chooseHiraganaList();
                     }
                 }
@@ -423,8 +426,8 @@ public class WordMatchWindowTab extends SimpleFormBase {
                     }
                     else {
                         //double ENTER on fourth list
-                        //end of test
-                        validateKanjiSelection();
+                        //submit row value
+                        validateKanjiSelection(isShiftDown);
                     }
                 }
             }
@@ -629,6 +632,8 @@ public class WordMatchWindowTab extends SimpleFormBase {
         lvSecondCol.getSelectionModel().clearSelection();
         lvThirdCol.getSelectionModel().clearSelection();
         lvFourthCol.getSelectionModel().clearSelection();
+
+        this.getTopBodyLabel().setText(sWordMatchEmptyValue);
     }
 
     private void refreshStartButton() {
@@ -770,7 +775,7 @@ public class WordMatchWindowTab extends SimpleFormBase {
           this.lstProblematicWords.remove(kanjiWord);
     }
 
-    public boolean validateKanjiSelection() {
+    public boolean validateKanjiSelection(final boolean isShiftDown) {
         boolean allFieldSet = true;
 
         final int iKanjiSel = lvFirstCol.getSelectionModel().getSelectedIndex();
@@ -815,6 +820,13 @@ public class WordMatchWindowTab extends SimpleFormBase {
 
               setSneekpeekFields(kanji, hira, hv, viet);
 
+              if (isShiftDown) {
+                //normally, we call noteWord on wrongly selected row
+                //but if Shift+ENTER and the selected row is correct, we still note it
+                //so the tester can also note this word for later test with "Wrong List"
+                noteWord(kanji);
+              }
+
               //remove the correct matched word set from lists
               int iRemainingItems = removeItemFromList(lvFirstCol, kanji);
               removeItemFromList(lvSecondCol, hira);
@@ -835,6 +847,7 @@ public class WordMatchWindowTab extends SimpleFormBase {
               //not correct!
               if (totalJCoin > 0) totalJCoin--;
               noteWord(kanji);
+              chooseKanjiList();
             }
             //update the statistic of word
             if (!updateWordStat(matchRes[0], matchRes[1])) {
