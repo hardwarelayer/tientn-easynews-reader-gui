@@ -161,4 +161,17 @@ public class SimpleFormBase extends VBox {
       }
   }
 
+  protected void showInformation(final String header, final String msg) {
+      Alert alert = new Alert(AlertType.INFORMATION);
+      alert.setTitle("Information");
+      alert.setHeaderText(header);
+      alert.setContentText(msg);
+
+      DialogPane dialogPane = alert.getDialogPane();
+      dialogPane.getStylesheets().add(
+              getClass().getResource("/css/dialog.css").toExternalForm());
+
+      Optional<ButtonType> result = alert.showAndWait();
+  }
+
 }

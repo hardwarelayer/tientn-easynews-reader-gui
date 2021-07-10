@@ -66,7 +66,7 @@ public final class AppGUI extends TabbedAppBase {
     @Override
     protected TabPaneBase initSceneElements(Stage primaryStage) {
 
-        setDefaultArgs("EasyNews Learn and Read", JBGConstants.MIN_WIDTH, JBGConstants.MIN_HEIGHT);
+        setDefaultArgs("Article Learn&Read - (c) Tran Ngoc Tien 2021", JBGConstants.MIN_WIDTH, JBGConstants.MIN_HEIGHT);
 
         this.dataModel = new ReaderModel();
         System.out.println(this.dataModel.toString());

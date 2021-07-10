@@ -47,6 +47,9 @@ public class TFMTTNAData {
   private List<JBGKanjiItem> kanjisForTest;
   @Getter
   @Setter
+  private List<String> problematicWords;
+  @Getter
+  @Setter
   private int totalTests = 0;
   @Getter
   @Setter
@@ -57,6 +60,7 @@ public class TFMTTNAData {
     this.articleSentences = new ArrayList<TFMTTNASentenceData>();
     this.articleKanjis = new ArrayList<TFMTTNAKanjiData>();
     this.kanjisForTest = new ArrayList<JBGKanjiItem>();
+    this.problematicWords = new ArrayList<String>();
     this.articleTitle = "";
     this.totalTests = 0;
     this.totalCorrectTests = 0;
@@ -68,6 +72,7 @@ public class TFMTTNAData {
     this.articleSentences = lstSentences;
     this.articleKanjis = lstKanjis;
     this.kanjisForTest = new ArrayList<JBGKanjiItem>();
+    this.problematicWords = new ArrayList<String>();
     this.articleTitle = title;
     this.totalTests = 0;
     this.totalCorrectTests = 0;
@@ -78,6 +83,7 @@ public class TFMTTNAData {
     this.articleSentences = lstSentences;
     this.articleKanjis = lstKanjis;
     this.kanjisForTest = new ArrayList<JBGKanjiItem>();
+    this.problematicWords = new ArrayList<String>();
     this.articleTitle = title;
     this.totalTests = 0;
     this.totalCorrectTests = 0;
@@ -88,6 +94,7 @@ public class TFMTTNAData {
     this.articleSentences = lstSentences;
     this.articleKanjis = lstKanjis;
     this.kanjisForTest = lstBuiltWords;
+    this.problematicWords = new ArrayList<String>();
     this.articleTitle = title;
     this.totalTests = 0;
     this.totalCorrectTests = 0;
@@ -98,7 +105,29 @@ public class TFMTTNAData {
     this.articleSentences = lstSentences;
     this.articleKanjis = lstKanjis;
     this.kanjisForTest = lstBuiltWords;
+    this.problematicWords = new ArrayList<String>();
     this.articleTitle = title;
+    this.totalTests = ttlTest;
+    this.totalCorrectTests = ttlCorrect;
+  }
+
+  public TFMTTNAData(final String id, final String title, final List<TFMTTNASentenceData> lstSentences, final List<TFMTTNAKanjiData> lstKanjis, final List<JBGKanjiItem> lstBuiltWords, final List<String> lstProblematicWords, final int ttlTest, final int ttlCorrect) {
+    this.id = UUID.fromString(id);
+    this.articleSentences = lstSentences;
+    this.articleKanjis = lstKanjis;
+    this.kanjisForTest = lstBuiltWords;
+    this.problematicWords = lstProblematicWords;
+    this.articleTitle = title;
+    this.totalTests = ttlTest;
+    this.totalCorrectTests = ttlCorrect;
+  }
+
+  public void setData(final String title, final List<TFMTTNASentenceData> lstSentences, final List<TFMTTNAKanjiData> lstKanjis, final List<JBGKanjiItem> lstKanjisForTest, final List<String> lstProblematicWords, final int ttlTest, final int ttlCorrect) {
+    this.articleTitle = title;
+    this.articleSentences = lstSentences;
+    this.articleKanjis = lstKanjis;
+    this.kanjisForTest = lstKanjisForTest;
+    this.problematicWords = lstProblematicWords;
     this.totalTests = ttlTest;
     this.totalCorrectTests = ttlCorrect;
   }

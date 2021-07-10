@@ -349,7 +349,7 @@ public class ArticleWordBuildWindowTab extends SimpleFormBase {
         ArticleWordBuildTableViewItem item = tvBuiltWords.getSelectionModel().getSelectedItem();
         if (item != null) {
 
-            if (!this.showQuestion("Delete?", "BuiltWord Delete Confim", "Do you want to delete this word?"))
+            if (!this.showQuestion("Delete?", "BuiltWord Delete Confim", "Do you want to delete this word: " + item.getKanji() + "?"))
                 return;
 
             boolean isRemovedInMemory = false;
@@ -554,7 +554,10 @@ public class ArticleWordBuildWindowTab extends SimpleFormBase {
 
     private void processStartWordMatchButtonClick() {
         if (currentTNA == null) return;
-        if (this.getDataModel().isTestStarted()) return;
+        if (this.getDataModel().isTestStarted()) {
+            this.showInformation("Cannot switch tab!", "You are currently in a match, complete or stop it first!");
+            return;
+        }
 
         this.getDataModel().setCurrentWorkMode(JBGConstants.TEST_WORD_IN_ARTICLE);
         this.getDataModel().setNeedRefresh(true);

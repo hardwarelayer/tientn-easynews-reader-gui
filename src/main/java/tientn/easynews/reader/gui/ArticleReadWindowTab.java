@@ -263,8 +263,8 @@ public class ArticleReadWindowTab extends SimpleFormBase {
         if (sText == null) return;
         sText = sText.trim();
 
-        System.out.println("trial: " + currentTestSentence);
-        System.out.println("enter: " + sText);
+        //System.out.println("trial: " + currentTestSentence);
+        //System.out.println("enter: " + sText);
 
         if (sText.equals(currentTestSentence)) {
             //System.out.println("valid match!");

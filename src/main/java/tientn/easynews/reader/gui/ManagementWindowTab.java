@@ -679,7 +679,7 @@ public class ManagementWindowTab extends GridPaneBase {
                 if (event.getClickCount() == 2 && (! row.isEmpty()) ) {
                     ManagementArticleTableViewItem rowData = row.getItem();
                     processArticleTableViewDblClick(rowData);
-                    System.out.println("Double click on: "+rowData.toString());
+                    //System.out.println("Double click on: "+rowData.toString());
                 }
             });
             return row ;

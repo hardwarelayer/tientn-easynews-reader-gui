@@ -45,6 +45,7 @@ import javafx.scene.input.KeyCode;
 import tientn.easynews.reader.gui.base.SimpleStackedFormBase;
 import tientn.easynews.reader.data.ReaderModel;
 import tientn.easynews.reader.data.JBGKanjiItem;
+import tientn.easynews.reader.data.TFMTTNAData;
 import tientn.easynews.reader.data.JBGConstants;
 
 // SimpleFormBase derived class
@@ -68,6 +69,7 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
     private Label lblTotalTests;
     private Label lblTestStatus;
     private Label lblJCoinAmount;
+    private Label lblProblematicWord;
 
     private ListView<String> lvFirstCol;
     private ListView<String> lvSecondCol;
@@ -78,13 +80,16 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
 
     private Button btnLoadNormalForTest;
     private Button btnLoadNewForTest;
-    private Button btnLoadWrongForTest;
+    private Button btnLoadProblematicWordsForTest;
     private Button btnStartTest;
+    private Button btnStopTest;
 
     private final String sWordMatchEmptyValue = "...";
     private static final String MATCH_WORD_OK = "OK";
     private static final String MATCH_WORD_NG = "NG";
     private static final int BONUS_ON_COMPLETE = 5;
+
+    private int iCurrentTestKJCount = 0;
 
     List<String> lstProblematicWords;
 
@@ -116,11 +121,12 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
 
         Label lblLoaded = new Label("Total Kanjis");
         lblTotalStats = createLabel("0/0");
-        Label lblTest = new Label("Total Test");
+        Label lblTest = new Label("Total Test:");
         lblTotalTests = createLabel("0");
         lblTestStatus = createLabel("Waiting ...");
         lblJCoinAmount = createLabel("0");
         lblJCoinAmount.setId("wordmatch-coin-amount");
+        lblProblematicWord = createLabel("0");
 
         lblFirstCol = createLabel(sWordMatchEmptyValue);
         lblSecondCol = createLabel(sWordMatchEmptyValue);
@@ -154,28 +160,34 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
                 loadNormalKanjisForTest();
             }
         };
-        btnLoadNormalForTest = createButton("Load Normal", fncLoadNormalButtonClick);
+        btnLoadNormalForTest = createButton("(L)oad Normal", fncLoadNormalButtonClick);
 
         EventHandler<ActionEvent> fncLoadNewButtonClick = new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent e) {
                 loadNewKanjisForTest();
             }
         };
-        btnLoadNewForTest = createButton("Load New ", fncLoadNewButtonClick);
+        btnLoadNewForTest = createButton("Load (N)ew ", fncLoadNewButtonClick);
 
         EventHandler<ActionEvent> fncLoadWrongButtonClick = new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent e) {
-                loadWrongKanjisForTest();
+                loadProblematicWordsForTest();
             }
         };
-        btnLoadWrongForTest = createButton("Load Wrong", fncLoadWrongButtonClick);
+        btnLoadProblematicWordsForTest = createButton("Load (P)roblematic", fncLoadWrongButtonClick);
 
         EventHandler<ActionEvent> fncStartTestButtonClick = new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent e) {
                 startTest();
             }
         };
-        btnStartTest = createButton("Start Test", fncStartTestButtonClick);
+        btnStartTest = createButton("(S)tart Test", fncStartTestButtonClick);
+        EventHandler<ActionEvent> fncStopTestButtonClick = new EventHandler<ActionEvent>() {
+            @Override public void handle(ActionEvent e) {
+                stopTest();
+            }
+        };
+        btnStopTest = createButton("Stop Test", fncStopTestButtonClick);
 
         lvFirstCol = createSingleSelectStringListView(0);
         lvSecondCol = createSingleSelectStringListView(1);
@@ -199,18 +211,19 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
 
         this.addBodyCtl(lblTestStatus, 0, 0);
         this.addBodyCtl(btnReloadKanjis, 1, 0);
-        this.addBodyCtl(new Label("Current JCoin"), 2, 0);
-        this.addBodyCtl(lblJCoinAmount, 3, 0);
+        this.addBodyPane(new HBox(new Label("Current JCoin:"), lblJCoinAmount), 2, 0);
+        this.addBodyPane(new HBox(new Label("Problematic Words:"), lblProblematicWord), 3, 0);
 
         this.addBodyCtl(lblLoaded, 0, 1);
         this.addBodyCtl(lblTotalStats, 1, 1);
-        this.addBodyCtl(lblTest, 2, 1);
-        this.addBodyCtl(lblTotalTests, 3, 1);
+        this.addBodyPane(new HBox(lblTest, lblTotalTests), 2, 1);
+        //this.addBodyCtl(lblTotalTests, 3, 1);
 
         this.addBodyCtl(btnLoadNormalForTest, 0, 2);
         this.addBodyCtl(btnLoadNewForTest, 1, 2);
-        this.addBodyCtl(btnLoadWrongForTest, 2, 2);
-        this.addBodyCtl(btnStartTest, 3, 2);
+        this.addBodyCtl(btnLoadProblematicWordsForTest, 2, 2);
+        HBox bxStartStop = new HBox(btnStartTest, btnStopTest);
+        this.addBodyPane(bxStartStop, 3, 2);
 
         this.addBodyCtl(lblFirstCol, 0, 3);
         this.addBodyCtl(lblSecondCol, 1, 3);
@@ -236,13 +249,15 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
 
         clearLists();
         if (this.getDataModel().getCurrentWorkMode() == JBGConstants.TEST_WORD_IN_MAJOR_LIST) {
-            lblTestStatus.setText("All KJs");
+            lblTestStatus.setText("Global Kanjis Mode");
         }
         else if (this.getDataModel().getCurrentWorkMode() == JBGConstants.TEST_WORD_IN_ARTICLE) {
-            lblTestStatus.setText("TNA KJs");
+            this.lstProblematicWords = new ArrayList<String>(this.getDataModel().getSelectedTNA().getProblematicWords());
+            lblTestStatus.setText("Article Kanjis Mode");
         }
 
         lblJCoinAmount.setText(String.valueOf(this.getDataModel().getJCoin()));
+        lblProblematicWord.setText(String.valueOf(this.lstProblematicWords.size()));
 
         List<JBGKanjiItem> lstKj = this.getDataModel().getDataKanjiItems();
         int iTotalKanjis = lstKj.size();
@@ -264,14 +279,16 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
         lblTotalTests.setText(String.valueOf(iTotalTests));
         if (iTotalKanjis < 1) {
             btnStartTest.setDisable(true);
+            btnStopTest.setDisable(true);
             btnLoadNewForTest.setDisable(true);
-            btnLoadWrongForTest.setDisable(true);
+            btnLoadProblematicWordsForTest.setDisable(true);
             btnLoadNormalForTest.setDisable(true);
         }
         else {
             btnStartTest.setDisable(false);
+            btnStopTest.setDisable(true);
             btnLoadNewForTest.setDisable(false);
-            btnLoadWrongForTest.setDisable(false);
+            btnLoadProblematicWordsForTest.setDisable(false);
             btnLoadNormalForTest.setDisable(false);
         }
 
@@ -294,6 +311,7 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
 
     private void loadNormalKanjisForTest() {
         List<JBGKanjiItem> lstKJ = this.getDataModel().getNormalKJSubset();
+        this.iCurrentTestKJCount = lstKJ.size();
 
         if (lstKJ != null && lstKJ.size() > 0) {
             this.kanjiList = lstKJ;
@@ -309,6 +327,7 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
 
     private void loadNewKanjisForTest() {
         List<JBGKanjiItem> lstKJ = this.getDataModel().getNewKJSubset();
+        this.iCurrentTestKJCount = lstKJ.size();
 
         if (lstKJ != null && lstKJ.size() > 0) {
             this.kanjiList = lstKJ;
@@ -322,10 +341,14 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
         refreshStartButton();
     }
 
-    private void loadWrongKanjisForTest() {
-        if (this.lstProblematicWords.size() < 1) return;
+    private void loadProblematicWordsForTest() {
+        if (this.lstProblematicWords.size() < 1) {
+            System.out.println("no problematic word!");
+            return;
+        }
 
         List<JBGKanjiItem> lstKJ = this.getDataModel().getSpecificKJSubset(this.lstProblematicWords);
+        this.iCurrentTestKJCount = lstKJ.size();
 
         if (lstKJ != null && lstKJ.size() > 0) {
             clearLists();
@@ -346,6 +369,24 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
         else {
             doStartGame();
         }
+    }
+
+    private void stopTest() {
+        boolean isStarted = this.getDataModel().isTestStarted();
+        if (!isStarted) {
+            return;
+        }
+        else {
+            doEndGame();
+        }
+    }
+
+    private int calculateBonusAmount() {
+        if (this.iCurrentTestKJCount < BONUS_ON_COMPLETE)
+            return BONUS_ON_COMPLETE;
+        int iMultiply = (int) this.iCurrentTestKJCount / BONUS_ON_COMPLETE;
+        if (iMultiply < 1) iMultiply = 1;
+        return BONUS_ON_COMPLETE + iMultiply; 
     }
 
     //event
@@ -542,8 +583,8 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
             case N:
                 loadNewKanjisForTest();
                 break;
-            case W:
-                loadWrongKanjisForTest();
+            case P:
+                loadProblematicWordsForTest();
                 break;
             case V:
                 this.getDataModel().printCurrentKanjisWithTest();
@@ -606,8 +647,9 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
         List<JBGKanjiItem> lstKj = this.getDataModel().getDataKanjiItems();
         if (lstKj.size() < 1) {
             btnStartTest.setDisable(true);
+            btnStopTest.setDisable(true);
             btnLoadNewForTest.setDisable(true);
-            btnLoadWrongForTest.setDisable(true);
+            btnLoadProblematicWordsForTest.setDisable(true);
             btnLoadNormalForTest.setDisable(true);
         }
     }
@@ -639,9 +681,11 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
     private void refreshStartButton() {
         if (lvFirstCol.getItems().size() < 1) {
             btnStartTest.setDisable(true);
+            btnStopTest.setDisable(false);
             return;
         }
         btnStartTest.setDisable(false);
+        btnStopTest.setDisable(true);
     }
 
     private void doStartGame() {
@@ -655,8 +699,9 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
         shuffleAllListModels();
         btnLoadNormalForTest.setDisable(true);
         btnLoadNewForTest.setDisable(true);
-        btnLoadWrongForTest.setDisable(true);
+        btnLoadProblematicWordsForTest.setDisable(true);
         btnStartTest.setDisable(true);
+        btnStopTest.setDisable(false);
         clearWordListSelection();
 
         lblJCoinAmount.setText(String.valueOf(this.getDataModel().getJCoin()));
@@ -672,8 +717,9 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
 
         btnLoadNormalForTest.setDisable(false);
         btnLoadNewForTest.setDisable(false);
-        btnLoadWrongForTest.setDisable(false);
+        btnLoadProblematicWordsForTest.setDisable(false);
         btnStartTest.setDisable(true);
+        btnStopTest.setDisable(true);
         clearWordListSelection();
 
         this.getDataModel().setTestStarted(false);
@@ -768,11 +814,29 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
     private void noteWord(final String kanjiWord) {
         if (!this.lstProblematicWords.contains(kanjiWord))
           this.lstProblematicWords.add(kanjiWord);
+
+        if (this.getDataModel().getCurrentWorkMode() == JBGConstants.TEST_WORD_IN_ARTICLE) {
+            TFMTTNAData currentTNA = this.getDataModel().getSelectedTNA();
+            if (!currentTNA.getProblematicWords().contains(kanjiWord)) {
+                currentTNA.getProblematicWords().add(kanjiWord);
+            }
+        }
+
+        lblProblematicWord.setText(String.valueOf(this.lstProblematicWords.size()));
+
     }
 
     private void unnoteWord(final String kanjiWord) {
         if (this.lstProblematicWords.contains(kanjiWord))
           this.lstProblematicWords.remove(kanjiWord);
+        if (this.getDataModel().getCurrentWorkMode() == JBGConstants.TEST_WORD_IN_ARTICLE) {
+            TFMTTNAData currentTNA = this.getDataModel().getSelectedTNA();
+            if (!currentTNA.getProblematicWords().contains(kanjiWord)) {
+                currentTNA.getProblematicWords().remove(kanjiWord);
+            }
+        }
+
+        lblProblematicWord.setText(String.valueOf(this.lstProblematicWords.size()));
     }
 
     public boolean validateKanjiSelection(final boolean isShiftDown) {
@@ -840,7 +904,7 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
               else {
                 //no more word
                 doEndGame();
-                totalJCoin += BONUS_ON_COMPLETE;
+                totalJCoin += calculateBonusAmount();
               }
             }
             else {

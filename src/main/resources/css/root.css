@@ -105,8 +105,8 @@
 }
 
 #wordmatch-top-kanji-label {
- -fx-font-size: 60pt; 
- -fx-font-family: Verdana;
+ -fx-font-size: 100pt; 
+ -fx-font-family: Courier;
  -fx-font-weight: bold;
  -fx-background-color: transparent;
  -fx-text-fill: #000d1a;
