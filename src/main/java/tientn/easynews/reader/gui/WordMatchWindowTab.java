@@ -93,6 +93,29 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
 
     List<String> lstProblematicWords;
 
+    char[] arrA_Chars_ForSearch = new char[] {'あ', 'ア'};
+    char[] arrB_Chars_ForSearch = new char[] {'ば', 'び', 'ぶ', 'べ', 'ぼ', 'バ', 'ビ', 'ブ', 'ベ', 'ボ'};
+    char[] arrC_Chars_ForSearch = new char[] {'ち', 'チ'};
+    char[] arrD_Chars_ForSearch = new char[] {'だ', 'ぢ', 'づ', 'で', 'ど', 'ダ', 'ヂ', 'ヅ', 'デ', 'ド'};
+    char[] arrE_Chars_ForSearch = new char[] {'え', 'エ'};
+    char[] arrF_Chars_ForSearch = new char[] {'ふ', 'フ'};
+    char[] arrG_Chars_ForSearch = new char[] {'が', 'ぎ', 'ぐ', 'げ', 'ご', 'ガ', 'ギ', 'グ', 'ゲ', 'ゴ'};
+    char[] arrH_Chars_ForSearch = new char[] {'は', 'ひ', 'ふ', 'へ', 'ほ', 'ハ', 'ヒ', 'フ', 'ヘ', 'ホ'};
+    char[] arrI_Chars_ForSearch = new char[] {'い', 'イ'};
+    char[] arrJ_Chars_ForSearch = new char[] {'じ', 'ジ'};
+    char[] arrK_Chars_ForSearch = new char[] {'か', 'き', 'く', 'け', 'こ', 'カ', 'キ', 'ク', 'ケ', 'コ'};
+    char[] arrM_Chars_ForSearch = new char[] {'ま', 'み', 'む', 'め', 'も', 'マ', 'ミ', 'ム', 'メ', 'モ'};
+    char[] arrN_Chars_ForSearch = new char[] {'な', 'に', 'ぬ', 'ね', 'の', 'ナ', '二', 'ヌ', 'ネ', 'ノ'};
+    char[] arrO_Chars_ForSearch = new char[] {'お', 'オ'};
+    char[] arrP_Chars_ForSearch = new char[] {'ぱ', 'ぴ', 'ぷ', 'ぺ', 'ぽ', 'パ', 'ピ', 'プ', 'ペ', 'ポ'};
+    char[] arrR_Chars_ForSearch = new char[] {'ら', 'り', 'る', 'れ', 'ろ', 'ラ', 'リ', 'ル', 'レ', 'ロ'};
+    char[] arrS_Chars_ForSearch = new char[] {'さ', 'し', 'そ', 'サ', 'シ', 'ソ'};
+    char[] arrT_Chars_ForSearch = new char[] {'た', 'ち', 'つ', 'て', 'と', 'タ', 'チ', 'ツ', 'テ', 'ト'};
+    char[] arrU_Chars_ForSearch = new char[] {'う', 'ウ'};
+    char[] arrW_Chars_ForSearch = new char[] {'わ', 'ワ'};
+    char[] arrY_Chars_ForSearch = new char[] {'や', 'ゆ', 'よ', 'ヤ', 'ユ', 'ヨ'};
+    char[] arrZ_Chars_ForSearch = new char[] {'ざ', 'じ', 'ず', 'ぜ', 'ぞ', 'ザ', 'ジ', 'ズ', 'ゼ', 'ゾ'};
+
     public WordMatchWindowTab(final int width, final int height, Desktop desktop, Stage primStage, ReaderModel model) {
         super(width, height, desktop, primStage, model);
         lstProblematicWords = new ArrayList<String>();
@@ -310,6 +333,9 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
     }
 
     private void loadNormalKanjisForTest() {
+        if (this.getDataModel().isTestStarted())
+          return;
+
         List<JBGKanjiItem> lstKJ = this.getDataModel().getNormalKJSubset();
         this.iCurrentTestKJCount = lstKJ.size();
 
@@ -326,6 +352,9 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
     }
 
     private void loadNewKanjisForTest() {
+        if (this.getDataModel().isTestStarted())
+          return;
+
         List<JBGKanjiItem> lstKJ = this.getDataModel().getNewKJSubset();
         this.iCurrentTestKJCount = lstKJ.size();
 
@@ -342,6 +371,9 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
     }
 
     private void loadProblematicWordsForTest() {
+        if (this.getDataModel().isTestStarted())
+          return;
+
         if (this.lstProblematicWords.size() < 1) {
             System.out.println("no problematic word!");
             return;
@@ -472,7 +504,7 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
                     }
                 }
             }
-            if (kc == KeyCode.SLASH && isShiftDown) {
+            else if (kc == KeyCode.SLASH && isShiftDown) {
                 // character / with Shift is ?
                 if (lvFirstCol.isFocused()) {
                     sItem = getListSelectedString(lv);
@@ -485,8 +517,95 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
                     lv.getItems().remove(selectedIdx);
                 }
             }
+            else {
+                if (lvSecondCol.isFocused()) {
+                    processHiraganaSearchKeyEvents(kc, isShiftDown);
+                }
+            }
         }
 
+    }
+
+    private boolean isCharInArray(char c, char[] arr) {
+        boolean contains = false;
+        for (char chr: arr) {
+            if (chr == c) {
+                contains = true;
+                break;
+            }
+        }
+        return contains;
+    }
+
+    private boolean matchFirstChar(final KeyCode kc, final String sItem) {
+        char chrFirst = sItem.charAt(0);
+        System.out.println("Comparing "+kc.toString() + " " + Character.toString(chrFirst));
+        switch (kc) {
+            case A:
+                return isCharInArray(chrFirst, arrA_Chars_ForSearch);
+            case B:
+                return isCharInArray(chrFirst, arrB_Chars_ForSearch);
+            case C:
+                return isCharInArray(chrFirst, arrC_Chars_ForSearch);
+            case D:
+                return isCharInArray(chrFirst, arrD_Chars_ForSearch);
+            case E:
+                return isCharInArray(chrFirst, arrE_Chars_ForSearch);
+            case F:
+                return isCharInArray(chrFirst, arrF_Chars_ForSearch);
+            case G:
+                return isCharInArray(chrFirst, arrG_Chars_ForSearch);
+            case H:
+                return isCharInArray(chrFirst, arrH_Chars_ForSearch);
+            case I:
+                return isCharInArray(chrFirst, arrI_Chars_ForSearch);
+            case J:
+                return isCharInArray(chrFirst, arrJ_Chars_ForSearch);
+            case K:
+                return isCharInArray(chrFirst, arrK_Chars_ForSearch);
+            case M:
+                return isCharInArray(chrFirst, arrM_Chars_ForSearch);
+            case N:
+                return isCharInArray(chrFirst, arrN_Chars_ForSearch);
+            case O:
+                return isCharInArray(chrFirst, arrO_Chars_ForSearch);
+            case P:
+                return isCharInArray(chrFirst, arrP_Chars_ForSearch);
+            case R:
+                return isCharInArray(chrFirst, arrR_Chars_ForSearch);
+            case S:
+                return isCharInArray(chrFirst, arrS_Chars_ForSearch);
+            case T:
+                return isCharInArray(chrFirst, arrT_Chars_ForSearch);
+            case U:
+                return isCharInArray(chrFirst, arrU_Chars_ForSearch);
+            case W:
+                return isCharInArray(chrFirst, arrW_Chars_ForSearch);
+            case Y:
+                return isCharInArray(chrFirst, arrY_Chars_ForSearch);
+            case Z:
+                return isCharInArray(chrFirst, arrZ_Chars_ForSearch);
+        }
+        return false;
+    }
+
+    private void processHiraganaSearchKeyEvents(final KeyCode kc, final boolean isShiftDown) {
+        int iStartPos = 0;
+        int iSelPos = lvSecondCol.getSelectionModel().getSelectedIndex();
+        if (iSelPos > 0) iStartPos = iSelPos;
+
+        System.out.println("key on hira list: " + kc.toString());
+
+        int iHiraIdx = 0;
+        ObservableList<String> hiraItems = lvSecondCol.getItems();
+        for (String hiraItem: hiraItems) {
+            if (iHiraIdx++ <= iStartPos) continue;
+            if (matchFirstChar(kc, hiraItem)) {
+                lvSecondCol.scrollTo(iHiraIdx - 1);
+                lvSecondCol.getSelectionModel().select(iHiraIdx - 1);
+                return;
+            }
+        }
     }
 
     private Label createLabel(final String sText) {
@@ -555,41 +674,48 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
 
     @Override
     protected void processKeyPress(final KeyEvent ke) {
-        KeyCode kc = ke.getCode(); 
-        switch (kc) {
-            case DIGIT1:
-                chooseKanjiList();
-                break;
-            case DIGIT2:
-                chooseHiraganaList();
-                break;
-            case DIGIT3:
-                chooseHanVietList();
-                break;
-            case DIGIT4:
-                chooseMeaningList();
-                break;
-            case ENTER:
-            case DELETE:
-            case SLASH:
-                this.processColumnListViewKeyEvent(kc, ke.isShiftDown());
-               break;
-            case S:
-                doStartGame();
-                break;
-            case L:
-                loadNormalKanjisForTest();
-                break;
-            case N:
-                loadNewKanjisForTest();
-                break;
-            case P:
-                loadProblematicWordsForTest();
-                break;
-            case V:
-                this.getDataModel().printCurrentKanjisWithTest();
-                break;
+        KeyCode kc = ke.getCode();
+
+        if (!this.getDataModel().isTestStarted()) {
+            switch (kc) {
+                case S:
+                    doStartGame();
+                    break;
+                case L:
+                    loadNormalKanjisForTest();
+                    break;
+                case N:
+                    loadNewKanjisForTest();
+                    break;
+                case P:
+                    loadProblematicWordsForTest();
+                    break;
+                case V:
+                    this.getDataModel().printCurrentKanjisWithTest();
+                    break;
+            }
         }
+        else {
+        switch (kc) {
+                case DIGIT1:
+                    chooseKanjiList();
+                    break;
+                case DIGIT2:
+                    chooseHiraganaList();
+                    break;
+                case DIGIT3:
+                    chooseHanVietList();
+                    break;
+                case DIGIT4:
+                    chooseMeaningList();
+                    break;
+                default:
+                   this.processColumnListViewKeyEvent(kc, ke.isShiftDown());
+                   break;
+            }
+        }
+
+
     }
 
     private ListView createSingleSelectStringListView(final int col) {
