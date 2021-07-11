@@ -93,28 +93,36 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
 
     List<String> lstProblematicWords;
 
-    char[] arrA_Chars_ForSearch = new char[] {'あ', 'ア'};
-    char[] arrB_Chars_ForSearch = new char[] {'ば', 'び', 'ぶ', 'べ', 'ぼ', 'バ', 'ビ', 'ブ', 'ベ', 'ボ'};
-    char[] arrC_Chars_ForSearch = new char[] {'ち', 'チ'};
-    char[] arrD_Chars_ForSearch = new char[] {'だ', 'ぢ', 'づ', 'で', 'ど', 'ダ', 'ヂ', 'ヅ', 'デ', 'ド'};
-    char[] arrE_Chars_ForSearch = new char[] {'え', 'エ'};
-    char[] arrF_Chars_ForSearch = new char[] {'ふ', 'フ'};
-    char[] arrG_Chars_ForSearch = new char[] {'が', 'ぎ', 'ぐ', 'げ', 'ご', 'ガ', 'ギ', 'グ', 'ゲ', 'ゴ'};
-    char[] arrH_Chars_ForSearch = new char[] {'は', 'ひ', 'ふ', 'へ', 'ほ', 'ハ', 'ヒ', 'フ', 'ヘ', 'ホ'};
-    char[] arrI_Chars_ForSearch = new char[] {'い', 'イ'};
-    char[] arrJ_Chars_ForSearch = new char[] {'じ', 'ジ'};
-    char[] arrK_Chars_ForSearch = new char[] {'か', 'き', 'く', 'け', 'こ', 'カ', 'キ', 'ク', 'ケ', 'コ'};
-    char[] arrM_Chars_ForSearch = new char[] {'ま', 'み', 'む', 'め', 'も', 'マ', 'ミ', 'ム', 'メ', 'モ'};
-    char[] arrN_Chars_ForSearch = new char[] {'な', 'に', 'ぬ', 'ね', 'の', 'ナ', '二', 'ヌ', 'ネ', 'ノ'};
-    char[] arrO_Chars_ForSearch = new char[] {'お', 'オ'};
-    char[] arrP_Chars_ForSearch = new char[] {'ぱ', 'ぴ', 'ぷ', 'ぺ', 'ぽ', 'パ', 'ピ', 'プ', 'ペ', 'ポ'};
-    char[] arrR_Chars_ForSearch = new char[] {'ら', 'り', 'る', 'れ', 'ろ', 'ラ', 'リ', 'ル', 'レ', 'ロ'};
-    char[] arrS_Chars_ForSearch = new char[] {'さ', 'し', 'そ', 'サ', 'シ', 'ソ'};
-    char[] arrT_Chars_ForSearch = new char[] {'た', 'ち', 'つ', 'て', 'と', 'タ', 'チ', 'ツ', 'テ', 'ト'};
-    char[] arrU_Chars_ForSearch = new char[] {'う', 'ウ'};
-    char[] arrW_Chars_ForSearch = new char[] {'わ', 'ワ'};
-    char[] arrY_Chars_ForSearch = new char[] {'や', 'ゆ', 'よ', 'ヤ', 'ユ', 'ヨ'};
-    char[] arrZ_Chars_ForSearch = new char[] {'ざ', 'じ', 'ず', 'ぜ', 'ぞ', 'ザ', 'ジ', 'ズ', 'ゼ', 'ゾ'};
+    char[] arrA_JPChars_ForSearch = new char[] {'あ', 'ア'};
+    char[] arrB_JPChars_ForSearch = new char[] {'ば', 'び', 'ぶ', 'べ', 'ぼ', 'バ', 'ビ', 'ブ', 'ベ', 'ボ'};
+    char[] arrC_JPChars_ForSearch = new char[] {'ち', 'チ'};
+    char[] arrD_JPChars_ForSearch = new char[] {'だ', 'ぢ', 'づ', 'で', 'ど', 'ダ', 'ヂ', 'ヅ', 'デ', 'ド'};
+    char[] arrE_JPChars_ForSearch = new char[] {'え', 'エ'};
+    char[] arrF_JPChars_ForSearch = new char[] {'ふ', 'フ'};
+    char[] arrG_JPChars_ForSearch = new char[] {'が', 'ぎ', 'ぐ', 'げ', 'ご', 'ガ', 'ギ', 'グ', 'ゲ', 'ゴ'};
+    char[] arrH_JPChars_ForSearch = new char[] {'は', 'ひ', 'ふ', 'へ', 'ほ', 'ハ', 'ヒ', 'フ', 'ヘ', 'ホ'};
+    char[] arrI_JPChars_ForSearch = new char[] {'い', 'イ'};
+    char[] arrJ_JPChars_ForSearch = new char[] {'じ', 'ジ'};
+    char[] arrK_JPChars_ForSearch = new char[] {'か', 'き', 'く', 'け', 'こ', 'カ', 'キ', 'ク', 'ケ', 'コ'};
+    char[] arrM_JPChars_ForSearch = new char[] {'ま', 'み', 'む', 'め', 'も', 'マ', 'ミ', 'ム', 'メ', 'モ'};
+    char[] arrN_JPChars_ForSearch = new char[] {'な', 'に', 'ぬ', 'ね', 'の', 'ナ', '二', 'ヌ', 'ネ', 'ノ'};
+    char[] arrO_JPChars_ForSearch = new char[] {'お', 'オ'};
+    char[] arrP_JPChars_ForSearch = new char[] {'ぱ', 'ぴ', 'ぷ', 'ぺ', 'ぽ', 'パ', 'ピ', 'プ', 'ペ', 'ポ'};
+    char[] arrR_JPChars_ForSearch = new char[] {'ら', 'り', 'る', 'れ', 'ろ', 'ラ', 'リ', 'ル', 'レ', 'ロ'};
+    char[] arrS_JPChars_ForSearch = new char[] {'さ', 'し', 'そ', 'サ', 'シ', 'ソ'};
+    char[] arrT_JPChars_ForSearch = new char[] {'た', 'ち', 'つ', 'て', 'と', 'タ', 'チ', 'ツ', 'テ', 'ト'};
+    char[] arrU_JPChars_ForSearch = new char[] {'う', 'ウ'};
+    char[] arrW_JPChars_ForSearch = new char[] {'わ', 'ワ'};
+    char[] arrY_JPChars_ForSearch = new char[] {'や', 'ゆ', 'よ', 'ヤ', 'ユ', 'ヨ'};
+    char[] arrZ_JPChars_ForSearch = new char[] {'ざ', 'じ', 'ず', 'ぜ', 'ぞ', 'ザ', 'ジ', 'ズ', 'ゼ', 'ゾ'};
+
+    char[] arrA_VNChars_ForSearch = new char[] {'a', 'á', 'à', 'ả', 'ã', 'ạ', 'A', 'Á', 'À', 'Ả', 'Ã', 'Ạ'};
+    char[] arrE_VNChars_ForSearch = new char[] {'e', 'é', 'è', 'ẻ', 'ẽ', 'ẹ', 'E', 'É', 'È', 'Ẻ', 'Ẽ', 'Ẹ'};
+    char[] arrI_VNChars_ForSearch = new char[] {'i', 'í', 'ì', 'ỉ', 'ĩ', 'ị', 'I', 'Í', 'Ì', 'Ỉ', 'Ĩ', 'Ị'};
+    char[] arrO_VNChars_ForSearch = new char[] {'o', 'ó', 'ò', 'ỏ', 'õ', 'ọ', 'O', 'Ó', 'Ò', 'Ỏ', 'Õ', 'Ọ'};
+    char[] arrU_VNChars_ForSearch = new char[] {'u', 'ú', 'ù', 'ủ', 'ũ', 'ụ', 'U', 'Ú', 'Ù', 'Ủ', 'Ũ', 'Ụ', 'ư', 'ứ', 'ừ', 'ử', 'ữ', 'ự', 'Ư', 'Ứ', 'Ừ', 'Ử', 'Ữ', 'Ự'};
+    char[] arrY_VNChars_ForSearch = new char[] {'y', 'ý', 'ỳ', 'ỷ', 'ỹ', 'ỵ', 'Y', 'Ý', 'Ỳ', 'Ỷ', 'Ỹ', 'Ỵ'};
+    char[] arrD_VNChars_ForSearch = new char[] {'d', 'đ', 'D', 'Đ'};
 
     public WordMatchWindowTab(final int width, final int height, Desktop desktop, Stage primStage, ReaderModel model) {
         super(width, height, desktop, primStage, model);
@@ -452,6 +460,14 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
         String sItem = null;
         ListView lv = null;
 
+        boolean isDigitKey = false;
+        boolean isLetterKey = false;
+
+        if (kc.toString().length() == 1) {
+            if (Character.isDigit(kc.toString().charAt(0))) isDigitKey = true;
+            if (Character.isLetter(kc.toString().charAt(0))) isLetterKey = true;
+        }
+
         if (!this.getDataModel().isTestStarted()) {
             return;
         }
@@ -517,9 +533,15 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
                     lv.getItems().remove(selectedIdx);
                 }
             }
-            else {
+            else if (isLetterKey) {
                 if (lvSecondCol.isFocused()) {
-                    processHiraganaSearchKeyEvents(kc, isShiftDown);
+                    processHiraganaSearchKeyEvents(kc, isShiftDown, true);
+                }
+                else if (lvThirdCol.isFocused()) {
+                    processVietnamSearchKeyEvents(lvThirdCol, kc, isShiftDown, true);
+                }
+                else if (lvFourthCol.isFocused()) {
+                    processVietnamSearchKeyEvents(lvFourthCol, kc, isShiftDown, true);
                 }
             }
         }
@@ -537,59 +559,84 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
         return contains;
     }
 
-    private boolean matchFirstChar(final KeyCode kc, final String sItem) {
+    private boolean matchHiraKanaFirstChar(final KeyCode kc, final String sItem) {
         char chrFirst = sItem.charAt(0);
-        System.out.println("Comparing "+kc.toString() + " " + Character.toString(chrFirst));
+        //System.out.println("Comparing "+kc.toString() + " " + Character.toString(chrFirst));
         switch (kc) {
             case A:
-                return isCharInArray(chrFirst, arrA_Chars_ForSearch);
+                return isCharInArray(chrFirst, arrA_JPChars_ForSearch);
             case B:
-                return isCharInArray(chrFirst, arrB_Chars_ForSearch);
+                return isCharInArray(chrFirst, arrB_JPChars_ForSearch);
             case C:
-                return isCharInArray(chrFirst, arrC_Chars_ForSearch);
+                return isCharInArray(chrFirst, arrC_JPChars_ForSearch);
             case D:
-                return isCharInArray(chrFirst, arrD_Chars_ForSearch);
+                return isCharInArray(chrFirst, arrD_JPChars_ForSearch);
             case E:
-                return isCharInArray(chrFirst, arrE_Chars_ForSearch);
+                return isCharInArray(chrFirst, arrE_JPChars_ForSearch);
             case F:
-                return isCharInArray(chrFirst, arrF_Chars_ForSearch);
+                return isCharInArray(chrFirst, arrF_JPChars_ForSearch);
             case G:
-                return isCharInArray(chrFirst, arrG_Chars_ForSearch);
+                return isCharInArray(chrFirst, arrG_JPChars_ForSearch);
             case H:
-                return isCharInArray(chrFirst, arrH_Chars_ForSearch);
+                return isCharInArray(chrFirst, arrH_JPChars_ForSearch);
             case I:
-                return isCharInArray(chrFirst, arrI_Chars_ForSearch);
+                return isCharInArray(chrFirst, arrI_JPChars_ForSearch);
             case J:
-                return isCharInArray(chrFirst, arrJ_Chars_ForSearch);
+                return isCharInArray(chrFirst, arrJ_JPChars_ForSearch);
             case K:
-                return isCharInArray(chrFirst, arrK_Chars_ForSearch);
+                return isCharInArray(chrFirst, arrK_JPChars_ForSearch);
             case M:
-                return isCharInArray(chrFirst, arrM_Chars_ForSearch);
+                return isCharInArray(chrFirst, arrM_JPChars_ForSearch);
             case N:
-                return isCharInArray(chrFirst, arrN_Chars_ForSearch);
+                return isCharInArray(chrFirst, arrN_JPChars_ForSearch);
             case O:
-                return isCharInArray(chrFirst, arrO_Chars_ForSearch);
+                return isCharInArray(chrFirst, arrO_JPChars_ForSearch);
             case P:
-                return isCharInArray(chrFirst, arrP_Chars_ForSearch);
+                return isCharInArray(chrFirst, arrP_JPChars_ForSearch);
             case R:
-                return isCharInArray(chrFirst, arrR_Chars_ForSearch);
+                return isCharInArray(chrFirst, arrR_JPChars_ForSearch);
             case S:
-                return isCharInArray(chrFirst, arrS_Chars_ForSearch);
+                return isCharInArray(chrFirst, arrS_JPChars_ForSearch);
             case T:
-                return isCharInArray(chrFirst, arrT_Chars_ForSearch);
+                return isCharInArray(chrFirst, arrT_JPChars_ForSearch);
             case U:
-                return isCharInArray(chrFirst, arrU_Chars_ForSearch);
+                return isCharInArray(chrFirst, arrU_JPChars_ForSearch);
             case W:
-                return isCharInArray(chrFirst, arrW_Chars_ForSearch);
+                return isCharInArray(chrFirst, arrW_JPChars_ForSearch);
             case Y:
-                return isCharInArray(chrFirst, arrY_Chars_ForSearch);
+                return isCharInArray(chrFirst, arrY_JPChars_ForSearch);
             case Z:
-                return isCharInArray(chrFirst, arrZ_Chars_ForSearch);
+                return isCharInArray(chrFirst, arrZ_JPChars_ForSearch);
         }
         return false;
     }
 
-    private void processHiraganaSearchKeyEvents(final KeyCode kc, final boolean isShiftDown) {
+    private boolean matchVietnamFirstChar(final KeyCode kc, final String sItem) {
+        char chrFirst = sItem.charAt(0);
+        //System.out.println("Comparing "+kc.toString() + " " + Character.toString(chrFirst));
+        switch (kc) {
+            case A:
+                return isCharInArray(chrFirst, arrA_VNChars_ForSearch);
+            case E:
+                return isCharInArray(chrFirst, arrE_VNChars_ForSearch);
+            case I:
+                return isCharInArray(chrFirst, arrI_VNChars_ForSearch);
+            case O:
+                return isCharInArray(chrFirst, arrO_VNChars_ForSearch);
+            case U:
+                return isCharInArray(chrFirst, arrU_VNChars_ForSearch);
+            case Y:
+                return isCharInArray(chrFirst, arrY_VNChars_ForSearch);
+            case D:
+                return isCharInArray(chrFirst, arrD_VNChars_ForSearch);
+            default:
+                //System.out.println("Default comparing " + Character.toString(kc.toString().toLowerCase().charAt(0)) + " " + Character.toString(chrFirst));
+                if (kc.toString().toLowerCase().charAt(0) == chrFirst) return true;
+        }
+        return false;
+    }
+
+    private void processHiraganaSearchKeyEvents(final KeyCode kc, final boolean isShiftDown, final boolean recursive) {
         int iStartPos = 0;
         int iSelPos = lvSecondCol.getSelectionModel().getSelectedIndex();
         if (iSelPos > 0) iStartPos = iSelPos;
@@ -600,11 +647,44 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
         ObservableList<String> hiraItems = lvSecondCol.getItems();
         for (String hiraItem: hiraItems) {
             if (iHiraIdx++ <= iStartPos) continue;
-            if (matchFirstChar(kc, hiraItem)) {
+            if (matchHiraKanaFirstChar(kc, hiraItem)) {
                 lvSecondCol.scrollTo(iHiraIdx - 1);
                 lvSecondCol.getSelectionModel().select(iHiraIdx - 1);
                 return;
             }
+        }
+
+        if (iStartPos > 0 && recursive) {
+            //still not found, re-search from 0
+            lvSecondCol.scrollTo(0);
+            lvSecondCol.getSelectionModel().select(0);
+            processHiraganaSearchKeyEvents(kc, isShiftDown, false /*no recursive*/);
+        }
+    }
+
+    private void processVietnamSearchKeyEvents(ListView lst, final KeyCode kc, final boolean isShiftDown, final boolean recursive) {
+        int iStartPos = 0;
+        int iSelPos = lst.getSelectionModel().getSelectedIndex();
+        if (iSelPos > 0) iStartPos = iSelPos;
+
+        System.out.println("key on vietnamese list: " + kc.toString());
+
+        int iItemIdx = 0;
+        ObservableList<String> vnItems = lst.getItems();
+        for (String vnItem: vnItems) {
+            if (iItemIdx++ <= iStartPos) continue;
+            if (matchVietnamFirstChar(kc, vnItem)) {
+                lst.scrollTo(iItemIdx - 1);
+                lst.getSelectionModel().select(iItemIdx - 1);
+                return;
+            }
+        }
+
+        if (iStartPos > 0 && recursive) {
+            //still not found, re-search from 0
+            lst.scrollTo(0);
+            lst.getSelectionModel().select(0);
+            processVietnamSearchKeyEvents(lst, kc, isShiftDown, false /*no recursive*/);
         }
     }
 
