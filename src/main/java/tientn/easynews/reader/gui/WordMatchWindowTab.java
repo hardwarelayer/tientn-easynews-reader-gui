@@ -109,7 +109,7 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
     char[] arrO_JPChars_ForSearch = new char[] {'お', 'オ'};
     char[] arrP_JPChars_ForSearch = new char[] {'ぱ', 'ぴ', 'ぷ', 'ぺ', 'ぽ', 'パ', 'ピ', 'プ', 'ペ', 'ポ'};
     char[] arrR_JPChars_ForSearch = new char[] {'ら', 'り', 'る', 'れ', 'ろ', 'ラ', 'リ', 'ル', 'レ', 'ロ'};
-    char[] arrS_JPChars_ForSearch = new char[] {'さ', 'し', 'そ', 'サ', 'シ', 'ソ'};
+    char[] arrS_JPChars_ForSearch = new char[] {'さ', 'し', 'す', 'せ', 'そ', 'サ', 'シ', 'ス', 'セ', 'ソ'};
     char[] arrT_JPChars_ForSearch = new char[] {'た', 'ち', 'つ', 'て', 'と', 'タ', 'チ', 'ツ', 'テ', 'ト'};
     char[] arrU_JPChars_ForSearch = new char[] {'う', 'ウ'};
     char[] arrW_JPChars_ForSearch = new char[] {'わ', 'ワ'};

@@ -283,6 +283,8 @@ public class ArticleReadWindowTab extends SimpleFormBase {
             }
         }
         else {
+            System.out.println("NOMATCH trial: " + currentTestSentence);
+            System.out.println("NOMATCH enter: " + sText);
             int iDiffPos = getIndexOfDifferent(sText, currentTestSentence);
             if (iDiffPos >= 0) {
                 int iRemainLength = sText.length() - iDiffPos;
@@ -417,6 +419,10 @@ public class ArticleReadWindowTab extends SimpleFormBase {
         this.btnRefresh.setDisable(false);
     }
 
+    private String normalizeSentenceForTest(final String s) {
+        return s.replace('　', ' ').replace('(', '（').replace(')', '）').replace('-', 'ー').trim();
+    }
+
     private boolean stepUpTestSentence() {
         if (this.currentTestSentenceIdx + 1 > this.arrSentences.size()) {
             //System.out.println("can't step up: " + String.valueOf(this.currentTestSentenceIdx+1) + "/" + String.valueOf(this.arrSentences.size()));
@@ -425,7 +431,7 @@ public class ArticleReadWindowTab extends SimpleFormBase {
         this.currentTestSentenceIdx += 1;
         String sen = this.arrSentences.get(this.currentTestSentenceIdx - 1);
         if (skipSentence(sen)) return stepUpTestSentence();
-        this.currentTestSentence = sen;
+        this.currentTestSentence = normalizeSentenceForTest(sen);
         this.currentTestSentenceVal = countKanjiInString(sen);
         return true;
     }
