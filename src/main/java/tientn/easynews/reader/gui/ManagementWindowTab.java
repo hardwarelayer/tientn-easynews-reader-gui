@@ -519,6 +519,8 @@ public class ManagementWindowTab extends GridPaneBase {
                 statusTableView.getItems().add(new ManagementStatusTableViewItem("TFMT Kanji Tests:", String.valueOf(this.dataModel.getTotalKanjiTests()) + " done"));
                 statusTableView.getItems().add(new ManagementStatusTableViewItem("TFMT Kanji Corrects:", String.valueOf(this.dataModel.getTotalMatchedKanjis()) + " qualified"));
                 statusTableView.getItems().add(new ManagementStatusTableViewItem("JCoin loaded:", String.valueOf(this.dataModel.getJCoin())));
+                statusTableView.getItems().add(new ManagementStatusTableViewItem("Last work date:", String.valueOf(this.dataModel.getLastWorkDate())));
+                statusTableView.getItems().add(new ManagementStatusTableViewItem("Penalty applied:", String.valueOf(this.dataModel.isPenaltyApplied())));
 
                 reloadKanjiList();
                 reloadTNAList();
@@ -528,6 +530,13 @@ public class ManagementWindowTab extends GridPaneBase {
             }
         } catch (Exception ex) {
             System.out.println("ERROR openFile: " + ex.getMessage());
+        }
+
+        if (this.dataModel.isPenaltyApplied()) {
+            showQuestion("Yesterday you didn't work?", 
+                "jCoin earning penalty will be applied to this session of work!",
+                "Last work date: "+this.dataModel.getLastWorkDate()
+                );
         }
     }
 

@@ -97,6 +97,19 @@ public class GridPaneBase extends GridPane {
         });
     }
 
+    protected void showMessage(final String title, final String header, final String msg) {
+        Alert alert = new Alert(AlertType.INFORMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(header);
+        alert.setContentText(msg);
+
+        DialogPane dialogPane = alert.getDialogPane();
+        dialogPane.getStylesheets().add(
+                getClass().getResource("/css/dialog.css").toExternalForm());
+
+        Optional<ButtonType> result = alert.showAndWait();
+    }
+
     protected boolean showQuestion(final String title, final String header, final String msg) {
         Alert alert = new Alert(AlertType.CONFIRMATION);
         alert.setTitle(title);

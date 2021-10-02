@@ -13,7 +13,8 @@ import java.util.Comparator;
 import java.util.concurrent.ThreadLocalRandom;
 import java.lang.StringBuilder;
 import java.time.Instant;
-
+import java.util.Calendar;
+import java.text.SimpleDateFormat;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -37,6 +38,9 @@ public class TFMTWorkData {
   private List<TFMTTNAData> articleWorks;
   @Getter
   @Setter
+  private String lastWorkDate;
+  @Getter
+  @Setter
   private int totalKanjis = 0;
   @Getter
   @Setter
@@ -57,9 +61,10 @@ public class TFMTWorkData {
     this.jCoin = 0;
   }
 
-  public void setData(final List<JBGKanjiItem> lstKanjis, final List<TFMTTNAData> lstTNA, final int iCoin) {
+  public void setData(final List<JBGKanjiItem> lstKanjis, final List<TFMTTNAData> lstTNA, final String lastDate, final int iCoin) {
     this.kanjiWorks = lstKanjis;
     this.articleWorks = lstTNA;
+    this.lastWorkDate = lastDate;
     this.jCoin = iCoin;
 
     this.totalMatchedKanjis = 0;

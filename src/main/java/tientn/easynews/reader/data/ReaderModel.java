@@ -11,9 +11,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.Calendar;
 import java.util.concurrent.ThreadLocalRandom;
 import java.lang.StringBuilder;
 import java.time.Instant;
+import java.text.SimpleDateFormat;
 
 import java.io.FileReader;
 import java.io.File;
@@ -49,6 +51,10 @@ public class ReaderModel {
   private List<JBGKanjiItem> dataKanjiItems;
   @Getter
   private List<TFMTTNAData> dataTNAItems;
+  @Getter
+  private String lastWorkDate;
+  private static final String DATE_FORMAT_NOW = "yyyy-MM-dd"; // HH:mm:ss";
+
   @Getter private List<JBGKanjiItem> subsetRecords = null;
   @Getter @Setter private boolean needRefresh;
   @Getter @Setter private boolean testStarted;
@@ -90,6 +96,19 @@ public class ReaderModel {
       sb.append("\n");
     }
     return sb.toString();
+  }
+
+  public static String getTodayString() {
+    Calendar cal = Calendar.getInstance();
+    SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT_NOW);
+    return sdf.format(cal.getTime());
+  }
+
+  public static String getYesterdayString() {
+    Calendar cal = Calendar.getInstance();
+    SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT_NOW);
+    cal.add(Calendar.DAY_OF_MONTH, -1);
+    return sdf.format(cal.getTime());
   }
 
   public void setSelectedArticleId(final String s) {
@@ -405,7 +424,10 @@ public class ReaderModel {
     try {
 
       TFMTWorkData tfmt = new TFMTWorkData();
-      tfmt.setData(this.dataKanjiItems, this.dataTNAItems, this.jCoin);
+      //reset it
+      //if in penalty, it is still be applied for today, because it's different from yesterday!!!
+      this.lastWorkDate = getTodayString();
+      tfmt.setData(this.dataKanjiItems, this.dataTNAItems, this.lastWorkDate, this.jCoin);
       ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
       String json = ow.writeValueAsString(tfmt);
       return json;
@@ -417,8 +439,15 @@ public class ReaderModel {
     return null;
   }
 
+  private String getStringFromJson(JSONObject obj, final String fld) {
+    String sVal = (String) obj.get(fld);
+    if (sVal == null)  sVal = getTodayString();
+    return sVal;
+  }
+
   private int getIntFromJson(JSONObject obj, final String fld) {
     Long lVal = (Long) obj.get(fld);
+    if (lVal == null) lVal = 0L;
     return lVal.intValue();
   }
 
@@ -504,6 +533,7 @@ public class ReaderModel {
       this.totalMatchedKanjis = getIntFromJson(jsonObject, "totalMatchedKanjis");
       this.totalKanjiTests = getIntFromJson(jsonObject, "totalKanjiTests");
       this.jCoin = getIntFromJson(jsonObject, "jcoin");
+      this.lastWorkDate = getStringFromJson(jsonObject, "lastWorkDate");
 
       for (Object aJ: articleList) {
         JSONObject articleItem = (JSONObject) aJ;
@@ -869,8 +899,17 @@ public class ReaderModel {
     return deleted;
   }
 
+  public boolean isPenaltyApplied() {
+    String s = getYesterdayString();
+    if (s.equals(this.lastWorkDate)) return false;
+    return true;
+  }
+
   public void increaseJCoin(final int step) {
-    this.jCoin += step;
+    if (!isPenaltyApplied()) 
+      this.jCoin += step;
+    else
+      this.jCoin += 1; //penalty
   }
 
   public boolean decreaseJCoin(final int step) {
