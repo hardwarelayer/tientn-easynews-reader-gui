@@ -697,7 +697,6 @@ public class ArticleWordBuildWindowTab extends SimpleFormBase {
 
     public void onShow() {
         if (this.getDataModel().isNeedRefresh()) {
-
             //unset it
             this.getDataModel().setNeedRefresh(false);
 

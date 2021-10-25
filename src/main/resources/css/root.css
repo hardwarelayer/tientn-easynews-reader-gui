@@ -316,3 +316,58 @@
   -fx-font-family: Courier New;
   -fx-background-radius: 10px;
 }
+
+#read-grammar-sentence-value {
+  -fx-font-weight: bold;
+  -fx-background-color: yellow;
+  -fx-text-fill: black; 
+  -fx-font-family: Courier New;
+  -fx-background-radius: 10px;
+}
+
+#read-grammar-coin-amount {
+  -fx-font-weight: bold;
+  -fx-background-color: blue;
+  -fx-text-fill: yellow; 
+  -fx-font-family: Courier New;
+  -fx-background-radius: 15px;
+}
+
+#read-grammar-content {
+  -fx-font-size: 17pt; 
+  -fx-font-family: Verdana;
+  text-area-background: #EFE1CE;
+  -fx-text-fill: black;
+  -fx-highlight-fill: #ADFF2F; 
+  -fx-highlight-text-fill: #B22222;
+}
+
+#read-grammar-content .content {
+    -fx-background-color: text-area-background ;
+}
+
+#read-grammar-sentence-input {
+  -fx-font-size: 16pt; 
+  -fx-font-family: Verdana;
+  text-area-background: lightgray;
+  -fx-text-fill: black;
+}
+
+#read-grammar-sentence-input .content {
+    -fx-background-color: text-area-background;
+}
+
+#grammar-read-pattern-list {
+  -fx-font-size: 9pt; 
+  -fx-font-family: Verdana;
+}
+
+
+#grammar-read-pattern-preview {
+  -fx-font-family: "Courier New";
+  -fx-font-size: 9pt;
+  -fx-text-fill: darkred;
+  -fx-text-alignment: center;
+  -fx-background-color: lightgray;
+  -fx-border-color: blue;
+}

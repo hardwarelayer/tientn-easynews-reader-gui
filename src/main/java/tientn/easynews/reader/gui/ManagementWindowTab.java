@@ -28,6 +28,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.Locale;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.application.Platform;
 import javafx.scene.text.Text;
 import javafx.geometry.Insets;
@@ -53,11 +54,13 @@ import tientn.easynews.reader.data.JBGKanjiItem;
 import tientn.easynews.reader.data.ReaderModel;
 import tientn.easynews.reader.data.TFMTWorkData;
 import tientn.easynews.reader.data.TFMTTNAData;
+import tientn.easynews.reader.data.TFMTTNGData;
 import tientn.easynews.reader.gui.base.GridPaneBase;
 import tientn.easynews.reader.data.JBGConstants;
 import tientn.easynews.reader.data.ManagementStatusTableViewItem;
 import tientn.easynews.reader.data.ManagementKanjiTableViewItem;
 import tientn.easynews.reader.data.ManagementArticleTableViewItem;
+import tientn.easynews.reader.data.ManagementGrammarTableViewItem;
 
 // Simple Hello World JavaFX program
 public class ManagementWindowTab extends GridPaneBase {
@@ -73,6 +76,7 @@ public class ManagementWindowTab extends GridPaneBase {
     TableView<ManagementStatusTableViewItem> statusTableView;
     TableView<ManagementKanjiTableViewItem> kanjiTableView;
     TableView<ManagementArticleTableViewItem> articleTableView;
+    TableView<ManagementGrammarTableViewItem> grammarTableView;
 
     public ManagementWindowTab(final String title, Desktop desktop, Stage primStage, final ReaderModel model, MainTabbedPane parent) {
         super(title, desktop, primStage);
@@ -112,13 +116,16 @@ public class ManagementWindowTab extends GridPaneBase {
         col2.setPercentWidth(40);
         paneLeft.getColumnConstraints().addAll(col1, col2);
 
-        Label lblCSVLoad = new Label("Kanji CSV Format");
-        Label lblKJLoad = new Label("Kanji KJ Format");
-        Label lblTFMTLoad = new Label("Work TFMT Format");
-        Label lblTNALoad = new Label("Article TNA Format");
         Button btnKJLoad = createKJLoadButton();
         Button btnCSVLoad = createCSVLoadButton();
         Button btnTFMTLoad = createTFMTLoadButton();
+
+        EventHandler<ActionEvent> fncLoadTNGButtonClick = new EventHandler<ActionEvent>() {
+            @Override public void handle(ActionEvent e) {
+                processLoadTNGButtonEvent();
+            }
+        };
+        Button btnTNGLoad = createButton("TNG Format", fncLoadTNGButtonClick);
 
         EventHandler<ActionEvent> fncLoadTNAButtonClick = new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent e) {
@@ -141,23 +148,26 @@ public class ManagementWindowTab extends GridPaneBase {
         };
         Button btnExportJCoin = createButton("Export JCoin", fncExportJCoinButtonClick);
 
-        paneLeft.add(lblCSVLoad, 0, 1);
-        paneLeft.add(btnCSVLoad, 1, 1);
+        paneLeft.add(new Label("Load Learning Process"), 0, 1);
+        paneLeft.add(btnTFMTLoad, 1, 1);
 
-        paneLeft.add(lblKJLoad, 0, 2);
-        paneLeft.add(btnKJLoad, 1, 2);
+        paneLeft.add(new Label("Save Learning Process"), 0, 2);
+        paneLeft.add(btnTFMTSave, 1, 2);
 
-        paneLeft.add(lblTFMTLoad, 0, 3);
-        paneLeft.add(btnTFMTLoad, 1, 3);
+        paneLeft.add(new Label("Export jCoin"), 0, 3);
+        paneLeft.add(btnExportJCoin, 1, 3);
 
-        paneLeft.add(new Label("Load TNA"), 0, 4);
-        paneLeft.add(btnTNALoad, 1, 4);
+        paneLeft.add(new Label("Load Kanji (CSV)"), 0, 4);
+        paneLeft.add(btnCSVLoad, 1, 4);
 
-        paneLeft.add(new Label("Save Work"), 0, 5);
-        paneLeft.add(btnTFMTSave, 1, 5);
+        paneLeft.add(new Label("Load Kanji (KJ)"), 0, 5);
+        paneLeft.add(btnKJLoad, 1, 5);
 
-        paneLeft.add(new Label("Export jCoin"), 0, 6);
-        paneLeft.add(btnExportJCoin, 1, 6);
+        paneLeft.add(new Label("Load Grammar"), 0, 6);
+        paneLeft.add(btnTNGLoad, 1, 6);
+
+        paneLeft.add(new Label("Load Article"), 0, 7);
+        paneLeft.add(btnTNALoad, 1, 7);
 
         statusTableView = createStatusTableView(0.3);
         statusTableView.setId("management-status-list");
@@ -181,15 +191,44 @@ public class ManagementWindowTab extends GridPaneBase {
         createArticleTableViewColumn("Test", 0.05);
         createArticleTableViewColumn("Correct", 0.05);
 
+        grammarTableView = createGrammarTableView(0.3);
+        grammarTableView.setId("management-grammar-list");
+        createGrammarTableViewColumn("Id", 0.05);
+        createGrammarTableViewColumn("Title", 0.7);
+        createGrammarTableViewColumn("Patterns", 0.05);
+        createGrammarTableViewColumn("Test", 0.05);
+        createGrammarTableViewColumn("Correct", 0.05);
+
+        VBox articleAndGrammarBox = new VBox(grammarTableView, articleTableView);
+        //hbox.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.7));
+
         //this.add(mainBox, 0, 1);
         this.add(paneLeft, 0, 1);
         this.add(statusTableView, 1, 1);
 
         this.add(kanjiTableView, 0, 2);
-        this.add(articleTableView, 1, 2);
+        this.add(articleAndGrammarBox, 1, 2);
         //this.add(new Label("Label2"), 0, 4);
         //this.add(new Label("Label3"), 1, 4);
 
+    }
+
+    private void processLoadTNGButtonEvent() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.getExtensionFilters().addAll(
+             new FileChooser.ExtensionFilter("TNG Files", "*." + JBGConstants.TNG_EXTENSION),
+             new FileChooser.ExtensionFilter("TMP Files", "*.tmp")
+        );
+        Button btnFileChoose = new Button("Select File");
+        btnFileChoose.setOnAction(onActEvent -> {
+            File selectedFile = fileChooser.showOpenDialog(getPrimaryStage());
+        });
+        fileChooser.setTitle("Open Tien's Grammar File");
+        File file = fileChooser.showOpenDialog(getPrimaryStage());
+        if (file != null) {
+            System.out.println("Selected file: " + file.getPath());
+            openTNGFile(file);
+        }
     }
 
     private void processLoadTNAButtonEvent() {
@@ -287,16 +326,21 @@ public class ManagementWindowTab extends GridPaneBase {
     private void saveTFMTToFile(final String fileName, final String content) {
           System.out.println("Saving to file " + fileName);
           File fOutputFile = new File(fileName);
+          final String sMessage = "Saved " + String.valueOf(content.length()) + " bytes to: " + fileName;
+
           try {
               PrintWriter pw = new PrintWriter(fOutputFile, Charset.forName("UTF-8"));
               pw.println(content);
               pw.flush(); //if not, PrintWriter may not write the whole data 
-              statusTableView.getItems().add(new ManagementStatusTableViewItem("Saved " + String.valueOf(content.length()) + " bytes to: ", fileName));
+              statusTableView.getItems().add(new ManagementStatusTableViewItem(sMessage, fileName));
           } catch (FileNotFoundException e) {
             System.out.println(e.getMessage());
           }
           catch (IOException e) {
             System.out.println("saveTFMTToFile error: " + e.getMessage());
+          }
+          finally {
+            showMessage("Work save", "Save complete!", sMessage);
           }
     }
 
@@ -317,7 +361,7 @@ public class ManagementWindowTab extends GridPaneBase {
     }
 
     private Button createKJLoadButton() {
-        String message = "Load KJ";
+        String message = "KJ Format";
 
         Button btn = new Button();
         btn.setText(message);
@@ -352,7 +396,7 @@ public class ManagementWindowTab extends GridPaneBase {
     }
 
     private Button createCSVLoadButton() {
-        String message = "Load CSV";
+        String message = "CSV Format";
 
         Button btn = new Button();
         btn.setText(message);
@@ -387,7 +431,7 @@ public class ManagementWindowTab extends GridPaneBase {
     }
 
     private Button createTFMTLoadButton() {
-        String message = "Load TFMT";
+        String message = "TFMT format";
 
         Button btn = new Button();
         btn.setText(message);
@@ -524,6 +568,7 @@ public class ManagementWindowTab extends GridPaneBase {
 
                 reloadKanjiList();
                 reloadTNAList();
+                reloadTNGList();
             }
             else {
                 System.out.println("cannot load object from TFMT");
@@ -533,7 +578,7 @@ public class ManagementWindowTab extends GridPaneBase {
         }
 
         if (this.dataModel.isPenaltyApplied()) {
-            showQuestion("Yesterday you didn't work?", 
+            showMessage("Yesterday you didn't work?", 
                 "jCoin earning penalty will be applied to this session of work!",
                 "Last work date: "+this.dataModel.getLastWorkDate()
                 );
@@ -548,6 +593,20 @@ public class ManagementWindowTab extends GridPaneBase {
             }
             else {
                 System.out.println("cannot load object from TNA");
+            }
+        } catch (Exception ex) {
+            System.out.println("ERROR openFile: " + ex.getMessage());
+        }
+    }
+
+    private void openTNGFile(File file) {
+        try {
+            if (this.dataModel.loadTNGJsonFromFile(file.getPath())) {
+                statusTableView.getItems().add(new ManagementStatusTableViewItem("TNG loaded:", file.getPath()));
+                reloadTNGList();
+            }
+            else {
+                System.out.println("cannot load object from TNG");
             }
         } catch (Exception ex) {
             System.out.println("ERROR openFile: " + ex.getMessage());
@@ -580,6 +639,20 @@ public class ManagementWindowTab extends GridPaneBase {
             articleTableView.getItems().add(showItem);
         }
     }
+    private void reloadTNGList() {
+        grammarTableView.getItems().clear();
+        for (TFMTTNGData aItem: this.dataModel.getDataTNGItems()) {
+            System.out.println(aItem.getGrammarTitle());
+            ManagementGrammarTableViewItem showItem = new ManagementGrammarTableViewItem(
+                aItem.getId().toString(),
+                aItem.getGrammarTitle(),
+                aItem.getGrammarPattern().size(),
+                aItem.getTotalTests(),
+                aItem.getTotalCorrectTests()
+                );
+            grammarTableView.getItems().add(showItem);
+        }
+    }
 
     private void processStatusTableViewDblClick(ManagementStatusTableViewItem rowData) {
         System.out.println(rowData.toString());
@@ -605,6 +678,14 @@ public class ManagementWindowTab extends GridPaneBase {
         this.parentPane.switchToTab(1);
     }
 
+    private void processGrammarTableViewDblClick(ManagementGrammarTableViewItem rowData) {
+        System.out.println(rowData.toString());
+        String sTNGId = rowData.getId().toString();
+        this.dataModel.setSelectedGrammarId(sTNGId); //this will also set needRefresh
+        this.dataModel.setNeedRefresh(true);
+        this.parentPane.switchToTab(4);
+    }
+
     private void createStatusTableViewColumn(final String title, final double width)
     {
         TableColumn<ManagementStatusTableViewItem, String> tcol = new TableColumn<>(title);
@@ -628,6 +709,14 @@ public class ManagementWindowTab extends GridPaneBase {
         tcol.prefWidthProperty().bind(articleTableView.widthProperty().multiply(width));
         tcol.setResizable(false);
         articleTableView.getColumns().add(tcol);
+    }
+    private void createGrammarTableViewColumn(final String title, final double width)
+    {
+        TableColumn<ManagementGrammarTableViewItem, String> tcol = new TableColumn<>(title);
+        tcol.setCellValueFactory(new PropertyValueFactory<>(title.toLowerCase()));
+        tcol.prefWidthProperty().bind(grammarTableView.widthProperty().multiply(width));
+        tcol.setResizable(false);
+        grammarTableView.getColumns().add(tcol);
     }
 
     private TableView<ManagementStatusTableViewItem> createStatusTableView(final double height) {
@@ -702,7 +791,32 @@ public class ManagementWindowTab extends GridPaneBase {
         selectionModel.setSelectionMode(SelectionMode.SINGLE);
         tableView.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(height));
 
-        return tableView;        
+        return tableView;
+    }
+
+    private TableView<ManagementGrammarTableViewItem> createGrammarTableView(final double height) {
+        TableView<ManagementGrammarTableViewItem> tableView = new TableView<>();
+        tableView.setRowFactory(tv -> {
+            TableRow<ManagementGrammarTableViewItem> row = new TableRow<>();
+            row.setOnMouseClicked(event -> {
+                if (event.getClickCount() == 2 && (! row.isEmpty()) ) {
+                    ManagementGrammarTableViewItem rowData = row.getItem();
+                    processGrammarTableViewDblClick(rowData);
+                    //System.out.println("Double click on: "+rowData.toString());
+                }
+            });
+            return row ;
+        });
+
+        //when empty
+        tableView.setPlaceholder(new Label("No data"));
+
+        TableViewSelectionModel<ManagementGrammarTableViewItem> selectionModel = tableView.getSelectionModel();
+        // set selection mode to only 1 row
+        selectionModel.setSelectionMode(SelectionMode.SINGLE);
+        tableView.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(height));
+
+        return tableView;
     }
 
     private void removeArticleFromList() {

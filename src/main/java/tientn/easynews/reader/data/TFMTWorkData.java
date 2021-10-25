@@ -38,6 +38,9 @@ public class TFMTWorkData {
   private List<TFMTTNAData> articleWorks;
   @Getter
   @Setter
+  private List<TFMTTNGData> grammarWorks;
+  @Getter
+  @Setter
   private String lastWorkDate;
   @Getter
   @Setter
@@ -55,15 +58,17 @@ public class TFMTWorkData {
   public TFMTWorkData() {
     this.kanjiWorks = new ArrayList<JBGKanjiItem>();
     this.articleWorks = new ArrayList<TFMTTNAData>();
+    this.grammarWorks = new ArrayList<TFMTTNGData>();
     this.totalKanjis = 0;
     this.totalMatchedKanjis = 0;
     this.totalKanjiTests = 0;
     this.jCoin = 0;
   }
 
-  public void setData(final List<JBGKanjiItem> lstKanjis, final List<TFMTTNAData> lstTNA, final String lastDate, final int iCoin) {
+  public void setData(final List<JBGKanjiItem> lstKanjis, final List<TFMTTNAData> lstTNA, final List<TFMTTNGData> lstTNG, final String lastDate, final int iCoin) {
     this.kanjiWorks = lstKanjis;
     this.articleWorks = lstTNA;
+    this.grammarWorks = lstTNG;
     this.lastWorkDate = lastDate;
     this.jCoin = iCoin;
 

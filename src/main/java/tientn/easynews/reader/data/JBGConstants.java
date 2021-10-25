@@ -168,6 +168,7 @@ public interface JBGConstants {
   static final String KJ_EXTENSION = ".kj";
   static final String TFMT_EXTENSION = ".tfmt";
   static final String TNA_EXTENSION = ".tna";
+  static final String TNG_EXTENSION = ".tng";
   static final String TFMT_SAVE_EXTENSION = ".twork";
 
   static final int KANJI_TOTAL_SUBSET_SIZE = 20;

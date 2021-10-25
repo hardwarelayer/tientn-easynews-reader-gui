@@ -64,11 +64,6 @@ public class ArticleReadWindowTab extends SimpleFormBase {
     private Label lblSelectedArticleId;
     private Label lblSelectedArticleTitle;
 
-    private Label lblWordKanji;
-    private Label lblWordHiragana;
-    private Label lblWordHanviet;
-    private Label lblWordMeaning;
-
     private Button btnRefresh;
     private Button btnLoadArticle;
     private Button btnStartTest;
@@ -80,9 +75,8 @@ public class ArticleReadWindowTab extends SimpleFormBase {
     private int currentTestSentenceIdx;
     private int currentTestSentenceVal;
 
-    private String[] arrSingleByteNumArray = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"};
-    private String[] arrDoubleByteNumArray = {"０", "１", "２", "３", "４", "５", "６", "７", "８", "９"};
-
+    private String[] arrSingleByteCharArray = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "–", "−"};
+    private String[] arrDoubleByteCharArray = {"０", "１", "２", "３", "４", "５", "６", "７", "８", "９", "ー", "ー"};
 
     static final String SENTENCE_DOT = "。";
     static final String DOUBLE_SPACE = "　";
@@ -138,7 +132,7 @@ public class ArticleReadWindowTab extends SimpleFormBase {
         tafSentenceInput.setId("read-article-sentence-input");
         tafSentenceInput.setWrapText(true);
         tafSentenceInput.setEditable(false);
-        tafSentenceInput.setPromptText("Input highlighed sentence above, and press Shift+ENTER to check");
+        tafSentenceInput.setPromptText("Input highlighted sentence above, and press Shift+ENTER to check");
 
         this.addHeaderText(txtFormTitle, 0, 0);
         this.addHeaderPane(titleRow, 0, 1);
@@ -332,7 +326,7 @@ public class ArticleReadWindowTab extends SimpleFormBase {
         if (!sRes.matches(".*\\d.*")) return sRes;
 
         for (int i = 0; i < 10; i ++) {
-            sRes = sRes.replace(arrSingleByteNumArray[i], arrDoubleByteNumArray[i]);
+            sRes = sRes.replace(arrSingleByteCharArray[i], arrDoubleByteCharArray[i]);
         }
         return sRes;
     }

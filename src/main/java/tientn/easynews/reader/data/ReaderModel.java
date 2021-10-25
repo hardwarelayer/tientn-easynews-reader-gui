@@ -52,6 +52,8 @@ public class ReaderModel {
   @Getter
   private List<TFMTTNAData> dataTNAItems;
   @Getter
+  private List<TFMTTNGData> dataTNGItems;
+  @Getter
   private String lastWorkDate;
   private static final String DATE_FORMAT_NOW = "yyyy-MM-dd"; // HH:mm:ss";
 
@@ -64,19 +66,21 @@ public class ReaderModel {
   @Getter private int totalKanjiTests = 0;
   @Getter private boolean tfmtLoaded = false;
   @Getter private String selectedArticleId;
+  @Getter private String selectedGrammarId;
 
   @Getter @Setter private int jCoin = 0;
 
   public ReaderModel() {
-    initKanjis();
+    initData();
 
     needRefresh = false;
     testStarted = false;
   }
 
-  private void initKanjis() {
+  private void initData() {
     this.dataKanjiItems = new ArrayList<JBGKanjiItem>();
     this.dataTNAItems = new ArrayList<TFMTTNAData>();
+    this.dataTNGItems = new ArrayList<TFMTTNGData>();
     /*
     for (int i = 0; i < 10; i++) {
       JBGKanjiItem item = new JBGKanjiItem(
@@ -116,6 +120,13 @@ public class ReaderModel {
       this.needRefresh = true;
     }
     this.selectedArticleId = s;
+  }
+
+  public void setSelectedGrammarId(final String s) {
+    if (!s.equals(this.selectedGrammarId)) {
+      this.needRefresh = true;
+    }
+    this.selectedGrammarId = s;
   }
 
   private InputStreamReader getInputStream(final File f) {
@@ -425,9 +436,8 @@ public class ReaderModel {
 
       TFMTWorkData tfmt = new TFMTWorkData();
       //reset it
-      //if in penalty, it is still be applied for today, because it's different from yesterday!!!
       this.lastWorkDate = getTodayString();
-      tfmt.setData(this.dataKanjiItems, this.dataTNAItems, this.lastWorkDate, this.jCoin);
+      tfmt.setData(this.dataKanjiItems, this.dataTNAItems, this.dataTNGItems, this.lastWorkDate, this.jCoin);
       ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
       String json = ow.writeValueAsString(tfmt);
       return json;
@@ -497,10 +507,13 @@ public class ReaderModel {
       JSONObject jsonObject = (JSONObject) obj;
       JSONArray kanjiList = (JSONArray) jsonObject.get("kanjiWorks");
       JSONArray articleList = (JSONArray) jsonObject.get("articleWorks");
+      JSONArray grammarList = (JSONArray) jsonObject.get("grammarWorks");
 
-      //System.out.println("Total load kanjis: " + String.valueOf(kanjiList.size()));
-      //System.out.println("Total load articles: " + String.valueOf(articleList.size()));
+      //System.out.println("Total kanjis to load: " + String.valueOf(kanjiList.size()));
+      //System.out.println("Total articles to load: " + String.valueOf(articleList.size()));
       //System.out.println("Open with jcoin " + String.valueOf(jsonObject.get("jcoin")));
+      if (grammarList != null)
+        System.out.println("Total grammars  to load: " + String.valueOf(grammarList.size()));
 
       if (kanjiList.size() < 1) return false;
 
@@ -511,6 +524,7 @@ public class ReaderModel {
       this.totalKanjiTests = 0;
       this.dataKanjiItems.clear();
       this.dataTNAItems.clear();
+      this.dataTNGItems.clear();
       for (Object kObj: kanjiList) {
         //System.out.println(kObj.toString());
         JSONObject jsonKObj = (JSONObject) kObj;
@@ -691,9 +705,89 @@ public class ReaderModel {
 
       }
 
-      if (hasNewKanjiFromTNA) {
-        recountGrandKanjiTests();
-      }
+      if (grammarList != null)
+        for (Object gJ: grammarList) {
+          JSONObject grammarItem = (JSONObject) gJ;
+          String sGrammarId = (String) grammarItem.get("id");
+          String sGrammarTitle = (String) grammarItem.get("grammarTitle");
+          JSONArray patternList = (JSONArray) grammarItem.get("grammarPattern");
+          JSONArray grammarProblematicIdList = null;
+          if (grammarItem.containsKey(("problematicPatternId"))) {
+            grammarProblematicIdList = (JSONArray) grammarItem.get("problematicPatternId");
+          }
+          int ttlTNGTests = getIntFromJson(grammarItem, "totalTests");
+          int ttlTNGTestCorrects = getIntFromJson(grammarItem, "totalCorrectTests");
+
+          System.out.println("  Loading grammar " + sGrammarId + " " + sGrammarTitle);
+          System.out.println("    Total grammar patterns: " + String.valueOf(patternList.size()));
+          if (grammarProblematicIdList != null)
+            System.out.println("    Total problematic patterns: " + String.valueOf(grammarProblematicIdList.size()));
+
+          List<TFMTTNGPatternData> lstTNGPatterns = new ArrayList<TFMTTNGPatternData>();
+          if (patternList != null) {
+            for (Object sObj: patternList) {
+              //System.out.println(kObj.toString());
+              JSONObject objPattern = (JSONObject) sObj;
+              String sPatternId = (String) objPattern.get("id");
+              String sTitle = (String) objPattern.get("title");
+              JSONArray descriptionList = (JSONArray) objPattern.get("description");
+              JSONArray sentenceList = (JSONArray) objPattern.get("sentence");
+
+              List<String> lstDescriptions = new ArrayList<String>();
+              if (descriptionList != null) {
+                for (Object kObj: descriptionList) {
+                  String sDesc = (String) kObj;
+                  lstDescriptions.add(sDesc);
+                }
+              }
+
+              List<TFMTTNGPatternSentence> lstSentences = new ArrayList<TFMTTNGPatternSentence>();
+              for (Object oSentence: sentenceList) {
+                JSONObject jsonSentence = (JSONObject) oSentence;
+                String sId = (String) jsonSentence.get("id");
+                String sSentence = (String) jsonSentence.get("sentence");
+                int ttlCorrects = getIntFromJson(jsonSentence, "correctTests");
+                int ttlTests = getIntFromJson(jsonSentence, "totalTests");
+                JSONArray meaningLst = (JSONArray) jsonSentence.get("meaning");
+                List<String> lstMeanings = new ArrayList<String>();
+                for (Object oM: meaningLst) {
+                  lstMeanings.add((String) oM);
+                }
+                TFMTTNGPatternSentence sen = null;
+                if (sId != null)
+                  sen = new TFMTTNGPatternSentence(sId, sSentence, lstMeanings, ttlCorrects, ttlTests);
+                else
+                  sen = new TFMTTNGPatternSentence(sSentence, lstMeanings);
+                lstSentences.add(sen);
+              }
+              TFMTTNGPatternData patternItem = new TFMTTNGPatternData(sPatternId, sTitle, lstDescriptions, lstSentences);
+              lstTNGPatterns.add(patternItem);
+            }
+          }
+
+          List<String> lstProblematicPatternIds = new ArrayList<String>();
+          if (grammarProblematicIdList != null) {
+            for (Object sW: grammarProblematicIdList) {
+              String sTmp = (String) sW;
+              if (sTmp != null) {
+                lstProblematicPatternIds.add(sTmp);
+              }
+            }
+          }
+
+          TFMTTNGData tng = null;
+          if (grammarProblematicIdList == null) {
+            tng = new TFMTTNGData(sGrammarId, sGrammarTitle, lstTNGPatterns,  
+              ttlTNGTests, ttlTNGTestCorrects);
+          }
+          else {
+            tng = new TFMTTNGData(sGrammarId, sGrammarTitle, lstTNGPatterns, lstProblematicPatternIds, 
+              ttlTNGTests, ttlTNGTestCorrects);
+          }
+          if (tng != null)
+            this.dataTNGItems.add(tng);
+
+        }
 
       this.tfmtLoaded = true;
 
@@ -731,7 +825,7 @@ public class ReaderModel {
       JSONObject dataPart = (JSONObject) jsonObject.get("tientn_nhkeasynews_format");
       String sArticleId = (String) dataPart.get("id");
       String sArticleTitle = (String) dataPart.get("title");
-      JSONArray sentenceList = (JSONArray) dataPart.get("sentences");
+      JSONArray sentenceList = (JSONArray) dataPart.get("sentence");
       JSONObject kanjiDict = (JSONObject) dataPart.get("kanjis");
       JSONArray lstBuiltWords = (JSONArray) dataPart.get("kanjisForTest");
       int ttlTNATests = 0; //getIntFromJson(dataPart, "totalTests");
@@ -899,9 +993,120 @@ public class ReaderModel {
     return deleted;
   }
 
+  public TFMTTNGData getSelectedTNG() {
+    if (this.selectedGrammarId == null) return null;
+    return getTNGById(this.selectedGrammarId);
+  }
+
+  public TFMTTNGData getTNGById(final String sSelTNGId) {
+    TFMTTNGData currentTNG = null;
+    for (int i = 0; i < dataTNGItems.size(); i++) {
+        currentTNG = dataTNGItems.get(i);
+        String sId = currentTNG.getId().toString();
+        if (sId.equals(sSelTNGId)) {
+          return currentTNG;
+        }
+    }
+    return null;
+  }
+
+  public boolean loadTNGJsonFromFile(final String fileName) {
+    if (this.testStarted) return false;
+    if (!this.tfmtLoaded) return false;
+
+    try {
+
+      JSONParser parser = new JSONParser();
+      Object obj = parser.parse(new FileReader(fileName));
+      JSONArray patternList = (JSONArray) obj;
+      String sGrammarTitle = fileName.substring(fileName.lastIndexOf('/')+1, fileName.lastIndexOf('.'));
+      int ttlTNGTests = 0; //getIntFromJson(dataPart, "totalTests");
+      int ttlTNGTestCorrects = 0; //getIntFromJson(dataPart, "totalCorrectTests");
+
+      System.out.println(sGrammarTitle); 
+      System.out.println("Prepare loading: " + String.valueOf(patternList.size()) + " patterns");
+
+      if (patternList.size() < 1) return false;
+
+        System.out.println("  Loading grammar: " + sGrammarTitle);
+        System.out.println("    Total grammar patterns: " + String.valueOf(patternList.size()));
+
+        List<TFMTTNGPatternData> lstTNGPatterns = new ArrayList<TFMTTNGPatternData>();
+        if (patternList != null) {
+          for (Object sObj: patternList) {
+            //System.out.println(kObj.toString());
+            JSONObject objPattern = (JSONObject) sObj;
+            String sPatternId = (String) objPattern.get("id");
+            String sTitle = (String) objPattern.get("title");
+            JSONArray descriptionList = (JSONArray) objPattern.get("description");
+            JSONArray sentenceList = (JSONArray) objPattern.get("sentence");
+
+            List<String> lstDescriptions = new ArrayList<String>();
+            if (descriptionList != null) {
+              for (Object kObj: descriptionList) {
+                String sDesc = (String) kObj;
+                System.out.println(sDesc);
+                lstDescriptions.add(sDesc);
+              }
+            }
+
+            List<TFMTTNGPatternSentence> lstSentences = new ArrayList<TFMTTNGPatternSentence>();
+
+            for (Object oSentence: sentenceList) {
+              JSONObject jsonSentence = (JSONObject) oSentence;
+              String sId = (String) jsonSentence.get("id");
+              String sSentence = (String) jsonSentence.get("sentence");
+              JSONArray meaningLst = (JSONArray) jsonSentence.get("meaning");
+              List<String> lstMeanings = new ArrayList<String>();
+              for (Object oM: meaningLst) {
+                lstMeanings.add((String) oM);
+              }
+              TFMTTNGPatternSentence sen = null;
+              if (sId != null)
+                sen = new TFMTTNGPatternSentence(sId, sSentence, lstMeanings);
+              else
+                sen = new TFMTTNGPatternSentence(sSentence, lstMeanings);
+              lstSentences.add(sen);
+            }
+
+            TFMTTNGPatternData patternItem = new TFMTTNGPatternData(sPatternId, sTitle, lstDescriptions, lstSentences);
+            lstTNGPatterns.add(patternItem);
+          }
+        }
+
+        TFMTTNGData tng = new TFMTTNGData(sGrammarTitle, lstTNGPatterns);
+        this.dataTNGItems.add(tng);
+
+      return true;
+
+    }
+    catch (FileNotFoundException ex) {
+      System.out.println("ERROR not found " + ex.toString());
+      ex.printStackTrace(System.out);
+    }
+    catch (ParseException ex) {
+      System.out.println("ERROR parse error " + ex.toString());
+      ex.printStackTrace(System.out);
+    }
+    catch (IOException ex) {
+      System.out.println("ERROR IO " + ex.toString());
+      ex.printStackTrace(System.out);
+    }
+    catch (Exception ex) {
+      System.out.println("ERROR unknown " + ex.toString());      
+      ex.printStackTrace(System.out);
+    }
+
+    return false;
+  }
+
+
+
+  //if lastWorkDate is today or yesterday, it is OK
   public boolean isPenaltyApplied() {
     String s = getYesterdayString();
     if (s.equals(this.lastWorkDate)) return false;
+    if (getTodayString().equals(this.lastWorkDate)) return false;
     return true;
   }
 
