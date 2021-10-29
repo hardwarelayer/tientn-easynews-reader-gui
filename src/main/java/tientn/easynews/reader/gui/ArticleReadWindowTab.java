@@ -69,7 +69,6 @@ public class ArticleReadWindowTab extends SimpleFormBase {
     private Button btnStartTest;
 
     private TFMTTNAData currentTNA = null;
-    private boolean testStarted;
     private List<String> arrSentences;
     private String currentTestSentence;
     private int currentTestSentenceIdx;
@@ -84,7 +83,6 @@ public class ArticleReadWindowTab extends SimpleFormBase {
     public ArticleReadWindowTab(final int width, final int height, Desktop desktop, Stage primStage, ReaderModel model) {
         super(width, height, desktop, primStage, model);
 
-        testStarted = false;
         arrSentences = new ArrayList<String>();
     }
 
@@ -235,7 +233,7 @@ public class ArticleReadWindowTab extends SimpleFormBase {
     }
 
     private void processInputEnter() {
-        if (!this.testStarted) return;
+        if (!this.getDataModel().isReadStarted()) return;
 
         validateSentence();
     }
@@ -291,7 +289,7 @@ public class ArticleReadWindowTab extends SimpleFormBase {
 
     private void loadArticle() {
 
-        if (this.testStarted) return;
+        if (this.getDataModel().isReadStarted()) return;
 
         clearFields();
 
@@ -332,7 +330,7 @@ public class ArticleReadWindowTab extends SimpleFormBase {
     }
 
     private void refreshData() {
-        if (this.testStarted) return;
+        if (this.getDataModel().isReadStarted()) return;
 
         this.currentTNA = this.getDataModel().getSelectedTNA();
 
@@ -369,9 +367,8 @@ public class ArticleReadWindowTab extends SimpleFormBase {
     }
 
     private void doStartTest() {
-        if (this.testStarted) return;
+        if (this.getDataModel().isReadStarted()) return;
 
-        this.testStarted = true;
         this.getDataModel().setReadStarted(true);
         clearFields();
 
@@ -389,7 +386,7 @@ public class ArticleReadWindowTab extends SimpleFormBase {
     }
 
     private void doEndTest() {
-        if (!this.testStarted) return;
+        if (!this.getDataModel().isReadStarted()) return;
         if (currentTNA == null) return;
 
         this.getDataModel().setReadStarted(false);
@@ -404,7 +401,6 @@ public class ArticleReadWindowTab extends SimpleFormBase {
         tafArticleContent.selectRange(0,0);
         tafSentenceInput.setEditable(false);
 
-        this.testStarted = false;
         this.currentTestSentenceIdx = 0;
         this.currentTestSentenceVal = 0;
         this.lblCurrentSentenceValue.setText("0");

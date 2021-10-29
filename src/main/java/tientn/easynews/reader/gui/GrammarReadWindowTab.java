@@ -84,7 +84,6 @@ public class GrammarReadWindowTab extends SimpleFormBase {
 
     private TFMTTNGData currentTNG = null;
     private TFMTTNGPatternData selectedPattern = null;
-    private boolean testStarted;
     private List<String> arrSentences;
     private String currentTestSentence;
     private int currentTestSentenceIdx;
@@ -102,7 +101,6 @@ public class GrammarReadWindowTab extends SimpleFormBase {
     public GrammarReadWindowTab(final int width, final int height, Desktop desktop, Stage primStage, ReaderModel model) {
         super(width, height, desktop, primStage, model);
 
-        testStarted = false;
         arrSentences = new ArrayList<String>();
     }
 
@@ -378,7 +376,7 @@ public class GrammarReadWindowTab extends SimpleFormBase {
     }
 
     private void processInputEnter() {
-        if (!this.testStarted) return;
+        if (!this.getDataModel().isReadStarted()) return;
 
         validateSentence();
     }
@@ -433,7 +431,7 @@ public class GrammarReadWindowTab extends SimpleFormBase {
     }
 
     private void loadGrammar() {
-        if (this.testStarted) return;
+        if (this.getDataModel().isReadStarted()) return;
         clearTestFields();
         currentTNG = this.getDataModel().getSelectedTNG();
         if (currentTNG != null) {
@@ -471,7 +469,7 @@ public class GrammarReadWindowTab extends SimpleFormBase {
     }
 
     private void refreshData() {
-        if (this.testStarted) return;
+        if (this.getDataModel().isReadStarted()) return;
 
         this.currentTNG = this.getDataModel().getSelectedTNG();
         if (this.currentTNG == null) return;
@@ -490,12 +488,11 @@ public class GrammarReadWindowTab extends SimpleFormBase {
     private void doStartTest() {
         if (this.selectedPattern == null) return;
 
-        if (this.testStarted) {
+        if (this.getDataModel().isReadStarted()) {
             doEndTest(false);
             return;
         }
 
-        this.testStarted = true;
         this.getDataModel().setReadStarted(true);
         clearTestFields();
 
@@ -514,10 +511,8 @@ public class GrammarReadWindowTab extends SimpleFormBase {
     }
 
     private void doEndTest(final boolean autoNext) {
-        if (!this.testStarted) return;
+        if (!this.getDataModel().isReadStarted()) return;
         if (currentTNG == null) return;
-
-        this.getDataModel().setReadStarted(false);
 
         this.getDataModel().increaseJCoin(5); //bonus in end game
         lblJCoinAmount.setText(String.valueOf(this.getDataModel().getJCoin()));
@@ -531,11 +526,11 @@ public class GrammarReadWindowTab extends SimpleFormBase {
 
         if (autoNext) {
             autoSelectNextPattern();
-            this.testStarted = false; //force start
+            this.getDataModel().setReadStarted(false); //force start
             doStartTest();
         }
         else {
-            this.testStarted = false;
+            this.getDataModel().setReadStarted(false);
             this.currentTestSentenceIdx = 0;
             this.currentTestSentenceVal = 0;
             this.lblCurrentSentenceValue.setText("0");
