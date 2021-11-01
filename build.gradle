@@ -49,7 +49,7 @@ application {
 //javafx has several bugs, we should use latest release: https://en.wikipedia.org/wiki/JavaFX
 javafx {
     version = '16'
-    modules = [ 'javafx.controls', 'javafx.fxml' ]
+    modules = [ 'javafx.controls', 'javafx.fxml', 'javafx.media' ]
 }
 
 test {

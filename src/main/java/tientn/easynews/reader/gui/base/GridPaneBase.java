@@ -6,6 +6,7 @@ import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
@@ -126,5 +127,19 @@ public class GridPaneBase extends GridPane {
         } else {
             return false;
         }
+    }
+
+    protected boolean showQuestionWithCustomOptions(final String title, final String header, final String msg, final String okText, final String cancelText) {
+        ButtonType btnOK = new ButtonType(okText, ButtonBar.ButtonData.OK_DONE);
+        ButtonType btnCancel = new ButtonType(cancelText, ButtonBar.ButtonData.CANCEL_CLOSE);
+        Alert alert = new Alert(AlertType.WARNING, msg, btnOK, btnCancel);
+        alert.setTitle(title);
+        alert.setHeaderText(header);
+        Optional<ButtonType> result = alert.showAndWait();
+
+        if (result.orElse(btnCancel) == btnOK) {
+            return true;
+        }
+        return false;
     }
 }

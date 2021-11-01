@@ -88,7 +88,7 @@ javafx {
 
 
 // SimpleFormBase derived class
-public class GrammarReadWindowTab extends SimpleFormBase {
+public class GrammarListenWindowTab extends SimpleFormBase {
 
     private TextArea tafGrammarContent;
     private TextArea tafSentenceInput;
@@ -104,6 +104,12 @@ public class GrammarReadWindowTab extends SimpleFormBase {
     private Button btnLoadGrammar;
     private Button btnStartTest;
 
+    private Button btnReadAndListen;
+    private Button btnRnLRepeatSentence;
+    private Button btnRnLNextSentence;
+    private Button btnRnLPreviousSentence;
+    private Button btnRnLStop;
+
     private TFMTTNGData currentTNG = null;
     private TFMTTNGPatternData selectedPattern = null;
     private List<String> arrSentences;
@@ -111,6 +117,11 @@ public class GrammarReadWindowTab extends SimpleFormBase {
     private int currentTestSentenceIdx;
     private int currentTestSentenceVal;
     private String selectedPatternId = null;
+
+    private MediaPlayer mediaPlayer = null;
+    private boolean inReadnListenMode = false;
+    private int currentRnLSentenceIdx = -1;
+    private String currentRnLSentenceId = null;
 
     private int iReadOnlyCount = 0;
     private int iReadOnlyBonusPoint = 0;
@@ -123,7 +134,7 @@ public class GrammarReadWindowTab extends SimpleFormBase {
     static final String SENTENCE_DOT = "。";
     static final String DOUBLE_SPACE = "　";
 
-    public GrammarReadWindowTab(final int width, final int height, Desktop desktop, Stage primStage, ReaderModel model) {
+    public GrammarListenWindowTab(final int width, final int height, Desktop desktop, Stage primStage, ReaderModel model) {
         super(width, height, desktop, primStage, model);
 
         arrSentences = new ArrayList<String>();
@@ -168,21 +179,53 @@ public class GrammarReadWindowTab extends SimpleFormBase {
         };
         btnLoadGrammar = createButton("Load Grammar", fncLoadGrammarButtonClick);
 
-        EventHandler<ActionEvent> fncStartTestButtonClick = new EventHandler<ActionEvent>() {
+        EventHandler<ActionEvent> fncReadAndListen = new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent e) {
-                doStartTest();
+                doReadAndListen();
             }
         };
-        btnStartTest = createButton("Start Test", fncStartTestButtonClick);
+        btnReadAndListen = createButton("Read&Listen", fncReadAndListen);
 
-        HBox titleRow = new HBox(btnRefresh, lblSelectedGrammarId, lblSelectedGrammarTitle, btnLoadGrammar, btnStartTest);
+        EventHandler<ActionEvent> fncRnLRepeatSentence = new EventHandler<ActionEvent>() {
+            @Override public void handle(ActionEvent e) {
+                doListenRepeat();
+            }
+        };
+        btnRnLRepeatSentence = createButton("Repeat Sentence", fncRnLRepeatSentence);
+        btnRnLRepeatSentence.setDisable(true);
+
+        EventHandler<ActionEvent> fncRnLNextSentence = new EventHandler<ActionEvent>() {
+            @Override public void handle(ActionEvent e) {
+                doListenNext();
+            }
+        };
+        btnRnLNextSentence = createButton("Next Sentence", fncRnLNextSentence);
+        btnRnLNextSentence.setDisable(true);
+
+        EventHandler<ActionEvent> fncRnLPreviousSentence = new EventHandler<ActionEvent>() {
+            @Override public void handle(ActionEvent e) {
+                doListenPrevious();
+            }
+        };
+        btnRnLPreviousSentence  = createButton("Previous Sentence", fncRnLPreviousSentence);
+        btnRnLPreviousSentence.setDisable(true);
+
+        EventHandler<ActionEvent> fncRnLStop = new EventHandler<ActionEvent>() {
+            @Override public void handle(ActionEvent e) {
+                doStopReadAndListen();
+            }
+        };
+        btnRnLStop = createButton("Stop Read&Listen", fncRnLStop);
+        btnRnLStop.setDisable(true);
+
+        HBox titleRow = new HBox(btnRefresh, lblSelectedGrammarId, lblSelectedGrammarTitle, btnLoadGrammar);
         HBox coinRow = new HBox(lblCoin, lblJCoinAmount, 
             new Label("Sentence:"), lblCurrentSentenceValue,
             new Label("R/O bonus:"), lblReadOnlyBonus,
             new Label("  Current Pattern:"), lblCurrentPattern);
 
         tafGrammarContent = new TextArea();
-        tafGrammarContent.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.6));
+        tafGrammarContent.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.56));
 
         tafGrammarContent.setId("read-grammar-content");
         tafGrammarContent.setWrapText(true);
@@ -218,11 +261,15 @@ public class GrammarReadWindowTab extends SimpleFormBase {
         lblGrammarPatternPreview.setAlignment(Pos.CENTER);
         lblGrammarPatternPreview.setWrapText(true);
 
+        HBox footerRow = new HBox(btnReadAndListen, btnRnLRepeatSentence, btnRnLNextSentence, btnRnLPreviousSentence);
+        HBox.setHgrow(footerRow, Priority.ALWAYS);
+
         this.addHeaderText(txtFormTitle, 0, 0);
         this.addHeaderPane(titleRow, 0, 1);
         this.addHeaderPane(coinRow, 0, 2);
         this.addHeaderCtl(lblGrammarPatternPreview, 0, 3);
         this.addHeaderPane(mainRow, 0, 4);
+        this.addHeaderPane(footerRow, 0, 5);
 
     }
 
@@ -288,6 +335,100 @@ public class GrammarReadWindowTab extends SimpleFormBase {
         selectPattern(patId, playSound);
     }
 
+    private String playMP3(final String patternId, final String sentenceId) {
+        Media media;
+        final String fullFileName = this.getDataModel().getGrammarMP3FileName(patternId, sentenceId);
+        try {
+            Thread thread = new Thread();
+            media = new Media("file:///" + fullFileName);
+            System.out.println(media.getDuration().toSeconds());
+
+            thread.setName("grammar_play_thread"+patternId+sentenceId);
+            System.out.println(thread.getName());
+
+            //why I declare the mediaPlayer outside?
+            //because Java GB will destroy this object right after the function, but actually, it is used in other thread
+            //so sometime the player can play all sound length, but mostly, it only plays some seconds
+            mediaPlayer = new MediaPlayer(media);
+            mediaPlayer.setOnEndOfMedia(() -> {
+                mediaPlayer.dispose();
+                mediaPlayer = null;
+            });
+            mediaPlayer.setOnReady(() -> mediaPlayer.play());
+
+            return fullFileName;
+        } catch (Exception ex) {
+          System.out.println("ERROR on playing MP3: " + ex.getMessage());
+        }
+        return null;
+    }
+
+    //currently, not used
+    private String playSound(final String patternId, final String sentenceId) {
+        final String fullFileName = this.getDataModel().getGrammarMP3FileName(patternId, sentenceId);
+
+        try {
+            AudioInputStream input=AudioSystem.getAudioInputStream(new File(fullFileName));
+            Clip clip=AudioSystem.getClip();
+            clip.open(input);
+            clip.start();
+
+            return fullFileName;
+        } catch (Exception ex) {
+          System.out.println("ERROR on playing MP3: " + ex.getMessage());
+        }
+        return null;
+    }
+
+    private void doListenRepeat() {
+        if (this.mediaPlayer != null) return;
+        if (this.selectedPatternId == null || this.currentRnLSentenceId == null || this.currentRnLSentenceIdx < 0) return;
+
+        playMP3(this.selectedPatternId.toString(), this.currentRnLSentenceId);
+    }
+
+    private void doListenPrevious() {
+        if (this.mediaPlayer != null) return;
+        if (this.selectedPatternId == null || this.currentRnLSentenceId == null || this.currentRnLSentenceIdx < 0) return;
+        if (this.currentRnLSentenceIdx > 0) {
+            this.currentRnLSentenceIdx--;
+            TFMTTNGPatternSentence s = this.selectedPattern.getSentence().get(this.currentRnLSentenceIdx);
+            this.currentRnLSentenceId = s.getId().toString();
+            final String sRet = playMP3(this.selectedPatternId.toString(), this.currentRnLSentenceId);
+System.out.println("Sentence: " + s.getSentence() + " MP3:" + sRet);
+        }
+    }
+
+    private void doListenNext() {
+        if (this.mediaPlayer != null) return;
+        if (this.selectedPatternId == null || this.currentRnLSentenceId == null || this.currentRnLSentenceIdx < 0) return;
+        if (this.currentRnLSentenceIdx + 1 < this.selectedPattern.getSentence().size()) {
+            this.currentRnLSentenceIdx++;
+        }
+        else {
+            this.currentRnLSentenceIdx = 0;
+        }
+
+        TFMTTNGPatternSentence s = this.selectedPattern.getSentence().get(this.currentRnLSentenceIdx);
+        this.currentRnLSentenceId = s.getId().toString();
+        final String sRet = playMP3(this.selectedPatternId.toString(), this.currentRnLSentenceId);
+System.out.println("Sentence: " + s.getSentence() + " MP3:" + sRet);
+    }
+
+    private void doStopReadAndListen() {
+        if (!this.inReadnListenMode) return;
+        if (this.mediaPlayer != null) return;
+
+        this.inReadnListenMode = false;
+        this.btnReadAndListen.setDisable(false);
+        this.btnRnLRepeatSentence.setDisable(true);
+        this.btnRnLNextSentence.setDisable(true);
+        this.btnRnLPreviousSentence.setDisable(true);
+        this.btnRnLPreviousSentence.setDisable(true);
+
+        clearTestFields();
+    }
+
     private void selectPattern(final String patId, final boolean playSound) {
         this.selectedPatternId = patId;
         this.selectedPattern = currentTNG.findPatternById(patId);
@@ -296,6 +437,14 @@ public class GrammarReadWindowTab extends SimpleFormBase {
 
         for (TFMTTNGPatternSentence s: this.selectedPattern.getSentence()) {
             this.arrSentences.add(preprocessSentence(s.getSentence()));
+        }
+
+        this.currentRnLSentenceIdx = 0;
+        TFMTTNGPatternSentence s = this.selectedPattern.getSentence().get(this.currentRnLSentenceIdx);
+        this.currentRnLSentenceId = s.getId().toString();
+        if (this.currentRnLSentenceId != null && playSound) {
+            final String sRet = playMP3(this.selectedPatternId.toString(), this.currentRnLSentenceId);
+System.out.println("Sentence: " + s.getSentence() + " MP3:" + sRet);
         }
 
         StringBuilder sb = new StringBuilder();
@@ -371,10 +520,23 @@ public class GrammarReadWindowTab extends SimpleFormBase {
     @Override
     protected void processKeyPress(final KeyEvent ke) {
         KeyCode kc = ke.getCode(); 
-        if (ke.isShiftDown()) {
+         {
             switch (kc) {
                 case ENTER:
-                    processInputEnter();
+                    if (ke.isShiftDown()) {
+                        doReadAndListen();
+                    }
+                    else
+                        if (this.inReadnListenMode)
+                            doListenNext();
+                    break;
+                case P:
+                    if (this.inReadnListenMode)
+                        doListenPrevious();
+                    break;
+                case R:
+                    if (this.inReadnListenMode)
+                        doListenRepeat();
                     break;
             }
         }
@@ -405,61 +567,6 @@ public class GrammarReadWindowTab extends SimpleFormBase {
             tafGrammarContent.positionCaret(iStartSel);
             tafGrammarContent.selectRange(iStartSel, iEndSel);
         }
-    }
-
-    private void processInputEnter() {
-        if (!this.getDataModel().isReadStarted()) return;
-
-        validateSentence();
-    }
-
-    private int getIndexOfDifferent(final String sEnter, final String sTrial) {
-        int minLen = Math.min(sEnter.length(), sTrial.length());
-        for (int i = 0 ; i != minLen ; i++) {
-            char chA = sEnter.charAt(i);
-            char chB = sTrial.charAt(i);
-            if (chA != chB) {
-                return i;
-            }
-        }
-        return -1;
-    }
-
-    private void validateSentence() {
-        String sText = tafSentenceInput.getText();
-        if (sText == null) return;
-        sText = sText.trim();
-
-        //System.out.println("trial: " + currentTestSentence);
-        //System.out.println("enter: " + sText);
-
-        if (sText.equals(currentTestSentence)) {
-            //System.out.println("valid match!");
-            this.getDataModel().increaseJCoin(this.currentTestSentenceVal);
-            lblJCoinAmount.setText(String.valueOf(this.getDataModel().getJCoin()));
-            if (stepUpTestSentence()) {
-                //System.out.println("stepped up!");
-                lblCurrentSentenceValue.setText(String.valueOf(this.currentTestSentenceVal));
-                appendTextToContent(currentTestSentence, true, true);
-                tafSentenceInput.clear();
-                tafSentenceInput.requestFocus();
-            }
-            else {
-                //System.out.println("can't stepped up, end test!");
-                doEndTest(true);
-            }
-        }
-        else {
-            System.out.println("NOMATCH trial: " + currentTestSentence);
-            System.out.println("NOMATCH enter: " + sText);
-            int iDiffPos = getIndexOfDifferent(sText, currentTestSentence);
-            if (iDiffPos >= 0) {
-                int iRemainLength = sText.length() - iDiffPos;
-                tafSentenceInput.positionCaret(iDiffPos);
-                tafSentenceInput.selectRange(iDiffPos, iDiffPos+1);
-            }
-        }
-        //System.out.println(sText);
     }
 
     private void loadGrammar() {
@@ -517,6 +624,52 @@ public class GrammarReadWindowTab extends SimpleFormBase {
 
     }
 
+    private void doReadAndListen() {
+        if (this.getDataModel().isReadStarted()) return;
+        if (this.mediaPlayer != null) return;
+
+        if (!this.inReadnListenMode) {
+            this.inReadnListenMode = true;
+            this.btnReadAndListen.setDisable(true);
+            this.btnRnLRepeatSentence.setDisable(false);
+            this.btnRnLNextSentence.setDisable(false);
+            this.btnRnLPreviousSentence.setDisable(false);
+            this.btnRnLPreviousSentence.setDisable(false);
+        }
+
+        if (this.selectedPattern == null) {
+            tvGrammarPattern.getSelectionModel().selectFirst();
+            tvGrammarPattern.getFocusModel().focus(0);
+            GrammarPatternTableViewItem rowData = tvGrammarPattern.getSelectionModel().getSelectedItem();
+            if (rowData == null) return;
+            clearTestFields();
+            final String patId = rowData.getId();
+            selectPattern(patId, true);
+            return;
+        }
+
+        int iTotalValue = 0;
+        for (String sen: this.arrSentences) {
+            if (skipSentence(sen)) continue;
+            String testSentence = normalizeSentenceForTest(sen);
+            int iSentenceVal = countKanjiInString(testSentence);
+            //for grammar, we set preferable amount
+            if (iSentenceVal + 2 < 4) iSentenceVal = 4;
+            iTotalValue += iSentenceVal;
+        }
+        int iGainValue = iTotalValue / 2;
+        iGainValue += this.iReadOnlyBonusPoint;
+        this.getDataModel().increaseJCoin(iGainValue);
+        lblJCoinAmount.setText(String.valueOf(this.getDataModel().getJCoin()));
+        autoSelectNextPattern(true);
+
+        //the longer you read, the more bonus
+        this.iReadOnlyCount++;
+        if ( (this.iReadOnlyCount % 2) == 0 ) {
+            this.iReadOnlyBonusPoint++;
+            this.lblReadOnlyBonus.setText(String.valueOf(this.iReadOnlyBonusPoint));
+        }
+    }
 
     private void doStartTest() {
         if (this.selectedPattern == null) return;
@@ -540,6 +693,7 @@ public class GrammarReadWindowTab extends SimpleFormBase {
         this.btnLoadGrammar.setDisable(true);
         this.btnStartTest.setText("Stop Test");
         this.btnRefresh.setDisable(true);
+        this.btnReadAndListen.setDisable(true);
         this.tvGrammarPattern.setDisable(true);
     }
 
@@ -570,6 +724,7 @@ public class GrammarReadWindowTab extends SimpleFormBase {
             this.btnLoadGrammar.setDisable(false);
             this.btnStartTest.setText("Start Test");
             this.btnRefresh.setDisable(false);
+            this.btnReadAndListen.setDisable(false);
             this.tvGrammarPattern.setDisable(false);
         }
     }

@@ -54,11 +54,22 @@ import tientn.easynews.reader.data.JBGConstants;
 import tientn.easynews.reader.data.TFMTTNAData;
 import tientn.easynews.reader.data.TFMTTNASentenceData;
 
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
+/* note: add this to build.gradle
+javafx {
+    version = '16'
+    modules = [ 'javafx.controls', 'javafx.fxml', 'javafx.media' ]
+}
+*/
+
+
 // SimpleFormBase derived class
 public class ArticleReadWindowTab extends SimpleFormBase {
 
     private TextArea tafArticleContent;
     private TextArea tafSentenceInput;
+    private TextArea tafReadOnlyTestInput;
     private Label lblJCoinAmount;
     private Label lblCurrentSentenceValue;
     private Label lblSelectedArticleId;
@@ -67,6 +78,10 @@ public class ArticleReadWindowTab extends SimpleFormBase {
     private Button btnRefresh;
     private Button btnLoadArticle;
     private Button btnStartTest;
+    private Button btnReadOnlyComplete;
+    private Button btnListenToArticle;
+
+    private MediaPlayer mediaPlayer = null;
 
     private TFMTTNAData currentTNA = null;
     private List<String> arrSentences;
@@ -118,7 +133,7 @@ public class ArticleReadWindowTab extends SimpleFormBase {
         HBox coinRow = new HBox(lblCoin, lblJCoinAmount, lblSentenceVal, lblCurrentSentenceValue);
 
         tafArticleContent = new TextArea();
-        tafArticleContent.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.6));
+        tafArticleContent.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.64));
         tafArticleContent.prefWidthProperty().bind(getPrimaryStage().widthProperty().multiply(1));
         tafArticleContent.setId("read-article-content");
         tafArticleContent.setWrapText(true);
@@ -132,11 +147,21 @@ public class ArticleReadWindowTab extends SimpleFormBase {
         tafSentenceInput.setEditable(false);
         tafSentenceInput.setPromptText("Input highlighted sentence above, and press Shift+ENTER to check");
 
+        //this input is for user to test a kanji which they do not sure on ReadOnly mode
+        tafReadOnlyTestInput = new TextArea();
+        tafReadOnlyTestInput.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.06));
+        tafReadOnlyTestInput.prefWidthProperty().bind(getPrimaryStage().widthProperty().multiply(1));
+        tafReadOnlyTestInput.setId("read-article-kanji-test-input");
+        tafReadOnlyTestInput.setWrapText(false);
+        tafReadOnlyTestInput.setEditable(true);
+        tafReadOnlyTestInput.setPromptText("Input kanji here to test when you in ReadOnly mode");
+        
         this.addHeaderText(txtFormTitle, 0, 0);
         this.addHeaderPane(titleRow, 0, 1);
         this.addHeaderPane(coinRow, 0, 2);
         this.addHeaderCtl(tafArticleContent, 0, 3);
         this.addHeaderCtl(tafSentenceInput, 0, 4);
+        this.addHeaderCtl(tafReadOnlyTestInput, 0, 5);
 
     }
 
@@ -154,6 +179,20 @@ public class ArticleReadWindowTab extends SimpleFormBase {
         };
         btnLoadArticle = createButton("Load Article", fncLoadArticleButtonClick);
 
+        EventHandler<ActionEvent> fncListen = new EventHandler<ActionEvent>() {
+            @Override public void handle(ActionEvent e) {
+                startListen();
+            }
+        };
+        btnListenToArticle = createButton("Listen", fncListen);
+
+        EventHandler<ActionEvent> fncReadOnlyComplete = new EventHandler<ActionEvent>() {
+            @Override public void handle(ActionEvent e) {
+                completeReadOnly();
+            }
+        };
+        btnReadOnlyComplete = createButton("Complete ReadOnly", fncReadOnlyComplete);
+
         EventHandler<ActionEvent> fncStartTestButtonClick = new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent e) {
                 doStartTest();
@@ -161,8 +200,10 @@ public class ArticleReadWindowTab extends SimpleFormBase {
         };
         btnStartTest = createButton("Start Test", fncStartTestButtonClick);
 
-        this.addBodyCtl(btnLoadArticle, 2, 0);
-        this.addBodyCtl(btnStartTest, 3, 0);
+        this.addBodyCtl(btnLoadArticle, 1, 0);
+        this.addBodyCtl(btnListenToArticle, 2, 0);
+        this.addBodyCtl(btnReadOnlyComplete, 3, 0);
+        this.addBodyCtl(btnStartTest, 4, 0);
 
     }
 
@@ -238,6 +279,38 @@ public class ArticleReadWindowTab extends SimpleFormBase {
         validateSentence();
     }
 
+    private void startListen() {
+        if (currentTNA == null) return;
+        String id = currentTNA.getId().toString();
+        String sFileName = getDataModel().getArticleMP3FileName(id);
+        System.out.println(sFileName);
+        playMP3(sFileName);
+    }
+
+    private void playMP3(final String fullFileName) {
+        if (mediaPlayer != null) return;
+
+        Media media;
+        try {
+            Thread thread = new Thread();
+            media = new Media("file:///" + fullFileName);
+
+            thread.setName("article_play_thread1");
+
+            //why I declare the mediaPlayer outside?
+            //because Java GB will destroy this object right after the function, but actually, it is used in other thread
+            //so sometime the player can play all sound length, but mostly, it only plays some seconds
+            mediaPlayer = new MediaPlayer(media);
+            mediaPlayer.setOnEndOfMedia(() -> {
+                mediaPlayer.dispose();
+                mediaPlayer = null;
+            });
+            mediaPlayer.setOnReady(() -> mediaPlayer.play());
+        } catch (Exception ex) {
+          System.out.println("ERROR on playing MP3: " + ex.getMessage());
+        }
+    }
+
     private int getIndexOfDifferent(final String sEnter, final String sTrial) {
         int minLen = Math.min(sEnter.length(), sTrial.length());
         for (int i = 0 ; i != minLen ; i++) {
@@ -306,6 +379,25 @@ public class ArticleReadWindowTab extends SimpleFormBase {
 
             }
         }
+    }
+
+    //this mode is for reading by eye only, and voluntary click the button to gain jCoin after reading
+    private void completeReadOnly() {
+        if (this.getDataModel().isReadStarted()) return;
+
+        if (this.arrSentences.size() < 1) return;
+
+        int iTotalValue = 0;
+        for (String sen: this.arrSentences) {
+            if (skipSentence(sen))
+                continue;
+            String senStrip = normalizeSentenceForTest(sen);
+            iTotalValue += countKanjiInString(sen);
+        }
+        int iGainValue = (int) (iTotalValue / 2);
+
+        this.getDataModel().increaseJCoin(iGainValue);
+        lblJCoinAmount.setText(String.valueOf(this.getDataModel().getJCoin()));
     }
 
     private boolean skipSentence(final String sSen) {
@@ -381,6 +473,8 @@ public class ArticleReadWindowTab extends SimpleFormBase {
         tafSentenceInput.requestFocus();
 
         this.btnLoadArticle.setDisable(true);
+        this.tafReadOnlyTestInput.setEditable(false);
+        this.btnReadOnlyComplete.setDisable(true);
         this.btnStartTest.setDisable(true);
         this.btnRefresh.setDisable(true);
     }
@@ -405,6 +499,8 @@ public class ArticleReadWindowTab extends SimpleFormBase {
         this.currentTestSentenceVal = 0;
         this.lblCurrentSentenceValue.setText("0");
         this.btnLoadArticle.setDisable(false);
+        this.tafReadOnlyTestInput.setEditable(true);
+        this.btnReadOnlyComplete.setDisable(false);
         this.btnStartTest.setDisable(false);
         this.btnRefresh.setDisable(false);
     }

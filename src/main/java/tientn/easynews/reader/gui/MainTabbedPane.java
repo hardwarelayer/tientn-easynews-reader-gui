@@ -66,6 +66,7 @@ public final class MainTabbedPane extends TabPaneBase {
     ArticleWordBuildWindowTab paneTNAWordBuilder;
     ArticleReadWindowTab paneArticleRead;
     GrammarReadWindowTab paneGrammarRead;
+    GrammarListenWindowTab paneGrammarListen;
     TableViewTab tblViewTab;
 
     public MainTabbedPane(Desktop desktop, Stage primStage, final ReaderModel model) {
@@ -93,6 +94,9 @@ public final class MainTabbedPane extends TabPaneBase {
         case 4:
             paneGrammarRead.onShow();
             break;
+        case 5:
+            paneGrammarListen.onShow();
+            break;
         }
     }
 
@@ -106,6 +110,7 @@ public final class MainTabbedPane extends TabPaneBase {
         paneWordMatch = new WordMatchWindowTab(JBGConstants.MIN_WIDTH, JBGConstants.MIN_HEIGHT, getDesktop(), primaryStage, this.dataModel);
         paneArticleRead = new ArticleReadWindowTab(JBGConstants.MIN_WIDTH, JBGConstants.MIN_HEIGHT, getDesktop(), primaryStage, this.dataModel);
         paneGrammarRead = new GrammarReadWindowTab(JBGConstants.MIN_WIDTH, JBGConstants.MIN_HEIGHT, getDesktop(), primaryStage, this.dataModel);
+        paneGrammarListen = new GrammarListenWindowTab(JBGConstants.MIN_WIDTH, JBGConstants.MIN_HEIGHT, getDesktop(), primaryStage, this.dataModel);
         tblViewTab = new TableViewTab("TableView", getDesktop(), primaryStage);
 
         this.addPaneAsTab("Management", paneManagement);
@@ -113,6 +118,7 @@ public final class MainTabbedPane extends TabPaneBase {
         this.addSimpleStackedFormAsTab("WordMatch", paneWordMatch);
         this.addSimpleFormAsTab("ArticleRead", paneArticleRead);
         this.addSimpleFormAsTab("GrammarRead", paneGrammarRead);
+        this.addSimpleFormAsTab("GrammarListen", paneGrammarListen);
         this.addPaneAsTab("Underworks", tblViewTab);
 
     }

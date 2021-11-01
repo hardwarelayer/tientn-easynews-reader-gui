@@ -68,6 +68,9 @@ public class ReaderModel {
   @Getter private String selectedArticleId;
   @Getter private String selectedGrammarId;
 
+  @Setter private String currentGrammarMP3FolderPath;
+  @Setter private String currentArticleMP3FolderPath;
+
   @Getter @Setter private int jCoin = 0;
 
   public ReaderModel() {
@@ -1100,7 +1103,15 @@ public class ReaderModel {
     return false;
   }
 
+  public String getGrammarMP3FileName(final String patternId, final String sentenceId) {
+      StringBuilder sb = new StringBuilder(this.currentGrammarMP3FolderPath + "/" + patternId + "/" + sentenceId + ".mp3");
+      return sb.toString();
+  }
 
+  public String getArticleMP3FileName(final String articleId) {
+      StringBuilder sb = new StringBuilder(this.currentArticleMP3FolderPath + "/" + articleId + ".mp3");
+      return sb.toString();
+  }
 
   //if lastWorkDate is today or yesterday, it is OK
   public boolean isPenaltyApplied() {

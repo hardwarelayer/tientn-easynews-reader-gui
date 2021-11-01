@@ -114,6 +114,15 @@ public class TFMTTNGPatternData {
     return sb.toString();
   }
 
+  public String getIdStrFromSentence(final String sentence) {
+    for (TFMTTNGPatternSentence sen: this.sentence) {
+      if (sen.getSentence().equals(sentence)) {
+        return sen.getId().toString();
+      }
+    }
+    return null;
+  }
+
   @Override
   public String toString() {
     return new StringBuilder(

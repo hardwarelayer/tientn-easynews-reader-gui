@@ -555,6 +555,8 @@ public class ManagementWindowTab extends GridPaneBase {
                 this.currentTFMTSaveFile = file.getPath();
 
                 this.currentKJFilePath = file.getParent();
+                this.dataModel.setCurrentGrammarMP3FolderPath(this.currentKJFilePath + "/mp3");
+                this.dataModel.setCurrentArticleMP3FolderPath(this.currentKJFilePath + "/mp3/articles");
                 this.currentJCoinSaveFile = this.currentKJFilePath + "/" + DEFAULT_JCOIN_EXPORT_FILE_NAME;
 
                 statusTableView.getItems().add(new ManagementStatusTableViewItem("TFMT Target File", this.currentTFMTSaveFile));
@@ -683,7 +685,12 @@ public class ManagementWindowTab extends GridPaneBase {
         String sTNGId = rowData.getId().toString();
         this.dataModel.setSelectedGrammarId(sTNGId); //this will also set needRefresh
         this.dataModel.setNeedRefresh(true);
-        this.parentPane.switchToTab(4);
+
+        boolean grammarFeature = this.showQuestionWithCustomOptions("Choose feature", "Read or Listen", "Do you want to read or listen", "Read", "Listen");
+        if (grammarFeature)
+            this.parentPane.switchToTab(4);
+        else
+            this.parentPane.switchToTab(5);
     }
 
     private void createStatusTableViewColumn(final String title, final double width)
