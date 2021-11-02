@@ -78,7 +78,7 @@ public class ArticleReadWindowTab extends SimpleFormBase {
     private Button btnRefresh;
     private Button btnLoadArticle;
     private Button btnStartTest;
-    private Button btnReadOnlyComplete;
+    private Button btnRnLComplete;
     private Button btnListenToArticle;
 
     private MediaPlayer mediaPlayer = null;
@@ -184,26 +184,26 @@ public class ArticleReadWindowTab extends SimpleFormBase {
                 startListen();
             }
         };
-        btnListenToArticle = createButton("Listen", fncListen);
+        btnListenToArticle = createButton("Listen Whole Article", fncListen);
 
-        EventHandler<ActionEvent> fncReadOnlyComplete = new EventHandler<ActionEvent>() {
+        EventHandler<ActionEvent> fncRnLComplete = new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent e) {
                 completeReadOnly();
             }
         };
-        btnReadOnlyComplete = createButton("Complete ReadOnly", fncReadOnlyComplete);
+        btnRnLComplete = createButton("Complete Read&Listen", fncRnLComplete);
 
         EventHandler<ActionEvent> fncStartTestButtonClick = new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent e) {
                 doStartTest();
             }
         };
-        btnStartTest = createButton("Start Test", fncStartTestButtonClick);
+        btnStartTest = createButton("Start Read", fncStartTestButtonClick);
 
-        this.addBodyCtl(btnLoadArticle, 1, 0);
-        this.addBodyCtl(btnListenToArticle, 2, 0);
-        this.addBodyCtl(btnReadOnlyComplete, 3, 0);
-        this.addBodyCtl(btnStartTest, 4, 0);
+        this.addBodyCtl(btnLoadArticle, 0, 0);
+        this.addBodyCtl(btnListenToArticle, 1, 0);
+        this.addBodyCtl(btnRnLComplete, 2, 0);
+        this.addBodyCtl(btnStartTest, 3, 0);
 
     }
 
@@ -242,10 +242,16 @@ public class ArticleReadWindowTab extends SimpleFormBase {
     @Override
     protected void processKeyPress(final KeyEvent ke) {
         KeyCode kc = ke.getCode(); 
-        if (!ke.isShiftDown()) return;
         switch (kc) {
             case ENTER:
+                if (!ke.isShiftDown()) return;
                 processInputEnter();
+                break;
+            case BACK_QUOTE:
+                if (!ke.isShiftDown())
+                    playCurrentSentenceMP3();
+                else
+                    doneListenToSentence();
                 break;
         }
     }
@@ -279,12 +285,27 @@ public class ArticleReadWindowTab extends SimpleFormBase {
         validateSentence();
     }
 
+    private void processListenToSentence() {
+        if (!this.getDataModel().isReadStarted()) return;
+    }
+
     private void startListen() {
         if (currentTNA == null) return;
+        if (mediaPlayer != null) return;
+
+        btnStartTest.setDisable(true);
+
         String id = currentTNA.getId().toString();
         String sFileName = getDataModel().getArticleMP3FileName(id);
         System.out.println(sFileName);
-        playMP3(sFileName);
+        File f = new File(sFileName);
+        if(f.exists() && !f.isDirectory()) { 
+            // do something
+            playMP3(sFileName);
+        }
+        else {
+            showInformation("ERROR", "No sound file to listen!");
+        }
     }
 
     private void playMP3(final String fullFileName) {
@@ -360,6 +381,70 @@ public class ArticleReadWindowTab extends SimpleFormBase {
         //System.out.println(sText);
     }
 
+    private String getCurrentArticleEachSentenceMP3Folder() {
+        final String articleMP3Folder = getDataModel().getArticleMP3FolderPath();
+        final String currentArticleMP3FolderPath = articleMP3Folder + "/" + currentTNA.getId().toString();
+        File folder = new File(currentArticleMP3FolderPath);
+        if(folder.exists() && folder.isDirectory()) { 
+            return currentArticleMP3FolderPath;
+        }
+        return null;
+    }
+
+    //this mode is for Read mode, not listen only
+    private void playCurrentSentenceMP3() {
+        if (!this.getDataModel().isReadStarted()) return;
+        if (mediaPlayer != null) return;
+        if (currentTestSentenceIdx < 0) return;
+        if (currentTNA == null) return;
+
+        final String currentArticleMP3FolderPath = getCurrentArticleEachSentenceMP3Folder();
+        if (currentArticleMP3FolderPath != null) {
+            // do something
+            final String sentenceMP3FullPath = String.format("%s/%03d.mp3", currentArticleMP3FolderPath, currentTestSentenceIdx-1);
+System.out.println(sentenceMP3FullPath);
+            File f = new File(sentenceMP3FullPath);
+            if(f.exists() && !f.isDirectory()) { 
+                playMP3(sentenceMP3FullPath);
+            }
+            else {
+                showInformation("ERROR", "File not found:\n"+sentenceMP3FullPath);
+            }
+        }
+        else {
+            showInformation("ERROR", "Folder for sentences MP3 not found!!!");
+        }
+
+    }
+
+    private void doneListenToSentence() {
+        if (!this.getDataModel().isReadStarted()) return;
+        if (mediaPlayer != null) return;
+        if (currentTNA == null) return;
+        String sText = currentTestSentence;
+        if (sText == null) return;
+
+        //no mp3 for each sentence, do nothing
+        if (getCurrentArticleEachSentenceMP3Folder() == null) return;
+
+        this.getDataModel().increaseJCoin(this.currentTestSentenceVal / 2); //listen only gain 50%
+        lblJCoinAmount.setText(String.valueOf(this.getDataModel().getJCoin()));
+        if (stepUpTestSentence()) {
+            //System.out.println("stepped up!");
+            lblCurrentSentenceValue.setText(String.valueOf(this.currentTestSentenceVal));
+            appendTextToContent(currentTestSentence, true);
+            tafSentenceInput.clear();
+            tafSentenceInput.requestFocus();
+            //listen to newly loaded sentence
+            playCurrentSentenceMP3();
+        }
+        else {
+            //System.out.println("can't stepped up, end test!");
+            doEndTest();
+        }
+        //System.out.println(sText);
+    }
+
     private void loadArticle() {
 
         if (this.getDataModel().isReadStarted()) return;
@@ -386,6 +471,8 @@ public class ArticleReadWindowTab extends SimpleFormBase {
         if (this.getDataModel().isReadStarted()) return;
 
         if (this.arrSentences.size() < 1) return;
+
+        btnStartTest.setDisable(false);
 
         int iTotalValue = 0;
         for (String sen: this.arrSentences) {
@@ -460,6 +547,7 @@ public class ArticleReadWindowTab extends SimpleFormBase {
 
     private void doStartTest() {
         if (this.getDataModel().isReadStarted()) return;
+        if (mediaPlayer != null) return;
 
         this.getDataModel().setReadStarted(true);
         clearFields();
@@ -474,8 +562,9 @@ public class ArticleReadWindowTab extends SimpleFormBase {
 
         this.btnLoadArticle.setDisable(true);
         this.tafReadOnlyTestInput.setEditable(false);
-        this.btnReadOnlyComplete.setDisable(true);
+        this.btnRnLComplete.setDisable(true);
         this.btnStartTest.setDisable(true);
+        this.btnListenToArticle.setDisable(true);
         this.btnRefresh.setDisable(true);
     }
 
@@ -500,7 +589,8 @@ public class ArticleReadWindowTab extends SimpleFormBase {
         this.lblCurrentSentenceValue.setText("0");
         this.btnLoadArticle.setDisable(false);
         this.tafReadOnlyTestInput.setEditable(true);
-        this.btnReadOnlyComplete.setDisable(false);
+        this.btnRnLComplete.setDisable(false);
+        this.btnListenToArticle.setDisable(false);
         this.btnStartTest.setDisable(false);
         this.btnRefresh.setDisable(false);
     }
