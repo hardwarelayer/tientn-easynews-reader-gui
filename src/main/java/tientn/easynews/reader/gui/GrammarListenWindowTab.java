@@ -312,7 +312,7 @@ public class GrammarListenWindowTab extends SimpleFormBase {
         clearTestFields();
 
         final String patId = rowData.getId();
-        selectPattern(patId, false);
+        selectPattern(patId, true);
         System.out.println(rowData.toString());
     }
 
