@@ -293,8 +293,6 @@ public class ArticleReadWindowTab extends SimpleFormBase {
         if (currentTNA == null) return;
         if (mediaPlayer != null) return;
 
-        btnStartTest.setDisable(true);
-
         String id = currentTNA.getId().toString();
         String sFileName = getDataModel().getArticleMP3FileName(id);
         System.out.println(sFileName);
@@ -302,6 +300,7 @@ public class ArticleReadWindowTab extends SimpleFormBase {
         if(f.exists() && !f.isDirectory()) { 
             // do something
             playMP3(sFileName);
+            btnStartTest.setDisable(true);
         }
         else {
             showInformation("ERROR", "No sound file to listen!");
@@ -471,6 +470,8 @@ System.out.println(sentenceMP3FullPath);
         if (this.getDataModel().isReadStarted()) return;
 
         if (this.arrSentences.size() < 1) return;
+
+        if (!showQuestion("Complete article readonly", "Finish and get jCoin", "Are you sure you have completed?")) return;
 
         btnStartTest.setDisable(false);
 

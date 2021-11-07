@@ -81,6 +81,7 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
     private Button btnLoadNormalForTest;
     private Button btnLoadNewForTest;
     private Button btnLoadProblematicWordsForTest;
+    private Button btnResetProblematicWords;
     private Button btnStartTest;
     private Button btnStopTest;
 
@@ -207,6 +208,13 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
         };
         btnLoadProblematicWordsForTest = createButton("Load (P)roblematic", fncLoadWrongButtonClick);
 
+        EventHandler<ActionEvent> fncResetProblematicWords = new EventHandler<ActionEvent>() {
+            @Override public void handle(ActionEvent e) {
+                resetProblematicWords();
+            }
+        };
+        btnResetProblematicWords = createButton("(R)eset", fncResetProblematicWords);
+
         EventHandler<ActionEvent> fncStartTestButtonClick = new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent e) {
                 startTest();
@@ -252,7 +260,8 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
 
         this.addBodyCtl(btnLoadNormalForTest, 0, 2);
         this.addBodyCtl(btnLoadNewForTest, 1, 2);
-        this.addBodyCtl(btnLoadProblematicWordsForTest, 2, 2);
+        HBox bxProblemWords = new HBox(btnLoadProblematicWordsForTest, btnResetProblematicWords);
+        this.addBodyPane(bxProblemWords, 2, 2);
         HBox bxStartStop = new HBox(btnStartTest, btnStopTest);
         this.addBodyPane(bxStartStop, 3, 2);
 
@@ -378,6 +387,24 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
         refreshStartButton();
     }
 
+    private  void resetProblematicWords() {
+        if (this.getDataModel().isTestStarted())
+          return;
+
+        if (this.lstProblematicWords.size() < 1) {
+            return;
+        }
+
+        if (!showQuestion("Reset focus/problematic words", "Empty the list!", "Are you sure?")) return;
+
+        this.lstProblematicWords.clear();
+        this.getDataModel().getSelectedTNA().getProblematicWords().clear();
+        clearLists();
+        btnResetProblematicWords.setDisable(true);
+
+        refreshStartButton();
+    }
+
     private void loadProblematicWordsForTest() {
         if (this.getDataModel().isTestStarted())
           return;
@@ -486,6 +513,7 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
         }
 
         if (lv != null) {
+
             if (kc == KeyCode.ENTER) {
                 sItem = getListSelectedString(lv);
                 if (sItem == null) return;
@@ -525,12 +553,6 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
                 if (lvFirstCol.isFocused()) {
                     sItem = getListSelectedString(lv);
                     showSneakpeek(sItem);
-                }
-            }
-            else if (kc == KeyCode.DELETE) {
-                final int selectedIdx = lv.getSelectionModel().getSelectedIndex();
-                if (selectedIdx >= 0) {
-                    lv.getItems().remove(selectedIdx);
                 }
             }
             else if (isLetterKey) {
@@ -773,6 +795,9 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
                 case V:
                     this.getDataModel().printCurrentKanjisWithTest();
                     break;
+                case DELETE:
+                    processDeleteInWaitingMode(kc);
+                    break;
             }
         }
         else {
@@ -795,6 +820,27 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
             }
         }
 
+
+    }
+
+    private void processDeleteInWaitingMode(KeyCode kc) {
+        if (!lvFirstCol.isFocused()) {
+            return;
+        }
+        if (kc == KeyCode.DELETE || kc == KeyCode.BACK_SPACE) {
+            List<String> lstProblems = this.getDataModel().getSelectedTNA().getProblematicWords();
+            if (this.lstProblematicWords.size() != lvFirstCol.getItems().size()) return; //not problematic mode
+            String sItem = getListSelectedString(lvFirstCol);
+            if (!sItem.isEmpty()) {
+                if (!showQuestion("Delete focus/problematic word", sItem, "Are you sure to remove the word?"))
+                    return;
+                if (lstProblems.contains(sItem)) {
+                    lstProblems.remove(sItem);
+                    this.lstProblematicWords.remove(sItem);
+                    loadProblematicWordsForTest();
+                }
+            }
+        }
 
     }
 
@@ -905,6 +951,7 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
         shuffleAllListModels();
         btnLoadNormalForTest.setDisable(true);
         btnLoadNewForTest.setDisable(true);
+        btnResetProblematicWords.setDisable(true);
         btnLoadProblematicWordsForTest.setDisable(true);
         btnStartTest.setDisable(true);
         btnStopTest.setDisable(false);
@@ -924,6 +971,7 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
         btnLoadNormalForTest.setDisable(false);
         btnLoadNewForTest.setDisable(false);
         btnLoadProblematicWordsForTest.setDisable(false);
+        btnResetProblematicWords.setDisable(false);
         btnStartTest.setDisable(true);
         btnStopTest.setDisable(true);
         clearWordListSelection();
