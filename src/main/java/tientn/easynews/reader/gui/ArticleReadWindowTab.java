@@ -625,6 +625,9 @@ System.out.println(sentenceMP3FullPath);
     }
 
     public void onShow() {
+        //always refresh this
+        lblJCoinAmount.setText(String.valueOf(this.getDataModel().getJCoin()));
+
         if (this.getDataModel().isNeedRefresh()) {
 
             //unset it

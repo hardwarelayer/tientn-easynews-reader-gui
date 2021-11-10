@@ -158,6 +158,14 @@
   -fx-background-radius: 10px;
 }
 
+#wordmatch-search-key {
+  -fx-font-weight: bold;
+  -fx-background-color: lightgreen;
+  -fx-text-fill: white; 
+  -fx-font-family: Courier New;
+  -fx-background-radius: 8px;
+}
+
 /* The main scrollbar CSS class of ListView */
 .wordmatch-scroll-bar .scroll-bar:horizontal ,
 .wordmatch-scroll-bar .scroll-bar:vertical{

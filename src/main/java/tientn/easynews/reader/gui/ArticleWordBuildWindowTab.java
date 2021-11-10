@@ -696,6 +696,9 @@ public class ArticleWordBuildWindowTab extends SimpleFormBase {
     }
 
     public void onShow() {
+        //always refresh this
+        lblJCoinAmount.setText(String.valueOf(this.getDataModel().getJCoin()));
+
         if (this.getDataModel().isNeedRefresh()) {
             //unset it
             this.getDataModel().setNeedRefresh(false);

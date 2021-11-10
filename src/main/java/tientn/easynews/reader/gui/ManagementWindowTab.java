@@ -252,7 +252,7 @@ public class ManagementWindowTab extends GridPaneBase {
     private void processSaveTFMTButtonEvent() {
         //this.dataModel.printCurrentKanjisWithTest();
         final String sContent = this.dataModel.getJsonDataAsString();
-        System.out.println(sContent);
+        //System.out.println(sContent);
         saveTFMTToFile(this.currentTFMTSaveFile, sContent);
     }
 
