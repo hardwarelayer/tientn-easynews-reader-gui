@@ -50,6 +50,17 @@ public class JBGKanjiItem implements Serializable {
     this.weightValue = weightValue;
   }
 
+  public JBGKanjiItem(final String kanji, final String hiragana, final String hv, final String meaning, final int testCount, final int correctCount, final int weightValue) {
+    this.id = UUID.randomUUID();
+    this.kanji = kanji;
+    this.hiragana = hiragana;
+    this.hv = hv;
+    this.meaning = meaning;
+    this.testCount = testCount;
+    this.correctCount = correctCount;
+    this.weightValue = weightValue;
+  }
+
   public void increaseTest(final boolean isOK) {
     this.testCount++;
     if (isOK) {

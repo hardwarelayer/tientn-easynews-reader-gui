@@ -68,6 +68,10 @@ public class ReaderModel {
   @Getter private String selectedArticleId;
   @Getter private String selectedGrammarId;
 
+  //for kanji subset select
+  private int kanjiSubsetStart = 0;
+  @Getter @Setter private int kanjiSubsetSize = JBGConstants.DEFAULT_KANJI_SUBSET_SIZE;
+
   @Setter private String grammarMP3FolderPath;
   @Setter @Getter private String articleMP3FolderPath;
 
@@ -243,6 +247,17 @@ public class ReaderModel {
     return null;
   }
 
+  //use for article loading, add to main kanjilist if not yet avail in this main list
+  private boolean addKanjiToMainKanjiList(final JBGKanjiItem kj) {
+    for (JBGKanjiItem item: this.dataKanjiItems) {
+      if (item.getKanji().equals(kj.getKanji()))
+        return false;
+    }
+    this.increaseJCoin(JBGConstants.JCOIN_AMOUNT_FOR_ADD_KANJI_WORD);
+    this.dataKanjiItems.add(kj.cloneItem());
+    return true;
+  }
+
   public List<JBGKanjiItem> getSimilarKanjiFromMainKanjiList(final String kanji) {
     List<JBGKanjiItem> lst = new ArrayList<JBGKanjiItem>();
     for (JBGKanjiItem item: this.dataKanjiItems) {
@@ -380,8 +395,12 @@ public class ReaderModel {
     else if (this.currentWorkMode == JBGConstants.TEST_WORD_IN_ARTICLE) {
       TFMTTNAData currentTNA = getSelectedTNA();
       if (currentTNA != null) {
-        this.subsetRecords = currentTNA.getKanjisForTest();
-        return this.subsetRecords;
+        int iSize = currentTNA.getKanjisForTest().size();
+        if (this.kanjiSubsetStart > 0) {
+          this.kanjiSubsetStart--;
+          this.subsetRecords = currentTNA.getKanjisForTest().subList(this.kanjiSubsetStart, this.kanjiSubsetStart + this.kanjiSubsetSize);
+          return this.subsetRecords;
+        }
       }
     }
     return null;
@@ -398,7 +417,15 @@ public class ReaderModel {
     else if (this.currentWorkMode == JBGConstants.TEST_WORD_IN_ARTICLE) {
       TFMTTNAData currentTNA = getSelectedTNA();
       if (currentTNA != null) {
-        this.subsetRecords = currentTNA.getKanjisForTest();
+        int iSize = currentTNA.getKanjisForTest().size();
+        if (this.kanjiSubsetStart + 1 + this.kanjiSubsetSize < iSize) {
+          this.kanjiSubsetStart++;
+          this.subsetRecords = currentTNA.getKanjisForTest().subList(this.kanjiSubsetStart, this.kanjiSubsetStart + this.kanjiSubsetSize);
+        }
+        else {
+          this.kanjiSubsetStart = 0;
+          this.subsetRecords = currentTNA.getKanjisForTest().subList(0, this.kanjiSubsetSize);
+        }
         return this.subsetRecords;
       }
     }
@@ -886,7 +913,7 @@ public class ReaderModel {
                 JSONObject kanjiDetailItem = (JSONObject) kanjiDetailDict.get(sDetailChar);
                 if (kanjiDetailItem != null) {
 
-                  String sDetailHvPhonetic = (String) kanjiDetailItem.get("h_phonetic");
+                  String sDetailHvPhonetic = (String) kanjiDetailItem.get("hv_phonetic");
                   String sDetailOnKun = (String) kanjiDetailItem.get("on_kun");
                   String sDetailMeaning = (String) kanjiDetailItem.get("meaning");
 
@@ -906,6 +933,7 @@ public class ReaderModel {
       }
 
       List<JBGKanjiItem> lstBuiltWordForTest = new ArrayList<JBGKanjiItem>();
+
       if (lstBuiltWords != null) {
         for (Object kObj: lstBuiltWords) {
           JSONObject wordItem = (JSONObject) kObj;
@@ -921,6 +949,8 @@ public class ReaderModel {
 
             JBGKanjiItem kjItem = new JBGKanjiItem(sId, sKanji, sHiragana, sHv, sMeaning, iTestCount, iCorrectCount, iWeightValue);
             lstBuiltWordForTest.add(kjItem);
+
+            addKanjiToMainKanjiList(kjItem);
           }
         }
 

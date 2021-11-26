@@ -92,7 +92,7 @@ public class ArticleWordBuildWindowTab extends SimpleFormBase {
     private Button btnStartWordMatchTest;
     private Button btnStartArticleRead;
 
-    int WORD_SCORE_MULTIPLIER = 2;
+    int WORD_SCORE_MULTIPLIER = JBGConstants.JCOIN_AMOUNT_FOR_ADD_KANJI_WORD;
 
     private ListView<String> lvTNAKanjiWords;
     private ListView<String> lvTNAKanjis;

@@ -449,7 +449,7 @@ System.out.println("Sentence: " + s.getSentence() + " MP3:" + sRet);
 
         StringBuilder sb = new StringBuilder();
         sb.append(this.selectedPattern.getSentenceAsString("\n"));
-        appendTextToContent(sb.toString(), false, false);
+        appendTextToContent(sb.toString(), false, true);
 
         setPreviewValue();
     }
@@ -552,7 +552,7 @@ System.out.println("Sentence: " + s.getSentence() + " MP3:" + sRet);
         iStartSel = sContent.length();
         StringBuilder sb = new StringBuilder();
         if (stripSentence) 
-            sb.append(sContent + "\n" + sText.trim().replace("、", "、\n").replace(SENTENCE_DOT, "") + SENTENCE_DOT);
+            sb.append(sContent + "\n" + sText.trim().replace("、", "、\n").replace(SENTENCE_DOT, "...\n") + SENTENCE_DOT);
         else
             sb.append(sContent + "\n" + sText);
         tafGrammarContent.setText(sb.toString());

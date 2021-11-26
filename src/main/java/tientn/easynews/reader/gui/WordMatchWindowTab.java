@@ -8,6 +8,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Button;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
+import javafx.scene.control.TextField;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text; 
@@ -92,7 +93,18 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
     private static final String MATCH_WORD_NG = "NG";
     private static final int BONUS_ON_COMPLETE = 5;
 
+    private static final String FIRST_LOAD_FOR_MAIN_LIST = "(L)oad Normal";
+    private static final String SECOND_LOAD_FOR_MAIN_LIST = "Load (N)ew ";
+    private static final String FIRST_LOAD_FOR_ARTICLE = "(L)oad Previous";
+    private static final String SECOND_LOAD_FOR_ARTICLE = "Load (N)ext ";
+
+    private TextField tfSizeOfWords;
+
     private int iCurrentTestKJCount = 0;
+
+    //for continuous test bonus
+    private int iTotalCorrectTestCount = 0;
+    private int iContinuousCorrectTestBonus = 0;
 
     private String currentSearchKeys = "";
 
@@ -285,14 +297,14 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
                 loadNormalKanjisForTest();
             }
         };
-        btnLoadNormalForTest = createButton("(L)oad Normal", fncLoadNormalButtonClick);
+        btnLoadNormalForTest = createButton(FIRST_LOAD_FOR_MAIN_LIST, fncLoadNormalButtonClick);
 
         EventHandler<ActionEvent> fncLoadNewButtonClick = new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent e) {
-                loadNewKanjisForTest();
+                loadNextKanjisForTest();
             }
         };
-        btnLoadNewForTest = createButton("Load (N)ew ", fncLoadNewButtonClick);
+        btnLoadNewForTest = createButton(SECOND_LOAD_FOR_MAIN_LIST, fncLoadNewButtonClick);
 
         EventHandler<ActionEvent> fncLoadWrongButtonClick = new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent e) {
@@ -320,6 +332,9 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
             }
         };
         btnStopTest = createButton("Stop Test", fncStopTestButtonClick);
+
+        tfSizeOfWords = new TextField(String.valueOf(this.getDataModel().getKanjiSubsetSize()));
+        tfSizeOfWords.prefWidthProperty().bind(getPrimaryStage().widthProperty().multiply(0.04));
 
         lvFirstCol = createSingleSelectStringListView(0);
         lvSecondCol = createSingleSelectStringListView(1);
@@ -352,7 +367,8 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
         //this.addBodyCtl(lblTotalTests, 3, 1);
 
         this.addBodyCtl(btnLoadNormalForTest, 0, 2);
-        this.addBodyCtl(btnLoadNewForTest, 1, 2);
+        HBox bxLoadNextWords = new HBox(btnLoadNewForTest, tfSizeOfWords);
+        this.addBodyPane(bxLoadNextWords, 1, 2);
         HBox bxProblemWords = new HBox(btnLoadProblematicWordsForTest, btnResetProblematicWords);
         this.addBodyPane(bxProblemWords, 2, 2);
         HBox bxStartStop = new HBox(btnStartTest, btnStopTest);
@@ -444,11 +460,25 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
         lvFourthCol.getItems().add(item.getMeaning());
     }
 
+    private void updateKanjiSubsetSize() {
+        final String val = tfSizeOfWords.getText();
+        int i = JBGConstants.DEFAULT_KANJI_SUBSET_SIZE;
+        try {
+            i = Integer.valueOf(tfSizeOfWords.getText());
+        }
+        catch (NumberFormatException ex) {
+            System.out.println("Wrong number format!");
+        }
+        this.getDataModel().setKanjiSubsetSize(i);
+
+    }
     private void loadNormalKanjisForTest() {
         if (this.getDataModel().isTestStarted())
           return;
 
+        this.updateKanjiSubsetSize();
         List<JBGKanjiItem> lstKJ = this.getDataModel().getNormalKJSubset();
+        if (lstKJ == null) return;
         this.iCurrentTestKJCount = lstKJ.size();
 
         if (lstKJ != null && lstKJ.size() > 0) {
@@ -463,10 +493,11 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
         refreshStartButton();
     }
 
-    private void loadNewKanjisForTest() {
+    private void loadNextKanjisForTest() {
         if (this.getDataModel().isTestStarted())
           return;
 
+        this.updateKanjiSubsetSize();
         List<JBGKanjiItem> lstKJ = this.getDataModel().getNewKJSubset();
         this.iCurrentTestKJCount = lstKJ.size();
 
@@ -1064,7 +1095,7 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
                     loadNormalKanjisForTest();
                     break;
                 case N:
-                    loadNewKanjisForTest();
+                    loadNextKanjisForTest();
                     break;
                 case P:
                     loadProblematicWordsForTest();
@@ -1161,6 +1192,15 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
         //always refresh this
         lblJCoinAmount.setText(String.valueOf(this.getDataModel().getJCoin()));
 
+        if (this.getDataModel().getCurrentWorkMode() == JBGConstants.TEST_WORD_IN_ARTICLE) {
+            btnLoadNormalForTest.setText(FIRST_LOAD_FOR_ARTICLE);
+            btnLoadNewForTest.setText(SECOND_LOAD_FOR_ARTICLE);
+        }
+        else {
+            btnLoadNormalForTest.setText(FIRST_LOAD_FOR_MAIN_LIST);
+            btnLoadNewForTest.setText(SECOND_LOAD_FOR_MAIN_LIST);
+        }
+
         if (this.getDataModel().isNeedRefresh()) {
 
             //unset it
@@ -1170,7 +1210,7 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
             if (this.getDataModel().isTestStarted()) return;
             btnReloadKanjis.setDisable(false);
             refreshKanjiStats();
-            loadNewKanjisForTest();
+            loadNextKanjisForTest();
         }
         else {
             //System.out.println("data is NOT dirty");
@@ -1419,6 +1459,11 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
 
               //reward
               totalJCoin++;
+              this.iTotalCorrectTestCount++;
+              if (this.iTotalCorrectTestCount % 4 == 0) {
+                iContinuousCorrectTestBonus++;
+                totalJCoin += this.iContinuousCorrectTestBonus;
+              }
 
               setSneekpeekFields(kanji, hira, hv, viet);
 

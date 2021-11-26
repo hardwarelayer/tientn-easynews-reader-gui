@@ -300,7 +300,7 @@ public class GrammarReadWindowTab extends SimpleFormBase {
 
         StringBuilder sb = new StringBuilder();
         sb.append(this.selectedPattern.getSentenceAsString("\n"));
-        appendTextToContent(sb.toString(), false, false);
+        appendTextToContent(sb.toString(), false, true);
 
         setPreviewValue();
     }
@@ -389,8 +389,8 @@ public class GrammarReadWindowTab extends SimpleFormBase {
         String sContent = tafGrammarContent.getText();
         iStartSel = sContent.length();
         StringBuilder sb = new StringBuilder();
-        if (stripSentence) 
-            sb.append(sContent + "\n" + sText.trim().replace("、", "、\n").replace(SENTENCE_DOT, "") + SENTENCE_DOT);
+        if (stripSentence)
+            sb.append(sContent + "\n" + sText.trim().replace("、", "、\n").replace(SENTENCE_DOT, "...\n") + SENTENCE_DOT);
         else
             sb.append(sContent + "\n" + sText);
         tafGrammarContent.setText(sb.toString());
