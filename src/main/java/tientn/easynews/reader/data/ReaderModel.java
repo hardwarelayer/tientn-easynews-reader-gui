@@ -994,6 +994,26 @@ public class ReaderModel {
     return false;
   }
 
+  public void increaseKanjiTestCorrect(final String kanji) {
+    for (JBGKanjiItem kj: this.dataKanjiItems) {
+      if (kj.getKanji().equals(kanji)) {
+        kj.setTestCount(kj.getTestCount() + 1);
+        kj.setCorrectCount(kj.getCorrectCount() + 1);
+        break;
+      }
+    }
+    TFMTTNAData currentTNA = getSelectedTNA();
+    if (currentTNA != null) {
+      for (JBGKanjiItem kj: currentTNA.getKanjisForTest()) {
+        if (kj.getKanji().equals(kanji)) {
+          kj.setTestCount(kj.getTestCount() + 1);
+          kj.setCorrectCount(kj.getCorrectCount() + 1);
+          break;
+        }
+      }
+    }
+  }
+
   public TFMTTNAData getSelectedTNA() {
     if (this.selectedArticleId == null) return null;
     return getTNAById(this.selectedArticleId);

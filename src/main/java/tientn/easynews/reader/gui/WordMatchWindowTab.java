@@ -1227,6 +1227,8 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
     }
 
     private boolean updateWordStat(final String kanji, final String isOK) {
+          this.getDataModel().increaseKanjiTestCorrect(kanji);
+          /*
           for (JBGKanjiItem item: this.kanjiList) {
             if (item.getKanji().equals(kanji) ) {
               item.increaseTest(isOK.equals(MATCH_WORD_OK)?true:false);
@@ -1234,6 +1236,8 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
             }
           }
           return false;
+          */
+          return true;
     }
 
     private void clearWordListSelection() {
