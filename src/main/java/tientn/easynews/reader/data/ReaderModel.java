@@ -396,11 +396,12 @@ public class ReaderModel {
       TFMTTNAData currentTNA = getSelectedTNA();
       if (currentTNA != null) {
         int iSize = currentTNA.getKanjisForTest().size();
-        if (this.kanjiSubsetStart > 0) {
+        if (this.kanjiSubsetStart > 0)
           this.kanjiSubsetStart--;
-          this.subsetRecords = currentTNA.getKanjisForTest().subList(this.kanjiSubsetStart, this.kanjiSubsetStart + this.kanjiSubsetSize);
-          return this.subsetRecords;
-        }
+        else
+          this.kanjiSubsetStart = 0;
+        this.subsetRecords = currentTNA.getKanjisForTest().subList(this.kanjiSubsetStart, this.kanjiSubsetStart + this.kanjiSubsetSize);
+        return this.subsetRecords;
       }
     }
     return null;
@@ -1061,6 +1062,34 @@ public class ReaderModel {
         }
     }
     return null;
+  }
+
+  public boolean moveTNGItemToTail(final String id) {
+    TFMTTNGData tng = this.getSelectedTNG();
+    if (tng == null) return false;
+
+    TFMTTNGPatternData pMovedItem = null;
+    List<TFMTTNGPatternData> lstNewOrderedPatterns = new ArrayList<TFMTTNGPatternData>();
+    for (TFMTTNGPatternData pItem: tng.getGrammarPattern()) {
+      if (!pItem.getId().toString().equals(id)) {
+        lstNewOrderedPatterns.add(pItem);
+      }
+      else {
+        pMovedItem = pItem;
+      }
+    }
+    if (pMovedItem != null) {
+      lstNewOrderedPatterns.add(pMovedItem);
+    }
+    else {
+      return false;
+    }
+
+    tng.setGrammarPattern(lstNewOrderedPatterns);
+
+    if (tng.getGrammarPattern().size() == lstNewOrderedPatterns.size())
+      return true;
+    return false;
   }
 
   public boolean loadTNGJsonFromFile(final String fileName) {

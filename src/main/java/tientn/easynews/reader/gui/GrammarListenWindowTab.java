@@ -459,7 +459,7 @@ System.out.println("Sentence: " + s.getSentence() + " MP3:" + sRet);
         TFMTTNGData tng = this.getDataModel().getSelectedTNG();
         if (tng == null) return;
         for (TFMTTNGPatternData pItem: tng.getGrammarPattern()) {
-            System.out.println(pItem);
+            //System.out.println(pItem);
             GrammarPatternTableViewItem showItem = new GrammarPatternTableViewItem(
                 pItem.getId().toString(),
                 pItem.getTitle(),
@@ -537,6 +537,10 @@ System.out.println("Sentence: " + s.getSentence() + " MP3:" + sRet);
                 case R:
                     if (this.inReadnListenMode)
                         doListenRepeat();
+                    break;
+                case SPACE:
+                    if (!this.inReadnListenMode)
+                        moveGrammarToTail();
                     break;
             }
         }
@@ -622,6 +626,17 @@ System.out.println("Sentence: " + s.getSentence() + " MP3:" + sRet);
 
         loadGrammar();
 
+    }
+
+    private void moveGrammarToTail() {
+        if (this.getDataModel().isReadStarted()) return;
+        if (this.mediaPlayer != null) return;
+
+        GrammarPatternTableViewItem rowData = tvGrammarPattern.getSelectionModel().getSelectedItem();
+        if (rowData == null) return;
+        System.out.println(rowData.toString());
+        if (this.getDataModel().moveTNGItemToTail(rowData.getId()) )
+            reloadPatternList();
     }
 
     private void doReadAndListen() {

@@ -74,6 +74,7 @@ public class ArticleReadWindowTab extends SimpleFormBase {
     private Label lblCurrentSentenceValue;
     private Label lblSelectedArticleId;
     private Label lblSelectedArticleTitle;
+    private Label lblCurrentListeningBonusValue;
 
     private Button btnRefresh;
     private Button btnLoadArticle;
@@ -88,6 +89,8 @@ public class ArticleReadWindowTab extends SimpleFormBase {
     private String currentTestSentence;
     private int currentTestSentenceIdx;
     private int currentTestSentenceVal;
+    private int currentListeningSentenceCount = 0;
+    private int currentListeningBonusVal;
 
     private String[] arrSingleByteCharArray = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "–", "−"};
     private String[] arrDoubleByteCharArray = {"０", "１", "２", "３", "４", "５", "６", "７", "８", "９", "ー", "ー"};
@@ -126,11 +129,15 @@ public class ArticleReadWindowTab extends SimpleFormBase {
         lblCurrentSentenceValue = new Label("0");
         lblCurrentSentenceValue.setId("read-article-sentence-value");
 
+        lblCurrentListeningBonusValue = new Label("0");
+        lblCurrentListeningBonusValue.setId("read-article-listening-bonus-value");
+
         lblSelectedArticleId = new Label("...");
         lblSelectedArticleTitle = new Label("...");
 
         HBox titleRow = new HBox(btnRefresh, lblSelectedArticleId, lblSelectedArticleTitle);
-        HBox coinRow = new HBox(lblCoin, lblJCoinAmount, lblSentenceVal, lblCurrentSentenceValue);
+        HBox coinRow = new HBox(lblCoin, lblJCoinAmount, lblSentenceVal, lblCurrentSentenceValue, 
+            new Label("  Listening Bonus:"), lblCurrentListeningBonusValue);
 
         tafArticleContent = new TextArea();
         tafArticleContent.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.64));
@@ -401,9 +408,12 @@ public class ArticleReadWindowTab extends SimpleFormBase {
         if (currentArticleMP3FolderPath != null) {
             // do something
             final String sentenceMP3FullPath = String.format("%s/%03d.mp3", currentArticleMP3FolderPath, currentTestSentenceIdx-1);
-System.out.println(sentenceMP3FullPath);
+//System.out.println(sentenceMP3FullPath);
             File f = new File(sentenceMP3FullPath);
-            if(f.exists() && !f.isDirectory()) { 
+            if(f.exists() && !f.isDirectory()) {
+                increaseListenBonusCounter();
+                this.getDataModel().increaseJCoin((this.currentTestSentenceVal / 3) + this.currentListeningBonusVal); //listen only gain 30%
+                lblJCoinAmount.setText(String.valueOf(this.getDataModel().getJCoin()));
                 playMP3(sentenceMP3FullPath);
             }
             else {
@@ -416,6 +426,15 @@ System.out.println(sentenceMP3FullPath);
 
     }
 
+    private void increaseListenBonusCounter() {
+        this.currentListeningSentenceCount++;
+        if (this.currentListeningSentenceCount == 9) {
+            this.currentListeningBonusVal += 1;
+            this.currentListeningSentenceCount = 0;
+            lblCurrentListeningBonusValue.setText(String.valueOf(this.currentListeningBonusVal));
+        }
+    }
+
     private void doneListenToSentence() {
         if (!this.getDataModel().isReadStarted()) return;
         if (mediaPlayer != null) return;
@@ -426,7 +445,8 @@ System.out.println(sentenceMP3FullPath);
         //no mp3 for each sentence, do nothing
         if (getCurrentArticleEachSentenceMP3Folder() == null) return;
 
-        this.getDataModel().increaseJCoin(this.currentTestSentenceVal / 2); //listen only gain 50%
+        increaseListenBonusCounter();
+        this.getDataModel().increaseJCoin((this.currentTestSentenceVal / 2) + this.currentListeningBonusVal); //listen only gain 50%
         lblJCoinAmount.setText(String.valueOf(this.getDataModel().getJCoin()));
         if (stepUpTestSentence()) {
             //System.out.println("stepped up!");
