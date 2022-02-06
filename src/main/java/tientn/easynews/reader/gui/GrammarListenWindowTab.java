@@ -243,16 +243,16 @@ public class GrammarListenWindowTab extends SimpleFormBase {
         tvGrammarPattern = createGrammarPatternTV();
         tvGrammarPattern.setId("grammar-read-pattern-list");
         createGrammarPatternTVColumn("Id", 0.01);
-        createGrammarPatternTVColumn("Title", 0.5);
-        createGrammarPatternTVColumn("Description", 0.28);
-        createGrammarPatternTVColumn("Test", 0.1);
-        createGrammarPatternTVColumn("Correct", 0.1);
+        createGrammarPatternTVColumn("Title", 0.4);
+        createGrammarPatternTVColumn("Description", 0.39);
+        createGrammarPatternTVColumn("Test", 0.05);
+        createGrammarPatternTVColumn("Correct", 0.05);
 
         HBox mainRow = new HBox(tvGrammarPattern, readSection);
         HBox.setHgrow(tvGrammarPattern, Priority.ALWAYS);
         HBox.setHgrow(readSection, Priority.ALWAYS);
-        tvGrammarPattern.prefWidthProperty().bind(getPrimaryStage().widthProperty().multiply(0.3));
-        readSection.prefWidthProperty().bind(getPrimaryStage().widthProperty().multiply(0.7));
+        tvGrammarPattern.prefWidthProperty().bind(getPrimaryStage().widthProperty().multiply(0.4));
+        readSection.prefWidthProperty().bind(getPrimaryStage().widthProperty().multiply(0.6));
 
         lblGrammarPatternPreview = new Label("...");
         lblGrammarPatternPreview.setId("grammar-read-pattern-preview");
@@ -327,6 +327,7 @@ public class GrammarListenWindowTab extends SimpleFormBase {
             iCurrentSelect = 0;
         }
         tvGrammarPattern.getSelectionModel().select(iCurrentSelect);
+        tvGrammarPattern.scrollTo(iCurrentSelect);
         GrammarPatternTableViewItem rowData = tvGrammarPattern.getSelectionModel().getSelectedItem();
         if (rowData == null) return;
 
@@ -380,10 +381,16 @@ public class GrammarListenWindowTab extends SimpleFormBase {
         return null;
     }
 
+    private void addBonusOfRepeating() {
+        this.getDataModel().increaseJCoin(2); //bonus in repeat
+        lblJCoinAmount.setText(String.valueOf(this.getDataModel().getJCoin()));
+    }
+
     private void doListenRepeat() {
         if (this.mediaPlayer != null) return;
         if (this.selectedPatternId == null || this.currentRnLSentenceId == null || this.currentRnLSentenceIdx < 0) return;
 
+        addBonusOfRepeating();
         playMP3(this.selectedPatternId.toString(), this.currentRnLSentenceId);
     }
 
@@ -394,8 +401,10 @@ public class GrammarListenWindowTab extends SimpleFormBase {
             this.currentRnLSentenceIdx--;
             TFMTTNGPatternSentence s = this.selectedPattern.getSentence().get(this.currentRnLSentenceIdx);
             this.currentRnLSentenceId = s.getId().toString();
+
+            addBonusOfRepeating();
             final String sRet = playMP3(this.selectedPatternId.toString(), this.currentRnLSentenceId);
-System.out.println("Sentence: " + s.getSentence() + " MP3:" + sRet);
+//System.out.println("Sentence: " + s.getSentence() + " MP3:" + sRet);
         }
     }
 
