@@ -396,11 +396,14 @@ public class ReaderModel {
       TFMTTNAData currentTNA = getSelectedTNA();
       if (currentTNA != null) {
         int iSize = currentTNA.getKanjisForTest().size();
-        if (this.kanjiSubsetStart > 0)
+        if (this.kanjiSubsetStart > 0 && this.kanjiSubsetStart < iSize)
           this.kanjiSubsetStart--;
         else
           this.kanjiSubsetStart = 0;
-        this.subsetRecords = currentTNA.getKanjisForTest().subList(this.kanjiSubsetStart, this.kanjiSubsetStart + this.kanjiSubsetSize);
+        int iToIdx = this.kanjiSubsetStart + this.kanjiSubsetSize;
+        if (iToIdx >= iSize)
+          iToIdx = iSize - 1;
+        this.subsetRecords = currentTNA.getKanjisForTest().subList(this.kanjiSubsetStart, iToIdx);
         return this.subsetRecords;
       }
     }
@@ -421,10 +424,15 @@ public class ReaderModel {
         int iSize = currentTNA.getKanjisForTest().size();
         if (this.kanjiSubsetStart + 1 + this.kanjiSubsetSize < iSize) {
           this.kanjiSubsetStart++;
-          this.subsetRecords = currentTNA.getKanjisForTest().subList(this.kanjiSubsetStart, this.kanjiSubsetStart + this.kanjiSubsetSize);
+          int iToIdx = this.kanjiSubsetStart + this.kanjiSubsetSize;
+          if (iToIdx >= iSize)
+            iToIdx = iSize - 1;
+          this.subsetRecords = currentTNA.getKanjisForTest().subList(this.kanjiSubsetStart, iToIdx);
         }
         else {
           this.kanjiSubsetStart = 0;
+          if (this.kanjiSubsetSize >= iSize)
+            this.kanjiSubsetSize = iSize - 1;
           this.subsetRecords = currentTNA.getKanjisForTest().subList(0, this.kanjiSubsetSize);
         }
         return this.subsetRecords;

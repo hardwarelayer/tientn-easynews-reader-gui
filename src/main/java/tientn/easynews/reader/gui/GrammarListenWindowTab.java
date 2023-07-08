@@ -172,6 +172,14 @@ public class GrammarListenWindowTab extends SimpleFormBase {
         lblSelectedGrammarId = new Label("...");
         lblSelectedGrammarTitle = new Label("...");
 
+        tvGrammarPattern = createGrammarPatternTV();
+        tvGrammarPattern.setId("grammar-read-pattern-list");
+        createGrammarPatternTVColumn("Id", 0.01);
+        createGrammarPatternTVColumn("Title", 0.4);
+        createGrammarPatternTVColumn("Description", 0.39);
+        createGrammarPatternTVColumn("Test", 0.05);
+        createGrammarPatternTVColumn("Correct", 0.05);
+
         EventHandler<ActionEvent> fncLoadGrammarButtonClick = new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent e) {
                 loadGrammar();
@@ -181,6 +189,7 @@ public class GrammarListenWindowTab extends SimpleFormBase {
 
         EventHandler<ActionEvent> fncReadAndListen = new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent e) {
+                tvGrammarPattern.setDisable(false);
                 doReadAndListen();
             }
         };
@@ -240,14 +249,6 @@ public class GrammarListenWindowTab extends SimpleFormBase {
 
         VBox readSection = new VBox(tafGrammarContent, tafSentenceInput);
 
-        tvGrammarPattern = createGrammarPatternTV();
-        tvGrammarPattern.setId("grammar-read-pattern-list");
-        createGrammarPatternTVColumn("Id", 0.01);
-        createGrammarPatternTVColumn("Title", 0.4);
-        createGrammarPatternTVColumn("Description", 0.39);
-        createGrammarPatternTVColumn("Test", 0.05);
-        createGrammarPatternTVColumn("Correct", 0.05);
-
         HBox mainRow = new HBox(tvGrammarPattern, readSection);
         HBox.setHgrow(tvGrammarPattern, Priority.ALWAYS);
         HBox.setHgrow(readSection, Priority.ALWAYS);
@@ -271,6 +272,7 @@ public class GrammarListenWindowTab extends SimpleFormBase {
         this.addHeaderPane(mainRow, 0, 4);
         this.addHeaderPane(footerRow, 0, 5);
 
+        tvGrammarPattern.setDisable(true);
     }
 
     private void createGrammarPatternTVColumn(final String title, final double width)
@@ -327,7 +329,8 @@ public class GrammarListenWindowTab extends SimpleFormBase {
             iCurrentSelect = 0;
         }
         tvGrammarPattern.getSelectionModel().select(iCurrentSelect);
-        tvGrammarPattern.scrollTo(iCurrentSelect);
+        if (iCurrentSelect >= 10)
+            tvGrammarPattern.scrollTo(iCurrentSelect - 10);
         GrammarPatternTableViewItem rowData = tvGrammarPattern.getSelectionModel().getSelectedItem();
         if (rowData == null) return;
 
