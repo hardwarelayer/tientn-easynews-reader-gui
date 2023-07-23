@@ -55,9 +55,6 @@ public class GridPaneBase extends GridPane {
         this.primaryStage = primaryStage;
         this.desktop = desktop;
 
-        //use root.css
-        this.getStyleClass().add("grid-pane");
-
         //note, don't set maxheight for a view, it's content will be vertical centered if we doing so
         //
         this.setAlignment(Pos.CENTER);
@@ -66,6 +63,9 @@ public class GridPaneBase extends GridPane {
         this.setPadding(new Insets(4, 4, 4, 4));
 
         initForm();
+
+        //this.getStyleClass().add("grid-pane");
+        this.setStyle("-fx-background-color: transparent;");
 
         this.addEventFilter(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {
             //or scene.setOnKeyPressed((KeyEvent ke) -> {}

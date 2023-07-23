@@ -106,7 +106,8 @@ public abstract class TabbedAppBase extends Application {
                 System.exit(0);
             }
         });
-        scene.getStylesheets().add("/css/root.css");
+        scene.getStylesheets().add("/css/darktheme.css");//root.css");
+        scene.getStylesheets().add("/css/itemspec.css");//root.css");
 
         // primaryStage is the main top level window created by platform
         primaryStage.setTitle(appTitle);

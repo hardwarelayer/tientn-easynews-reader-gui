@@ -291,10 +291,10 @@ public class ArticleWordBuildWindowTab extends SimpleFormBase {
             }
         });
 
-        lvTNAKanjiWords.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.25));
-        lvTNADetailKanjis.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.25));
-        tafKanjiMeaning.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.25));
-        tvBuiltWords.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.25));
+        lvTNAKanjiWords.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.28));
+        lvTNADetailKanjis.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.28));
+        tafKanjiMeaning.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.28));
+        tvBuiltWords.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.28));
 
         this.addBodyCtl(new Label("Selected Word"), 0, 0);
         this.addBodyCtl(new Label("Hiragana"), 1, 0);
