@@ -1064,6 +1064,31 @@ public class ReaderModel {
     return deleted;
   }
 
+  //bring an article to top of the list
+  public void setPriorityTNAById(final String sSelTNAId) {
+    List<TFMTTNAData> newDataTNAItems = new ArrayList<TFMTTNAData>();
+    boolean foundItem = false;
+    TFMTTNAData currentTNA = null;
+    for (int i = 0; i < dataTNAItems.size(); i++) {
+        currentTNA = dataTNAItems.get(i);
+        String sId = currentTNA.getId().toString();
+        if (sId.equals(sSelTNAId)) {
+          newDataTNAItems.add(currentTNA);
+          foundItem = true;
+          break;
+        }
+    }
+    if (!foundItem) return;
+    for (int i = 0; i < dataTNAItems.size(); i++) {
+        currentTNA = dataTNAItems.get(i);
+        String sId = currentTNA.getId().toString();
+        if (!sId.equals(sSelTNAId)) {
+          newDataTNAItems.add(currentTNA);
+        }
+    }
+    dataTNAItems = newDataTNAItems;
+  }
+
   public TFMTTNGData getSelectedTNG() {
     if (this.selectedGrammarId == null) return null;
     return getTNGById(this.selectedGrammarId);

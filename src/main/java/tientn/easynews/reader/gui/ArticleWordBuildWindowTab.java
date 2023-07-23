@@ -631,9 +631,9 @@ public class ArticleWordBuildWindowTab extends SimpleFormBase {
             tvBuiltWords.scrollTo(iBuilt);
         }
         else {
+            tvBuiltWords.getSelectionModel().clearSelection();
+            tvBuiltWords.getFocusModel().focus(0);
             tvBuiltWords.scrollTo(0);
-            tvBuiltWords.getSelectionModel().select(-1);
-            tvBuiltWords.getFocusModel().focus(-1);
         }
     }
 
@@ -913,7 +913,7 @@ public class ArticleWordBuildWindowTab extends SimpleFormBase {
         EventHandler<MouseEvent> lstClickHander = new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
-                if( event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 2) {
+                if( event.getButton() == MouseButton.PRIMARY && event.getClickCount() >= 1) {
                     processLVColumnButtonClick(iCol);
                 }
             }

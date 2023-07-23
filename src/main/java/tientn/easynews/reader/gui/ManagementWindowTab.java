@@ -14,10 +14,13 @@ import javafx.scene.text.Text;
 import javafx.scene.paint.Color;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.input.MouseButton;
 import javafx.event.EventHandler;
 import javafx.event.ActionEvent;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.KeyCode;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
 
 import javafx.stage.FileChooser;
 import java.io.File;
@@ -194,6 +197,27 @@ public class ManagementWindowTab extends GridPaneBase {
         createArticleTableViewColumn("Kanjis", 0.05);
         createArticleTableViewColumn("Test", 0.05);
         createArticleTableViewColumn("Correct", 0.05);
+
+
+        ContextMenu articleCM = new ContextMenu();
+        MenuItem acmMi1 = new MenuItem("Set Priority TNA");
+        articleCM.getItems().add(acmMi1);
+        MenuItem acmMi2 = new MenuItem("Delete TNA");
+        articleCM.getItems().add(acmMi2);
+        acmMi1.setOnAction((ActionEvent event) -> {
+            this.setTNAOnTop();
+        });
+        acmMi2.setOnAction((ActionEvent event) -> {
+            this.removeArticleFromList();
+        });
+        articleTableView.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent t) {
+                if(t.getButton() == MouseButton.SECONDARY) {
+                    articleCM.show(articleTableView, t.getScreenX(), t.getScreenY());
+                }
+            }
+        });
 
         grammarTableView = createGrammarTableView(0.3);
         grammarTableView.setId("management-grammar-list");
@@ -634,6 +658,28 @@ public class ManagementWindowTab extends GridPaneBase {
             kanjiTableView.getItems().add(showItem);
         }
     }
+
+    private void setTNAOnTop() {
+
+        ManagementArticleTableViewItem item = articleTableView.getSelectionModel().getSelectedItem();
+        System.out.println(item.toString());
+
+        if (item != null) {
+            if (!this.showQuestion("Set priority?", "Do you want to set this article on top?", item.getTitle()))
+                return;
+            String sTNAId = item.getId().toString();
+            this.dataModel.setPriorityTNAById(sTNAId);
+            reloadTNAList();
+
+            articleTableView.requestFocus();
+            articleTableView.getSelectionModel().select(0);
+            articleTableView.getFocusModel().focus(0);
+            articleTableView.scrollTo(0);
+
+        }
+
+    }
+
     private void reloadTNAList() {
         articleTableView.getItems().clear();
         for (TFMTTNAData aItem: this.dataModel.getDataTNAItems()) {
@@ -837,7 +883,6 @@ public class ManagementWindowTab extends GridPaneBase {
 
         ManagementArticleTableViewItem item = articleTableView.getSelectionModel().getSelectedItem();
         System.out.println(item.toString());
-        String sTNAId = item.getId().toString();
 
         if (item != null) {
 
@@ -845,6 +890,7 @@ public class ManagementWindowTab extends GridPaneBase {
                 return;
         }
 
+        String sTNAId = item.getId().toString();
         if (this.dataModel.deleteTNAById(sTNAId)) {
             reloadTNAList();
         }
