@@ -18,6 +18,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.event.EventHandler;
 import javafx.event.ActionEvent;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.text.TextAlignment;
 
 import javafx.stage.FileChooser;
 import java.io.File;
@@ -49,6 +50,9 @@ import tientn.easynews.reader.data.ReaderModel;
 import tientn.easynews.reader.data.JBGKanjiItem;
 import tientn.easynews.reader.data.TFMTTNAData;
 import tientn.easynews.reader.data.JBGConstants;
+
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 
 // SimpleFormBase derived class
 public class WordMatchWindowTab extends SimpleStackedFormBase {
@@ -356,6 +360,25 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
         lvThirdCol.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.72));
         lvFourthCol.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.72));
 
+
+        ChangeListener<Boolean> firstColFocusListener = new ChangeListener<Boolean>() {
+            @Override
+            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+                if (!newValue) {
+                    //lost focus
+                    //TODO
+                }
+                else {
+                    //got focus
+                    //TODO
+                }
+            }
+        };
+        lvFirstCol.focusedProperty().addListener(firstColFocusListener);
+        //lvSecondCol.focusedProperty().addListener(2ndColFocusListener);
+        //lvThirdCol.focusedProperty().addListener(3rdColFocusListener);
+        //lvFourthCol.focusedProperty().addListener(4thColFocusListener);
+
         this.addBodyCtl(lblTestStatus, 0, 0);
         this.addBodyCtl(btnReloadKanjis, 1, 0);
         this.addBodyPane(new HBox(new Label("Current JCoin:"), lblJCoinAmount), 2, 0);
@@ -443,6 +466,11 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
             btnLoadNormalForTest.setDisable(false);
         }
 
+
+        this.getTopBodyLabel().prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.4));
+        this.getBottomBodyLabel().prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.05));
+        this.getMidBodyLabel().prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.5));
+
         //btnReloadKanjis.setDisable(true); no need to disable
     }
 
@@ -472,6 +500,7 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
         this.getDataModel().setKanjiSubsetSize(i);
 
     }
+
     private void loadNormalKanjisForTest() {
         if (this.getDataModel().isTestStarted())
           return;
@@ -651,6 +680,7 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
                     if (!sItem.isEmpty()) {
                         lblFirstCol.setText(sItem);
                         this.getMidBodyLabel().setText(sItem);
+                        this.getMidBodyLabel().setStyle("-fx-text-fill: white; -fx-opacity: 0.8;");
                         chooseHiraganaList();
                     }
                 }
@@ -1183,7 +1213,7 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
     private String getListSelectedString(ListView lst) {
         String sSelected = (String) lst.getSelectionModel().getSelectedItem();
         if (sSelected != null) {
-            System.out.println(sSelected);
+            //System.out.println(sSelected);
         }
         return sSelected;
     }
@@ -1468,6 +1498,9 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
                 iContinuousCorrectTestBonus++;
                 totalJCoin += this.iContinuousCorrectTestBonus;
               }
+
+              //restore color
+              this.getMidBodyLabel().setStyle("-fx-text-fill: #000b10; -fx-opacity: 0.5");
 
               setSneekpeekFields(kanji, hira, hv, viet);
 
