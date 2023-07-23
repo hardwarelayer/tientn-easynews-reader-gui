@@ -231,7 +231,7 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
         super(width, height, desktop, primStage, model);
         lstProblematicWords = new ArrayList<String>();
 
-        this.getTopBodyLabel().setId("wordmatch-top-kanji-label");
+        this.getMidBodyLabel().setId("wordmatch-middle-kanji-label");
     }
 
     @Override
@@ -650,7 +650,7 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
                 if (lvFirstCol.isFocused()) {
                     if (!sItem.isEmpty()) {
                         lblFirstCol.setText(sItem);
-                        this.getTopBodyLabel().setText(sItem);
+                        this.getMidBodyLabel().setText(sItem);
                         chooseHiraganaList();
                     }
                 }
@@ -1251,7 +1251,7 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
         lvThirdCol.getSelectionModel().clearSelection();
         lvFourthCol.getSelectionModel().clearSelection();
 
-        this.getTopBodyLabel().setText(sWordMatchEmptyValue);
+        this.getMidBodyLabel().setText(sWordMatchEmptyValue);
     }
 
     private void refreshStartButton() {

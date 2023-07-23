@@ -82,6 +82,9 @@ public class GridPaneBase extends GridPane {
     protected void processKeyPress(final KeyEvent ke) {
     }
 
+    protected void processFirstShowEvent() {
+    }
+
     protected void showBorder() {
         this.setStyle("-fx-background-color: white; -fx-grid-lines-visible: true");
     }

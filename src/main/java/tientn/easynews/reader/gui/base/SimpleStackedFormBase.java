@@ -45,6 +45,10 @@ import javafx.scene.layout.VBox;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.text.Text;
+import javafx.scene.control.ContentDisplay;
+import javafx.scene.text.TextAlignment;
+import static javafx.geometry.Pos.CENTER;
+import static javafx.geometry.Pos.CENTER_RIGHT;
 
 import java.util.Locale;
 import lombok.Getter;
@@ -57,7 +61,7 @@ public class SimpleStackedFormBase extends VBox {
   @Getter protected Stage primaryStage = null;
   @Getter protected Desktop desktop = null;
   @Getter protected GridPane headerPane = null;
-  @Getter protected Label topBodyLabel = null;
+  @Getter protected Label topBodyLabel = null, midBodyLabel = null, bottomBodyLabel = null;
   @Getter protected StackPane bodyStackPane = null;
   @Getter protected GridPane bodyPane = null;
   @Getter protected GridPane footerPane = null;
@@ -81,12 +85,36 @@ public class SimpleStackedFormBase extends VBox {
     this.bodyPane = new GridPane();
     this.footerPane = new GridPane();
 
-    topBodyLabel = new Label("...");
-    this.bodyStackPane.getChildren().addAll(this.bodyPane, this.topBodyLabel);
+    topBodyLabel = new Label("");
+    midBodyLabel = new Label("");
+    bottomBodyLabel = new Label("");
+    HBox hb1 = new HBox(this.topBodyLabel);
+    HBox hb2 = new HBox(this.midBodyLabel);
+    HBox hb3 = new HBox(this.bottomBodyLabel);
+    VBox vb = new VBox(hb1, hb2, hb3);
+    topBodyLabel.setDisable(true);
+    midBodyLabel.setDisable(true);
+    bottomBodyLabel.setDisable(true);
+    vb.setDisable(true);
+
+    hb1.setAlignment(CENTER_RIGHT);
+    hb3.setAlignment(CENTER_RIGHT);
+    hb2.setAlignment(CENTER);
+    vb.setAlignment(CENTER);
+
+    this.bodyStackPane.getChildren().addAll(this.bodyPane, vb);
 
     this.getChildren().add(headerPane);
     this.getChildren().add(bodyStackPane);
     this.getChildren().add(footerPane);
+
+    topBodyLabel.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.1));
+    //topBodyLabel.prefWidthProperty().bind(getPrimaryStage().widthProperty().multiply(1));
+    topBodyLabel.setTextAlignment(TextAlignment.RIGHT);
+    topBodyLabel.setContentDisplay(ContentDisplay.TOP);
+
+    midBodyLabel.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.5));
+    bottomBodyLabel.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.4));
 
     initForm();
 

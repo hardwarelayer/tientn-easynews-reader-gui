@@ -62,6 +62,8 @@ import tientn.easynews.reader.data.ManagementKanjiTableViewItem;
 import tientn.easynews.reader.data.ManagementArticleTableViewItem;
 import tientn.easynews.reader.data.ManagementGrammarTableViewItem;
 
+import java.sql.*;
+
 // Simple Hello World JavaFX program
 public class ManagementWindowTab extends GridPaneBase {
 
@@ -77,6 +79,8 @@ public class ManagementWindowTab extends GridPaneBase {
     TableView<ManagementKanjiTableViewItem> kanjiTableView;
     TableView<ManagementArticleTableViewItem> articleTableView;
     TableView<ManagementGrammarTableViewItem> grammarTableView;
+
+    String sLastTFMTFile;
 
     public ManagementWindowTab(final String title, Desktop desktop, Stage primStage, final ReaderModel model, MainTabbedPane parent) {
         super(title, desktop, primStage);
@@ -254,6 +258,9 @@ public class ManagementWindowTab extends GridPaneBase {
         final String sContent = this.dataModel.getJsonDataAsString();
         //System.out.println(sContent);
         saveTFMTToFile(this.currentTFMTSaveFile, sContent);
+
+        this.sLastTFMTFile = this.currentTFMTSaveFile;
+        saveLastTFMTFile();
     }
 
     private void processExportJCoinButtonEvent() {
@@ -859,5 +866,54 @@ public class ManagementWindowTab extends GridPaneBase {
         }
     }
 
-    public void onShow() {}
+    private String getLastTFMTFile() {
+        String sVal = "";
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            Connection con = DriverManager.getConnection(
+                "jdbc:mysql://localhost:3306/enewsreader","tientn","123");  
+            Statement stmt=con.createStatement();  
+            ResultSet rs=stmt.executeQuery("SELECT last_tfmt FROM worktemp");  
+            if (rs.next())
+                sVal = rs.getString(1);  
+            con.close();
+        }
+        catch(Exception e) {
+            System.out.println(e);
+        }
+        return sVal;
+    }
+
+    private String saveLastTFMTFile() {
+        String sVal = "";
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            Connection con = DriverManager.getConnection(
+                "jdbc:mysql://localhost:3306/enewsreader","tientn","123");  
+            PreparedStatement preparedStmt = con.prepareStatement("UPDATE worktemp SET last_tfmt=?");
+            preparedStmt.setString (1, this.sLastTFMTFile);  
+            preparedStmt.execute();
+            con.close();
+        }
+        catch(Exception e) {
+            System.out.println(e);
+        }
+        return sVal;
+    }
+
+    public void processFirstShowEvent() {
+        this.sLastTFMTFile = getLastTFMTFile(); 
+        System.out.println(this.sLastTFMTFile);
+
+        if (this.sLastTFMTFile.length() > 0) {
+            File file = new File(this.sLastTFMTFile);
+            if (file != null) {
+                System.out.println("Selected file: " + file.getPath());
+                openTFMTFile(file);
+            }
+        }
+    }
+
+    public void onShow() {
+    }
 }

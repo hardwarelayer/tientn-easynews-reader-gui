@@ -112,5 +112,7 @@ public abstract class TabbedAppBase extends Application {
         primaryStage.setTitle(appTitle);
         primaryStage.setScene(scene);
         primaryStage.show();
+
+        ctl.processFirstShowEvent();
     }
 }

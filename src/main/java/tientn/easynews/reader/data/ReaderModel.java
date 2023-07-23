@@ -268,6 +268,15 @@ public class ReaderModel {
     return lst;
   }
 
+  public JBGKanjiItem getKanjiFromMainKanjiList(final String kanji) {
+    for (JBGKanjiItem item: this.dataKanjiItems) {
+      if (item.getKanji().equals(kanji)) {
+        return item;
+      }
+    }
+    return null;
+  }
+
   private boolean isKanjiInList(final String kanji, List<JBGKanjiItem> lst) {
     for (JBGKanjiItem item: lst) {
       if (item.getKanji().equals(kanji)) {
@@ -515,7 +524,7 @@ public class ReaderModel {
     }
   }
 
-  private boolean addBuiltWordToGrandKanjiList(JBGKanjiItem kItem) {
+  public boolean addBuiltWordToGrandKanjiList(JBGKanjiItem kItem) {
     boolean wordExists = false;
     for (JBGKanjiItem item: this.dataKanjiItems) {
       if (item.getKanji().equals(kItem.getKanji())) {

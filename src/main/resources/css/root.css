@@ -105,7 +105,25 @@
 }
 
 #wordmatch-top-kanji-label {
+ -fx-font-size: 140pt; 
+ -fx-font-family: Courier;
+ -fx-font-weight: bold;
+ -fx-background-color: transparent;
+ -fx-text-fill: #000d1a;
+ -fx-opacity: 0.5;
+}
+
+#wordmatch-middle-kanji-label {
  -fx-font-size: 100pt; 
+ -fx-font-family: Courier;
+ -fx-font-weight: bold;
+ -fx-background-color: transparent;
+ -fx-text-fill: #000d1a;
+ -fx-opacity: 0.4;
+}
+
+#wordmatch-bottom-kanji-label {
+ -fx-font-size: 140pt; 
  -fx-font-family: Courier;
  -fx-font-weight: bold;
  -fx-background-color: transparent;
@@ -236,10 +254,15 @@
 
 /* ------------------------ ArticleWord -------------------------*/
 #build-word-ja-content {
-  -fx-font-size: 16pt; 
+  -fx-font-size: 11pt; 
   -fx-font-family: Verdana;
-  text-area-background: #EFE1CE;
+  text-area-background: white;
   -fx-text-fill: black;
+}
+
+#article-build-word-sentence-list {
+  -fx-font-size: 13pt; 
+  -fx-font-family: Verdana;
 }
 
 #build-word-ja-content .content {
@@ -270,7 +293,7 @@
 }
 
 #build-word-detail-kanji {
-  -fx-font-size:40pt; 
+  -fx-font-size: 40pt; 
   -fx-text-fill: darkred;
   -fx-font-family: Arial;
 }
@@ -302,6 +325,14 @@
   -fx-font-size: 16pt; 
   -fx-font-family: Verdana;
   text-area-background: lightgray;
+  -fx-text-fill: black;
+}
+
+#kanji-content-view,
+#dict-kanji-content-view {
+  -fx-font-size: 12pt; 
+  -fx-font-family: Verdana;
+  text-area-background: gray;
   -fx-text-fill: black;
 }
 

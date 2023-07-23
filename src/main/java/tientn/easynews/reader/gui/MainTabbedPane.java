@@ -68,6 +68,7 @@ public final class MainTabbedPane extends TabPaneBase {
     GrammarReadWindowTab paneGrammarRead;
     GrammarListenWindowTab paneGrammarListen;
     TableViewTab tblViewTab;
+    KanjiDictionaryTab kanjiDictTab;
 
     public MainTabbedPane(Desktop desktop, Stage primStage, final ReaderModel model) {
         super();
@@ -100,6 +101,11 @@ public final class MainTabbedPane extends TabPaneBase {
         }
     }
 
+    @Override
+    protected void processFirstShowEvent() {
+        paneManagement.processFirstShowEvent();
+    }
+
     public void initTabs() {
 
         paneManagement = new ManagementWindowTab("Management", getDesktop(), primaryStage, this.dataModel, this);
@@ -111,6 +117,8 @@ public final class MainTabbedPane extends TabPaneBase {
         paneArticleRead = new ArticleReadWindowTab(JBGConstants.MIN_WIDTH, JBGConstants.MIN_HEIGHT, getDesktop(), primaryStage, this.dataModel);
         paneGrammarRead = new GrammarReadWindowTab(JBGConstants.MIN_WIDTH, JBGConstants.MIN_HEIGHT, getDesktop(), primaryStage, this.dataModel);
         paneGrammarListen = new GrammarListenWindowTab(JBGConstants.MIN_WIDTH, JBGConstants.MIN_HEIGHT, getDesktop(), primaryStage, this.dataModel);
+        kanjiDictTab = new KanjiDictionaryTab(JBGConstants.MIN_WIDTH, JBGConstants.MIN_HEIGHT, getDesktop(), primaryStage, this.dataModel);
+
         tblViewTab = new TableViewTab("TableView", getDesktop(), primaryStage);
 
         this.addPaneAsTab("Management", paneManagement);
@@ -119,6 +127,7 @@ public final class MainTabbedPane extends TabPaneBase {
         this.addSimpleFormAsTab("ArticleRead", paneArticleRead);
         this.addSimpleFormAsTab("GrammarRead", paneGrammarRead);
         this.addSimpleFormAsTab("GrammarListen", paneGrammarListen);
+        this.addSimpleStackedFormAsTab("KanjiDict", kanjiDictTab);
         this.addPaneAsTab("Underworks", tblViewTab);
 
     }

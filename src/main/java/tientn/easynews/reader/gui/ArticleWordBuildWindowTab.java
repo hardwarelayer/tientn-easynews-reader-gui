@@ -27,6 +27,8 @@ import javafx.event.ActionEvent;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.HBox;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
 
 import javafx.stage.FileChooser;
 import java.io.File;
@@ -77,6 +79,7 @@ public class ArticleWordBuildWindowTab extends SimpleFormBase {
 
     private Label lblArticleTitle;
     private Label lblJCoinAmount;
+    private Label lblTNAWordCount;
     private TextArea tafArticleJAContent;
     private TextArea tafArticleENContent;
     private TextArea tafKanjiMeaning;
@@ -94,8 +97,9 @@ public class ArticleWordBuildWindowTab extends SimpleFormBase {
 
     int WORD_SCORE_MULTIPLIER = JBGConstants.JCOIN_AMOUNT_FOR_ADD_KANJI_WORD;
 
+    private ListView<String> lvTNASentences;
     private ListView<String> lvTNAKanjiWords;
-    private ListView<String> lvTNAKanjis;
+    private ListView<String> lvTNADetailKanjis;
     TableView<ArticleWordBuildTableViewItem> tvBuiltWords;
 
     private TFMTTNAData currentTNA = null;
@@ -133,23 +137,31 @@ public class ArticleWordBuildWindowTab extends SimpleFormBase {
         };
         btnLoadArticle = createButton("Load Article", fncLoadArticleButtonClick);
         HBox firstSection = new HBox(btnLoadArticle, lblArticleTitle, new Label("Current JCoin:"), lblJCoinAmount);
+        firstSection.setAlignment(Pos.CENTER);
+        //this.addHeaderCtl(lblArticleTitle, 0, 2);
+        this.addHeaderPane(firstSection, 0, 2);
+
+        lvTNASentences = createSingleSelectStringListView(0);
+        lvTNASentences.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.4));
+        lvTNASentences.prefWidthProperty().bind(getPrimaryStage().widthProperty().multiply(1));
+        lvTNASentences.setId("article-build-word-sentence-list");
+        this.addHeaderCtl(lvTNASentences, 0, 3);
 
         tafArticleJAContent = new TextArea();
-        tafArticleJAContent.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.3));
-        tafArticleJAContent.prefWidthProperty().bind(getPrimaryStage().widthProperty().multiply(1));
+        tafArticleJAContent.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.13));
+        tafArticleJAContent.prefWidthProperty().bind(getPrimaryStage().widthProperty().multiply(0.5));
         tafArticleJAContent.setId("build-word-ja-content");
         tafArticleJAContent.setWrapText(true);
 
         tafArticleENContent = new TextArea();
-        tafArticleENContent.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.1));
-        tafArticleENContent.prefWidthProperty().bind(getPrimaryStage().widthProperty().multiply(1));
+        tafArticleENContent.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.13));
+        tafArticleENContent.prefWidthProperty().bind(getPrimaryStage().widthProperty().multiply(0.5));
         tafArticleENContent.setId("build-word-en-content");
         tafArticleENContent.setWrapText(true);
 
-        //this.addHeaderCtl(lblArticleTitle, 0, 2);
-        this.addHeaderPane(firstSection, 0, 2);
-        this.addHeaderCtl(tafArticleJAContent, 0, 3);
-        this.addHeaderCtl(tafArticleENContent, 0, 4);
+        HBox hbContents = new HBox(tafArticleJAContent, tafArticleENContent);
+        //hbContents.prefWidthProperty().bind(getPrimaryStage().widthProperty().multiply(1));
+        this.addHeaderPane(hbContents, 0, 4);
     }
 
     private void createBodyElements() {
@@ -168,6 +180,19 @@ public class ArticleWordBuildWindowTab extends SimpleFormBase {
         tfSelectedHiragana.setId("build-word-hiragana");
         tfHv.setId("build-word-hanviet");
         tfMeaning.setId("build-word-meaning");
+
+        //if HV has value and meaning not has any yet, set meaning as Hv value
+        //can be useful when creating new words
+        ChangeListener<Boolean> focusListener = new ChangeListener<Boolean>() {
+            @Override
+            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+                if (!newValue) {
+                    if (tfHv.getText().length() > 0 && tfMeaning.getText().length() < 1)
+                        tfMeaning.setText(tfHv.getText());
+                }
+            }
+        };
+        tfHv.focusedProperty().addListener(focusListener);
 
         cbSelectedWord = new ComboBox();
         cbSelectedWord.setId("build-word-kanji-ref-combo");
@@ -222,10 +247,11 @@ public class ArticleWordBuildWindowTab extends SimpleFormBase {
         };
         btnStartArticleRead = createButton("ArticleRead", fncStartArticleReadButtonClick);
 
-        lvTNAKanjiWords = createSingleSelectStringListView(0);
+        lblTNAWordCount = createLabel("0");
+        lvTNAKanjiWords = createSingleSelectStringListView(1);
         lvTNAKanjiWords.setId("build-word-list");
-        lvTNAKanjis = createSingleSelectStringListView(1);
-        lvTNAKanjis.setId("build-word-detail-kanji");
+        lvTNADetailKanjis = createSingleSelectStringListView(2);
+        lvTNADetailKanjis.setId("build-word-detail-kanji");
         tafKanjiMeaning = new TextArea();
         tafKanjiMeaning.setId("build-word-kanji-meaning");
         tafKanjiMeaning.setWrapText(true);
@@ -239,10 +265,36 @@ public class ArticleWordBuildWindowTab extends SimpleFormBase {
         createKanjiTableViewColumn("Correct", 0.05);
         createKanjiTableViewColumn("Test", 0.05);
 
-        lvTNAKanjiWords.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.4));
-        lvTNAKanjis.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.4));
-        tafKanjiMeaning.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.4));
-        tvBuiltWords.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.4));
+        ContextMenu cm = new ContextMenu();
+        MenuItem mi1 = new MenuItem("Delete Word");
+        cm.getItems().add(mi1);
+        MenuItem mi2 = new MenuItem("Delete ALL Words");
+        cm.getItems().add(mi2);
+        MenuItem mi3 = new MenuItem("Merge to main kanjis");
+        cm.getItems().add(mi3);
+
+        mi1.setOnAction((ActionEvent event) -> {
+            this.removeKanjiItemFromBuiltWordList();
+        });
+        mi2.setOnAction((ActionEvent event) -> {
+            this.removeAllBuiltWordList();
+        });
+        mi3.setOnAction((ActionEvent event) -> {
+            this.mergeAllBuiltWordList();
+        });
+        tvBuiltWords.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent t) {
+                if(t.getButton() == MouseButton.SECONDARY) {
+                    cm.show(tvBuiltWords, t.getScreenX(), t.getScreenY());
+                }
+            }
+        });
+
+        lvTNAKanjiWords.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.25));
+        lvTNADetailKanjis.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.25));
+        tafKanjiMeaning.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.25));
+        tvBuiltWords.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.25));
 
         this.addBodyCtl(new Label("Selected Word"), 0, 0);
         this.addBodyCtl(new Label("Hiragana"), 1, 0);
@@ -255,19 +307,21 @@ public class ArticleWordBuildWindowTab extends SimpleFormBase {
         this.addBodyCtl(tfMeaning, 3, 1);
 
         this.addBodyCtl(cbSelectedWord, 0, 2);
-        HBox wordCmdPane = new HBox(btnBuildSelectedWord, btnStartWordMatchTest, btnStartArticleRead);
+        HBox wordCmdPane = new HBox(btnBuildSelectedWord, btnStartWordMatchTest, btnStartArticleRead, lblTNAWordCount);
+        wordCmdPane.setAlignment(Pos.CENTER);
         this.addBodyPane(wordCmdPane, 3, 2);
 
         this.addBodyCtl(lvTNAKanjiWords, 0, 3);
-        this.addBodyCtl(lvTNAKanjis, 1, 3);
+        this.addBodyCtl(lvTNADetailKanjis, 1, 3);
         this.addBodyCtl(tafKanjiMeaning, 2, 3);
         this.addBodyCtl(tvBuiltWords, 3, 3);
 
     }
 
     private void clearLists() {
+        lvTNASentences.getItems().clear();
         lvTNAKanjiWords.getItems().clear();
-        lvTNAKanjis.getItems().clear();
+        lvTNADetailKanjis.getItems().clear();
         tafKanjiMeaning.clear();
         tvBuiltWords.getItems().clear();
 
@@ -329,6 +383,8 @@ public class ArticleWordBuildWindowTab extends SimpleFormBase {
     private void reloadBuiltWordList() {
         if (currentTNA == null) return;
         tvBuiltWords.getItems().clear();
+        lblTNAWordCount.setText(String.valueOf(currentTNA.getKanjisForTest().size()));
+
         for (JBGKanjiItem kItem: currentTNA.getKanjisForTest()) {
             ArticleWordBuildTableViewItem showItem = new ArticleWordBuildTableViewItem(
                 kItem.getKanji(),
@@ -341,6 +397,32 @@ public class ArticleWordBuildWindowTab extends SimpleFormBase {
             tvBuiltWords.getItems().add(showItem);
         }
 
+    }
+
+    private void mergeAllBuiltWordList() {
+        if (currentTNA == null) return;
+        if (!this.showQuestion("Merge ALL?", "Merge ALL BuiltWord to Main List", "Do you want to merge ALL built words???"))
+            return;
+
+        List<JBGKanjiItem> kanjisForTest = currentTNA.getKanjisForTest();
+        int totalBuiltWord = kanjisForTest.size();
+        int totalMergeWord = 0;
+        for (JBGKanjiItem kItem: kanjisForTest) {
+            if (this.getDataModel().addBuiltWordToGrandKanjiList(kItem)) {
+                totalMergeWord++;
+            }
+        }
+        String msg = String.format("Words merged: %d/%d", totalMergeWord, totalBuiltWord);
+        this.showInformation("Merge result", msg);
+
+    }
+
+    private void removeAllBuiltWordList() {
+        if (currentTNA == null) return;
+        if (!this.showQuestion("Delete ALL?", "ALL BuiltWord Delete Confim", "Do you want to delete ALL built words???"))
+            return;
+        currentTNA.getKanjisForTest().clear();
+        lblTNAWordCount.setText(String.valueOf(currentTNA.getKanjisForTest().size()));
     }
 
     private void removeKanjiItemFromBuiltWordList() {
@@ -367,6 +449,7 @@ public class ArticleWordBuildWindowTab extends SimpleFormBase {
 
             if (isRemovedInMemory) {
                 tvBuiltWords.getItems().removeAll(item);
+                lblTNAWordCount.setText(String.valueOf(currentTNA.getKanjisForTest().size()));
             }
         }
 
@@ -384,6 +467,34 @@ public class ArticleWordBuildWindowTab extends SimpleFormBase {
         }
     }
 
+    private String simplifyArticleKanjiForSelect(TFMTTNAKanjiData kj) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(kj.getKanji());
+        sb.append("||");
+        sb.append(kj.getHv());
+        sb.append("|");
+        return sb.toString();
+    }
+    //assume that all kanjis is attached with the articles
+    private String buildDynamicFromArticleKanjis(final String sWord) {
+        StringBuilder sbKanjis = new StringBuilder("");
+        //scan whole word
+        for (TFMTTNAKanjiData kjData: currentTNA.getArticleKanjis()) {
+            if (kjData.getKanji().equals(sWord)) {
+                sbKanjis.append(simplifyArticleKanjiForSelect(kjData));
+            }
+        }
+        //scan each char
+        for (char ch: sWord.toCharArray()) {
+            for (TFMTTNAKanjiData kjData: currentTNA.getArticleKanjis()) {
+                if (kjData.getKanji().equals(ch)) {
+                    sbKanjis.append(simplifyArticleKanjiForSelect(kjData));
+                }
+            }
+        }
+        return sbKanjis.toString();
+    }
+
     private void processLoadWordKanjiCombo(final String sKanji) {
         cbSelectedWord.getItems().clear();
         currentBuildWordKanjiSimilarList = this.getDataModel().getSimilarKanjiFromMainKanjiList(sKanji);
@@ -395,8 +506,13 @@ public class ArticleWordBuildWindowTab extends SimpleFormBase {
                 cbSelectedWord.getItems().add(sb.toString());
             }
         }
+
+        String sDynKanjis = buildDynamicFromArticleKanjis(sKanji);
+        if (sDynKanjis.length() > 0) {
+            cbSelectedWord.getItems().add(sDynKanjis);
+        }
         if (cbSelectedWord.getItems().size() > 0) {
-            cbSelectedWord.show();
+            //cbSelectedWord.show();
         }
     }
 
@@ -423,11 +539,24 @@ public class ArticleWordBuildWindowTab extends SimpleFormBase {
         this.parentPane.switchToTab(3);
     }
 
+    private void processArticleSentenceListClick() {
+        String sItem = getListSelectedString(lvTNASentences);
+        if (sItem == null) return;
+        if (currentTNA == null) return;
+
+        //System.out.println(sItem);
+        loadSentenceDetail(sItem);
+    }
+
     private void processArticleWordListClick() {
         String sItem = getListSelectedString(lvTNAKanjiWords);
         if (sItem == null) return;
         if (currentTNA == null) return;
+        loadSelectedTNAKanjiWordDetail(sItem);
+        selectBuiltWordIfExists(sItem);
+    }
 
+    private void loadSelectedTNAKanjiWordDetail(final String sItem) {
         boolean isArticleKJFound = false;
         for (int i = 0; i < currentTNA.getArticleKanjis().size(); i++) {
             currentTNAKanji = currentTNA.getArticleKanjis().get(i);
@@ -437,20 +566,28 @@ public class ArticleWordBuildWindowTab extends SimpleFormBase {
             }
         }
 
+        JBGKanjiItem mainItem = this.getDataModel().getKanjiFromMainKanjiList(sItem);
         if (isArticleKJFound && currentTNAKanji != null) {
             setBuildWordComboValue(currentTNAKanji.getKanji());
 
-            tfSelectedHiragana.setText(currentTNAKanji.getHiragana());
-            if (currentTNAKanji.getHv() != null)
-                tfHv.setText(currentTNAKanji.getHv());
-            else
-                tfHv.clear();
-            tfMeaning.clear();
+            if (mainItem != null) {
+                tfSelectedHiragana.setText(mainItem.getHiragana());
+                tfHv.setText(mainItem.getHv());
+                tfMeaning.setText(mainItem.getMeaning());
+            }
+            else {
+                tfSelectedHiragana.setText(currentTNAKanji.getHiragana());
+                if (currentTNAKanji.getHv() != null)
+                    tfHv.setText(currentTNAKanji.getHv());
+                else
+                    tfHv.clear();
+                tfMeaning.clear();
+            }
 
             tafKanjiMeaning.clear();
 
             List<TFMTTNAKanjiDetailData> lstKanjis = currentTNAKanji.getKanjis();
-            lvTNAKanjis.getItems().clear();
+            lvTNADetailKanjis.getItems().clear();
             String kanjisOfWord = currentTNAKanji.getKanji();
             //thu tu cua kanji trong ds cua tung word khong theo thu tu trong word
             //nen phai dam bao viec add vao nhu sau:
@@ -458,18 +595,46 @@ public class ArticleWordBuildWindowTab extends SimpleFormBase {
                 String tmpKJCharacter = Character.toString(kanjisOfWord.charAt(i));
                 for (TFMTTNAKanjiDetailData kDtl: lstKanjis) {
                     if (tmpKJCharacter.equals(kDtl.getKanji())) {
-                      lvTNAKanjis.getItems().add(kDtl.getKanji());
+                      lvTNADetailKanjis.getItems().add(kDtl.getKanji());
                       break;
                     }
                 }
             }
-            String sFirstDetailKanji = (String) lvTNAKanjis.getItems().get(0);
+            String sFirstDetailKanji = (String) lvTNADetailKanjis.getItems().get(0);
             loadDetailKanjiItemMeaning(sFirstDetailKanji);
 
         }
 
         btnBuildSelectedWord.setDisable(false);
+    }
 
+    private int getKanjiBuiltIndexInTNA(final String kj) {
+        int iRes = 0;
+        List<JBGKanjiItem> kanjisForTest = currentTNA.getKanjisForTest();
+        for (JBGKanjiItem kItem: kanjisForTest) {
+            if (kItem.getKanji().equals(kj))
+                return iRes;
+            iRes++;
+        }
+        return -1;
+    }
+
+    //select and show the kanji if it is already in built list of TNA
+    //this is to avoid duplication process (not data, because data is unique)
+    private void selectBuiltWordIfExists(final String kj) {
+        int iBuilt = getKanjiBuiltIndexInTNA(kj);
+        //System.out.println("selectBuiltWordIfExists:" + kj + " pos: " + String.valueOf(iBuilt));
+        if (iBuilt >= 0) {
+            tvBuiltWords.requestFocus();
+            tvBuiltWords.getSelectionModel().select(iBuilt);
+            tvBuiltWords.getFocusModel().focus(iBuilt);
+            tvBuiltWords.scrollTo(iBuilt);
+        }
+        else {
+            tvBuiltWords.scrollTo(0);
+            tvBuiltWords.getSelectionModel().select(-1);
+            tvBuiltWords.getFocusModel().focus(-1);
+        }
     }
 
     private void setBuildWordComboValue(final String sVal) {
@@ -478,7 +643,7 @@ public class ArticleWordBuildWindowTab extends SimpleFormBase {
     }
 
     private void processKanjiListClick() {
-        String sItem = getListSelectedString(lvTNAKanjis);
+        String sItem = getListSelectedString(lvTNADetailKanjis);
         if (sItem == null) return;
 
         loadDetailKanjiItemMeaning(sItem);
@@ -545,7 +710,7 @@ public class ArticleWordBuildWindowTab extends SimpleFormBase {
             this.getDataModel().increaseJCoin(sWord.length()*WORD_SCORE_MULTIPLIER);
             lblJCoinAmount.setText(String.valueOf(this.getDataModel().getJCoin()));
         }
-        reloadTNAWordList();
+        //reloadTNAWordList("");
         reloadBuiltWordList();
 
         btnBuildSelectedWord.setDisable(true);
@@ -565,23 +730,26 @@ public class ArticleWordBuildWindowTab extends SimpleFormBase {
 
     }
 
-    private void processColumnButtonClick(final int iCol) {
+    private void processLVColumnButtonClick(final int iCol) {
 
         String sItem = null;
         ListView lv = null;
 
         switch(iCol) {
         case 0:
-            processArticleWordListClick();
+            processArticleSentenceListClick();
             break;
         case 1:
+            processArticleWordListClick();
+            break;
+        case 2:
             processKanjiListClick();
             break;
         }
 
         if (lv != null) {
             sItem = getListSelectedString(lv);
-            System.out.println(sItem);
+            //System.out.println(sItem);
         }
     }
 
@@ -628,33 +796,103 @@ public class ArticleWordBuildWindowTab extends SimpleFormBase {
 
         currentTNA = this.getDataModel().getSelectedTNA();
         if (currentTNA != null) {
+            reloadTNASentenceList();
+            reloadTNAWordList("");
+            reloadBuiltWordList();
+            lblJCoinAmount.setText(String.valueOf(this.getDataModel().getJCoin()));
+        }
+    }
+
+    private void loadSentenceDetail(final String selectedSentence) {
+        currentTNA = this.getDataModel().getSelectedTNA();
+        if (currentTNA != null) {
             String sArticleTitle = currentTNA.getArticleTitle();
             lblArticleTitle.setText(sArticleTitle);
             StringBuilder sb = new StringBuilder();
             StringBuilder sbEng = new StringBuilder();
             for (TFMTTNASentenceData sen: currentTNA.getArticleSentences()) {
-                sb.append(sen.getSentence() + "\n");
-                String engMeaning = sen.getEnglishMeaning();
-                if (engMeaning != null)
-                  sbEng.append(sen.getEnglishMeaning() + "\n");
+                if (sen.getSentence().equals(selectedSentence)) {
+                    sb.append(sen.getSentence() + "\n");
+                    String engMeaning = sen.getEnglishMeaning();
+                    if (engMeaning != null)
+                      sbEng.append(sen.getEnglishMeaning() + "\n");
+                    break;
+                }
             }
-            tafArticleJAContent.setText(sb.toString());
+            String jaText = sb.toString().strip().replace("\n", "");
+            tafArticleJAContent.setText(jaText);
             tafArticleENContent.setText(sbEng.toString());
 
-            reloadTNAWordList();
-            reloadBuiltWordList();
+            cbSelectedWord.getItems().clear();
+            lvTNADetailKanjis.getItems().clear();
+            tafKanjiMeaning.setText("");
+            tfSelectedWord.setText("");
+            tfSelectedHiragana.setText("");
+            tfHv.setText("");
+            tfMeaning.setText("");
+            //load kanji list for the sentence
+            int iLoadedCount = reloadTNAWordList(jaText);
+            //System.out.println("loaded sen: " + jaText + " " + String.valueOf(iLoadedCount) + " " + String.valueOf(jaText.length()));
+            if (iLoadedCount < 1) {// && jaText.length() < 3) {
+                selectBuiltWordIfExists(jaText);
+            }
 
-            lblJCoinAmount.setText(String.valueOf(this.getDataModel().getJCoin()));
+            /*
+            //if first kanji in the TNAKanjiWords is the beginning of sentence, or sentence equals to it
+            //auto load the first kanji
+            if (lvTNAKanjiWords.getItems().size() > 0) {
+                String firstTNAKanji = lvTNAKanjiWords.getItems().get(0);
+                if (jaText.indexOf(firstTNAKanji) == 0) {
+                    loadSelectedTNAKanjiWordDetail(firstTNAKanji);
+                    //lvTNADetailKanjis.getItems().add(firstTNAKanji);
+                    if (jaText.length() <= 3) {
+                        tfMeaning.setText(sbEng.toString());
+                    }
+                }
+            }
+            */
         }
     }
 
-    private void reloadTNAWordList() {
+    private void reloadTNASentenceList() {
         if (currentTNA == null) return;
+        lvTNASentences.getItems().clear();
+        for (TFMTTNASentenceData sen: currentTNA.getArticleSentences()) {
+            lvTNASentences.getItems().add(sen.getSentence());
+        }
+    }
+
+    private int reloadTNAWordList(final String sPromptText) {
+        int iTotalLoad = 0;
+        boolean bNeedPrompt = true;
+        if (currentTNA == null) return 0;
+        if (sPromptText.length() < 1) bNeedPrompt = false;
         lvTNAKanjiWords.getItems().clear();
         for (TFMTTNAKanjiData kjData: currentTNA.getArticleKanjis()) {
-            lvTNAKanjiWords.getItems().add(kjData.getKanji());
-        }
+            if (!bNeedPrompt)
+                lvTNAKanjiWords.getItems().add(kjData.getKanji());
+            else {
+                String[] subSenWords = sPromptText.split("\\s+");
+                for (String wrd : subSenWords) {
+                    //don't add already built TNA kanji here
+                    if (getKanjiBuiltIndexInTNA(wrd) >= 0) continue;
 
+                    if (kjData.getKanji().contains(wrd) || wrd.contains(kjData.getKanji())) {
+                        if (wrd.length() > 1) {
+                            if (kjData.getKanji().length() > 1) {
+                              lvTNAKanjiWords.getItems().add(kjData.getKanji());
+                              iTotalLoad++;
+                            }
+                        }
+                        else {
+                            lvTNAKanjiWords.getItems().add(kjData.getKanji());
+                            iTotalLoad++;
+                        }
+                    }
+                }
+            }
+        }
+        return iTotalLoad;
     }
 
     @Override
@@ -676,7 +914,7 @@ public class ArticleWordBuildWindowTab extends SimpleFormBase {
             @Override
             public void handle(MouseEvent event) {
                 if( event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 2) {
-                    processColumnButtonClick(iCol);
+                    processLVColumnButtonClick(iCol);
                 }
             }
         };
@@ -690,7 +928,7 @@ public class ArticleWordBuildWindowTab extends SimpleFormBase {
     private String getListSelectedString(ListView lst) {
         String sSelected = (String) lst.getSelectionModel().getSelectedItem();
         if (sSelected != null) {
-            System.out.println(sSelected);
+            //System.out.println(sSelected);
         }
         return sSelected;
     }
