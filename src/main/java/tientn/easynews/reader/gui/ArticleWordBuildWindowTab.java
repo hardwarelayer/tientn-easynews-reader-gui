@@ -375,8 +375,10 @@ public class ArticleWordBuildWindowTab extends SimpleFormBase {
         String sWordHv = tfHv.getText();
         String sWordMeaning = tfMeaning.getText();
 
-        if (sWordKJ.length() > 0 && sWordHira.length() > 0 && sWordHv.length() > 0 && sWordMeaning.length() > 0) {
-            btnBuildSelectedWord.setDisable(false);
+        if (sWordKJ != null && sWordHira != null && sWordHv != null && sWordMeaning != null) {
+            if (sWordKJ.length() > 0 && sWordHira.length() > 0 && sWordHv.length() > 0 && sWordMeaning.length() > 0) {
+                btnBuildSelectedWord.setDisable(false);
+            }
         }
     }
 

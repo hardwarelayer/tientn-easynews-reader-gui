@@ -236,6 +236,7 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
         lstProblematicWords = new ArrayList<String>();
 
         this.getMidBodyLabel().setId("wordmatch-middle-kanji-label");
+        this.getBottomBodyLabel().setId("wordmatch-bottom-kanji-label");
     }
 
     @Override
@@ -252,10 +253,10 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
 
     private void createBodyElements() {
 
-        this.addBodyColumn(17);
-        this.addBodyColumn(20);
+        this.addBodyColumn(15);
+        this.addBodyColumn(21);
         this.addBodyColumn(31);
-        this.addBodyColumn(31);
+        this.addBodyColumn(32);
 
         Label lblLoaded = new Label("Total Kanjis");
         lblTotalStats = createLabel("0/0");
@@ -468,7 +469,7 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
 
 
         this.getTopBodyLabel().prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.4));
-        this.getBottomBodyLabel().prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.05));
+        this.getBottomBodyLabel().prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.1));
         this.getMidBodyLabel().prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.5));
 
         //btnReloadKanjis.setDisable(true); no need to disable
@@ -573,6 +574,7 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
         this.iCurrentTestKJCount = lstKJ.size();
 
         if (lstKJ != null && lstKJ.size() > 0) {
+            this.kanjiList = lstKJ;
             clearLists();
             for (int i = 0; i < lstKJ.size(); i++) {
                 JBGKanjiItem item = lstKJ.get(i);
@@ -676,15 +678,18 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
                 this.currentSearchKeys = "";
                 lblSearchKeys.setText("");
 
+                /*I changed the behaviour, by using autoSelectKanji()
                 if (lvFirstCol.isFocused()) {
+                    
                     if (!sItem.isEmpty()) {
                         lblFirstCol.setText(sItem);
                         this.getMidBodyLabel().setText(sItem);
                         this.getMidBodyLabel().setStyle("-fx-text-fill: white; -fx-opacity: 0.8;");
+
                         chooseHiraganaList();
                     }
-                }
-                else if (lvSecondCol.isFocused()) {
+                } else */ 
+                if (lvSecondCol.isFocused()) {
                     if (!sItem.isEmpty()) {
                         lblSecondCol.setText(sItem);
                         chooseHanVietList();
@@ -709,10 +714,11 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
             }
             else if (kc == KeyCode.SLASH && isShiftDown) {
                 // character / with Shift is ?
+                /*
                 if (lvFirstCol.isFocused()) {
                     sItem = getListSelectedString(lv);
                     showSneakpeek(sItem);
-                }
+                }*/
             }
             else if (kc == KeyCode.SPACE) {
                 if (lvSecondCol.isFocused())
@@ -1294,6 +1300,27 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
         btnStopTest.setDisable(true);
     }
 
+    private void autoSelectKanji() {
+
+        if (lvFirstCol.getItems().size() < 1) return;
+
+        lvFirstCol.scrollTo(0);
+        lvFirstCol.getSelectionModel().select(0);
+        String sItem = getListSelectedString(lvFirstCol);
+        if (sItem == null) return;
+
+        this.currentSearchKeys = "";
+        lblSearchKeys.setText("");
+
+        if (!sItem.isEmpty()) {
+            lblFirstCol.setText(sItem);
+            this.getMidBodyLabel().setText(sItem);
+            this.getMidBodyLabel().setStyle("-fx-text-fill: white; -fx-opacity: 0.8;");
+
+            chooseHiraganaList();
+        }
+    }
+
     private void doStartGame() {
         if (this.getDataModel().isTestStarted())
           return;
@@ -1313,7 +1340,9 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
 
         lblJCoinAmount.setText(String.valueOf(this.getDataModel().getJCoin()));
 
-        chooseKanjiList();
+        lvFirstCol.setDisable(true);
+        autoSelectKanji();
+        //chooseKanjiList();
 
         this.getDataModel().setTestStarted(true);
     }
@@ -1329,6 +1358,8 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
         btnStartTest.setDisable(true);
         btnStopTest.setDisable(true);
         clearWordListSelection();
+
+        lvFirstCol.setDisable(false);
 
         this.getDataModel().setTestStarted(false);
     }
@@ -1488,6 +1519,8 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
 
           if (allFieldSet) {
 
+            System.out.println(String.format("%s %s %s %s", kanji, hira, hv, viet));
+
             final String[] matchRes = isSelectedWordMatched(kanji, hira, hv, viet);
             if (matchRes[1].equals(MATCH_WORD_OK) && matchRes[0].length() > 0) {
 
@@ -1501,7 +1534,7 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
 
               //restore color
               this.getMidBodyLabel().setStyle("-fx-text-fill: #000b10; -fx-opacity: 0.5");
-
+              this.getBottomBodyLabel().setText(kanji);
               setSneekpeekFields(kanji, hira, hv, viet);
 
               if (isShiftDown) {
@@ -1528,6 +1561,7 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
               }
             }
             else {
+              System.out.println("Not matched!");
               //not correct!
               if (totalJCoin > 0) totalJCoin--;
               noteWord(kanji);
@@ -1536,15 +1570,15 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
             //update the statistic of word
             if (!updateWordStat(matchRes[0], matchRes[1])) {
               //can't update
-              System.out.println("cannot update work of" + matchRes[0]);
+              //System.out.println("cannot update work of" + matchRes[0]);
             }
             else {
-              System.out.println("Updated work of" + matchRes[0]);
+              //System.out.println("Updated work of" + matchRes[0]);
             }
             this.getDataModel().setJCoin(totalJCoin); //set back to parent
             lblJCoinAmount.setText(String.valueOf(totalJCoin));
             clearWordListSelection();
-
+            autoSelectKanji();
           }
 
         }

@@ -123,9 +123,9 @@
 }
 
 #wordmatch-bottom-kanji-label {
- -fx-font-size: 140pt; 
- -fx-font-family: Courier;
- -fx-font-weight: bold;
+ -fx-font-size: 200pt; 
+ -fx-font-family: "HanziPen TC", "BiauKai", "Courier";
+ -fx-font-weight: normal;
  -fx-background-color: transparent;
  -fx-text-fill: #000d1a;
  -fx-opacity: 0.5;
