@@ -176,6 +176,14 @@
   -fx-background-radius: 10px;
 }
 
+#wordmatch-bonus-amount {
+  -fx-font-weight: bold;
+  -fx-background-color: white;
+  -fx-text-fill: green; 
+  -fx-font-family: Arial;
+  -fx-background-radius: 8px;
+}
+
 #wordmatch-search-key {
   -fx-font-weight: bold;
   -fx-background-color: lightgreen;

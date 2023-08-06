@@ -75,6 +75,7 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
     private Label lblTotalTests;
     private Label lblTestStatus;
     private Label lblJCoinAmount;
+    private Label lblBonusAmount;
     private Label lblProblematicWord;
     private Label lblSearchKeys;
 
@@ -265,6 +266,8 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
         lblTestStatus = createLabel("Waiting ...");
         lblJCoinAmount = createLabel("0");
         lblJCoinAmount.setId("wordmatch-coin-amount");
+        lblBonusAmount = createLabel("0");
+        lblBonusAmount.setId("wordmatch-bonus-amount");
         lblProblematicWord = createLabel("0");
 
         lblFirstCol = createLabel(sWordMatchEmptyValue);
@@ -382,7 +385,7 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
 
         this.addBodyCtl(lblTestStatus, 0, 0);
         this.addBodyCtl(btnReloadKanjis, 1, 0);
-        this.addBodyPane(new HBox(new Label("Current JCoin:"), lblJCoinAmount), 2, 0);
+        this.addBodyPane(new HBox(new Label("Current JCoin:"), lblJCoinAmount, lblBonusAmount), 2, 0);
         this.addBodyPane(new HBox(new Label("Problematic Words:"), lblProblematicWord), 3, 0);
 
         this.addBodyCtl(lblLoaded, 0, 1);
@@ -1557,7 +1560,9 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
               else {
                 //no more word
                 doEndGame();
-                totalJCoin += calculateBonusAmount();
+                int iBonusVal = calculateBonusAmount();
+                lblBonusAmount.setText(String.valueOf(iBonusVal));
+                totalJCoin += iBonusVal;
               }
             }
             else {
