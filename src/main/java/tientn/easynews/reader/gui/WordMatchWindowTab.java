@@ -1249,7 +1249,7 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
             if (this.getDataModel().isTestStarted()) return;
             btnReloadKanjis.setDisable(false);
             refreshKanjiStats();
-            loadNextKanjisForTest();
+            loadNormalKanjisForTest();
         }
         else {
             //System.out.println("data is NOT dirty");
