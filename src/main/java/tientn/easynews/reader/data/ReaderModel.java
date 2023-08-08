@@ -431,7 +431,61 @@ public class ReaderModel {
       TFMTTNAData currentTNA = getSelectedTNA();
       if (currentTNA != null) {
         int iSize = currentTNA.getKanjisForTest().size();
-        if (this.kanjiSubsetStart + 1 + this.kanjiSubsetSize < iSize) {
+        if ((this.kanjiSubsetStart + 1 + this.kanjiSubsetSize) < iSize) {
+          this.kanjiSubsetStart++;
+          int iToIdx = this.kanjiSubsetStart + this.kanjiSubsetSize;
+          if (iToIdx >= iSize)
+            iToIdx = iSize - 1;
+          this.subsetRecords = currentTNA.getKanjisForTest().subList(this.kanjiSubsetStart, iToIdx);
+        }
+        else {
+          this.kanjiSubsetStart = 0;
+          if (this.kanjiSubsetSize >= iSize)
+            this.kanjiSubsetSize = iSize - 1;
+          this.subsetRecords = currentTNA.getKanjisForTest().subList(0, this.kanjiSubsetSize);
+        }
+        return this.subsetRecords;
+      }
+    }
+
+    return null;
+
+  }
+
+
+  /*
+  find the newest learn kanji, and load a subset from it back to previous kanji
+  This could be useful for resume learning last session.
+  Now only work for article words
+  */
+  public List<JBGKanjiItem> getNewestLearnKJSubset() {
+
+   if (this.currentWorkMode == JBGConstants.TEST_WORD_IN_ARTICLE) {
+      TFMTTNAData currentTNA = getSelectedTNA();
+      if (currentTNA != null) {
+        //first, find the latest learn kanji
+        int iLatestLearn = -1;
+        int iKjIdxCount = 0;
+        for (JBGKanjiItem kj: currentTNA.getKanjisForTest()) {
+          if (kj.getTestCount() == 0) {
+            break;
+          }
+          iKjIdxCount++;
+        }
+
+        if (iKjIdxCount + 1 < currentTNA.getKanjisForTest().size()) {
+          iKjIdxCount -= 1; //get the first kj with testcount > 0
+        } //otherwise just get end of list
+
+        if (iKjIdxCount - this.kanjiSubsetSize <= 0) {
+          this.kanjiSubsetStart = 0;
+        }
+        else {
+          this.kanjiSubsetStart = iKjIdxCount - this.kanjiSubsetSize;
+        }
+
+        int iSize = currentTNA.getKanjisForTest().size();
+        if ((this.kanjiSubsetStart + 1 + this.kanjiSubsetSize) < iSize) {
           this.kanjiSubsetStart++;
           int iToIdx = this.kanjiSubsetStart + this.kanjiSubsetSize;
           if (iToIdx >= iSize)

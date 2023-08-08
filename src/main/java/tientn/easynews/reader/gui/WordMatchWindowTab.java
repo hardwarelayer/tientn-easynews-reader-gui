@@ -88,6 +88,7 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
 
     private Button btnLoadNormalForTest;
     private Button btnLoadNewForTest;
+    private Button btnLoadNewestLearnPage;
     private Button btnLoadProblematicWordsForTest;
     private Button btnResetProblematicWords;
     private Button btnStartTest;
@@ -314,6 +315,13 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
         };
         btnLoadNewForTest = createButton(SECOND_LOAD_FOR_MAIN_LIST, fncLoadNewButtonClick);
 
+        EventHandler<ActionEvent> fncLoadNewestPageButtonClick = new EventHandler<ActionEvent>() {
+            @Override public void handle(ActionEvent e) {
+                loadNewestLearnPage();
+            }
+        };
+        btnLoadNewestLearnPage = createButton("Load NewLearn", fncLoadNewestPageButtonClick);
+
         EventHandler<ActionEvent> fncLoadWrongButtonClick = new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent e) {
                 loadProblematicWordsForTest();
@@ -396,7 +404,7 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
         this.addBodyCtl(btnLoadNormalForTest, 0, 2);
         HBox bxLoadNextWords = new HBox(btnLoadNewForTest, tfSizeOfWords);
         this.addBodyPane(bxLoadNextWords, 1, 2);
-        HBox bxProblemWords = new HBox(btnLoadProblematicWordsForTest, btnResetProblematicWords);
+        HBox bxProblemWords = new HBox(btnLoadNewestLearnPage, btnLoadProblematicWordsForTest, btnResetProblematicWords);
         this.addBodyPane(bxProblemWords, 2, 2);
         HBox bxStartStop = new HBox(btnStartTest, btnStopTest);
         this.addBodyPane(bxStartStop, 3, 2);
@@ -560,6 +568,25 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
         this.getDataModel().getSelectedTNA().getProblematicWords().clear();
         clearLists();
         btnResetProblematicWords.setDisable(true);
+
+        refreshStartButton();
+    }
+
+    private void loadNewestLearnPage() {
+        if (this.getDataModel().isTestStarted())
+          return;
+
+        List<JBGKanjiItem> lstKJ = this.getDataModel().getNewestLearnKJSubset();
+        this.iCurrentTestKJCount = lstKJ.size();
+
+        if (lstKJ != null && lstKJ.size() > 0) {
+            this.kanjiList = lstKJ;
+            clearLists();
+            for (int i = 0; i < lstKJ.size(); i++) {
+                JBGKanjiItem item = lstKJ.get(i);
+                fillItemToLists(item);
+            }
+        }
 
         refreshStartButton();
     }
@@ -1260,6 +1287,7 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
             btnStartTest.setDisable(true);
             btnStopTest.setDisable(true);
             btnLoadNewForTest.setDisable(true);
+            btnLoadNewestLearnPage.setDisable(true);
             btnLoadProblematicWordsForTest.setDisable(true);
             btnLoadNormalForTest.setDisable(true);
         }
@@ -1336,6 +1364,7 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
         btnLoadNormalForTest.setDisable(true);
         btnLoadNewForTest.setDisable(true);
         btnResetProblematicWords.setDisable(true);
+        btnLoadNewestLearnPage.setDisable(true);
         btnLoadProblematicWordsForTest.setDisable(true);
         btnStartTest.setDisable(true);
         btnStopTest.setDisable(false);
@@ -1356,6 +1385,7 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
 
         btnLoadNormalForTest.setDisable(false);
         btnLoadNewForTest.setDisable(false);
+        btnLoadNewestLearnPage.setDisable(false);
         btnLoadProblematicWordsForTest.setDisable(false);
         btnResetProblematicWords.setDisable(false);
         btnStartTest.setDisable(true);
