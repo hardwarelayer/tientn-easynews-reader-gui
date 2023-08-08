@@ -1552,7 +1552,7 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
 
           if (allFieldSet) {
 
-            System.out.println(String.format("%s %s %s %s", kanji, hira, hv, viet));
+            //System.out.println(String.format("%s %s %s %s", kanji, hira, hv, viet));
 
             final String[] matchRes = isSelectedWordMatched(kanji, hira, hv, viet);
             if (matchRes[1].equals(MATCH_WORD_OK) && matchRes[0].length() > 0) {
