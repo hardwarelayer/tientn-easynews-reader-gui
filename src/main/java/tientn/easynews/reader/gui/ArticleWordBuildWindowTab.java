@@ -152,6 +152,7 @@ public class ArticleWordBuildWindowTab extends SimpleFormBase {
         tafArticleJAContent.prefWidthProperty().bind(getPrimaryStage().widthProperty().multiply(0.5));
         tafArticleJAContent.setId("build-word-ja-content");
         tafArticleJAContent.setWrapText(true);
+        tafArticleJAContent.getStyleClass().add("bright_background_textfield");
 
         tafArticleENContent = new TextArea();
         tafArticleENContent.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.13));
@@ -936,6 +937,10 @@ public class ArticleWordBuildWindowTab extends SimpleFormBase {
     }
 
     public void onShow() {
+        tafArticleJAContent.lookup(".content").setStyle("-fx-background-color: lightgray;");
+        tafArticleJAContent.setStyle("-fx-font-size: 14pt;-fx-font-family: Arial;");
+        tafArticleENContent.setStyle("-fx-font-size: 14pt;-fx-font-family: Arial;");
+
         //always refresh this
         lblJCoinAmount.setText(String.valueOf(this.getDataModel().getJCoin()));
 

@@ -19,6 +19,7 @@ import javafx.event.EventHandler;
 import javafx.event.ActionEvent;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.text.TextAlignment;
+import javafx.scene.control.CheckBox;
 
 import javafx.stage.FileChooser;
 import java.io.File;
@@ -78,6 +79,8 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
     private Label lblBonusAmount;
     private Label lblProblematicWord;
     private Label lblSearchKeys;
+
+    private CheckBox cbContinuous;
 
     private ListView<String> lvFirstCol;
     private ListView<String> lvSecondCol;
@@ -271,6 +274,9 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
         lblBonusAmount.setId("wordmatch-bonus-amount");
         lblProblematicWord = createLabel("0");
 
+        cbContinuous = new CheckBox("Continuous test");
+        cbContinuous.setIndeterminate(false);
+
         lblFirstCol = createLabel(sWordMatchEmptyValue);
         lblSecondCol = createLabel(sWordMatchEmptyValue);
         lblThirdCol = createLabel(sWordMatchEmptyValue);
@@ -320,28 +326,28 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
                 loadNewestLearnPage();
             }
         };
-        btnLoadNewestLearnPage = createButton("Load NewLearn", fncLoadNewestPageButtonClick);
+        btnLoadNewestLearnPage = createButton("Load NeẃLearn", fncLoadNewestPageButtonClick);
 
         EventHandler<ActionEvent> fncLoadWrongButtonClick = new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent e) {
                 loadProblematicWordsForTest();
             }
         };
-        btnLoadProblematicWordsForTest = createButton("Load (P)roblematic", fncLoadWrongButtonClick);
+        btnLoadProblematicWordsForTest = createButton("Load Ṕroblematic", fncLoadWrongButtonClick);
 
         EventHandler<ActionEvent> fncResetProblematicWords = new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent e) {
                 resetProblematicWords();
             }
         };
-        btnResetProblematicWords = createButton("(R)eset", fncResetProblematicWords);
+        btnResetProblematicWords = createButton("Ŕeset", fncResetProblematicWords);
 
         EventHandler<ActionEvent> fncStartTestButtonClick = new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent e) {
                 startTest();
             }
         };
-        btnStartTest = createButton("(S)tart Test", fncStartTestButtonClick);
+        btnStartTest = createButton("śtart Test", fncStartTestButtonClick);
         EventHandler<ActionEvent> fncStopTestButtonClick = new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent e) {
                 stopTest();
@@ -398,7 +404,7 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
 
         this.addBodyCtl(lblLoaded, 0, 1);
         this.addBodyCtl(lblTotalStats, 1, 1);
-        this.addBodyPane(new HBox(lblTest, lblTotalTests), 2, 1);
+        this.addBodyPane(new HBox(lblTest, lblTotalTests, cbContinuous), 2, 1);
         //this.addBodyCtl(lblTotalTests, 3, 1);
 
         this.addBodyCtl(btnLoadNormalForTest, 0, 2);
@@ -532,6 +538,22 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
         }
 
         refreshStartButton();
+    }
+
+    //this is for continuous test, so we don't check starting mode and change button state
+    private void loadAllNewKanjisForContinuousTest() {
+        this.updateKanjiSubsetSize();
+        List<JBGKanjiItem> lstKJ = this.getDataModel().getAllNewKJSubset();
+        this.iCurrentTestKJCount = lstKJ.size();
+
+        if (lstKJ != null && lstKJ.size() > 0) {
+            this.kanjiList = lstKJ;
+            clearLists();
+            for (int i = 0; i < lstKJ.size(); i++) {
+                JBGKanjiItem item = lstKJ.get(i);
+                fillItemToLists(item);
+            }
+        }
     }
 
     private void loadNextKanjisForTest() {
@@ -1169,6 +1191,9 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
                 case V:
                     this.getDataModel().printCurrentKanjisWithTest();
                     break;
+                case W:
+                    loadNewestLearnPage();
+                    break;
                 case DELETE:
                     processDeleteInWaitingMode(kc);
                     break;
@@ -1589,14 +1614,21 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
               }
               else {
                 //no more word
-                doEndGame();
+
+                if (cbContinuous.isSelected()) {
+                    loadAllNewKanjisForContinuousTest();
+                    shuffleAllListModels();
+                }
+                else {
+                    doEndGame();
+                }
                 int iBonusVal = calculateBonusAmount();
                 lblBonusAmount.setText(String.valueOf(iBonusVal));
                 totalJCoin += iBonusVal;
               }
             }
             else {
-              System.out.println("Not matched!");
+              //System.out.println("Not matched!");
               //not correct!
               if (totalJCoin > 0) totalJCoin--;
               noteWord(kanji);

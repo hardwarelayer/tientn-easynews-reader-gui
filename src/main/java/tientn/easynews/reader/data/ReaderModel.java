@@ -452,6 +452,37 @@ public class ReaderModel {
 
   }
 
+  public List<JBGKanjiItem> getAllNewKJSubset() {
+
+    if (this.currentWorkMode == JBGConstants.TEST_WORD_IN_MAJOR_LIST) {
+      //System.out.println("total rows: " + String.valueOf(dataKanjiItems.size()));
+      buildSubSetRecords(5); //lay cac tu dung tu 5 lan tro xuong cho toi 0 (chua hoc)
+      return this.subsetRecords;
+    }
+    else if (this.currentWorkMode == JBGConstants.TEST_WORD_IN_ARTICLE) {
+      TFMTTNAData currentTNA = getSelectedTNA();
+      if (currentTNA != null) {
+        int iSize = currentTNA.getKanjisForTest().size();
+        if ((this.kanjiSubsetStart + this.kanjiSubsetSize) < iSize) {
+          this.kanjiSubsetStart += this.kanjiSubsetSize;
+          int iToIdx = this.kanjiSubsetStart + this.kanjiSubsetSize;
+          if (iToIdx >= iSize)
+            iToIdx = iSize - 1;
+          this.subsetRecords = currentTNA.getKanjisForTest().subList(this.kanjiSubsetStart, iToIdx);
+        }
+        else {
+          this.kanjiSubsetStart = 0;
+          if (this.kanjiSubsetSize >= iSize)
+            this.kanjiSubsetSize = iSize - 1;
+          this.subsetRecords = currentTNA.getKanjisForTest().subList(0, this.kanjiSubsetSize);
+        }
+        return this.subsetRecords;
+      }
+    }
+
+    return null;
+
+  }
 
   /*
   find the newest learn kanji, and load a subset from it back to previous kanji

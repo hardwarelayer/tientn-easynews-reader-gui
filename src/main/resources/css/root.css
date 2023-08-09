@@ -262,8 +262,8 @@
 
 /* ------------------------ ArticleWord -------------------------*/
 #build-word-ja-content {
-  -fx-font-size: 11pt; 
-  -fx-font-family: Verdana;
+  -fx-font-size: 40pt; 
+  -fx-font-family: Arial;
   text-area-background: white;
   -fx-text-fill: black;
 }
@@ -274,7 +274,7 @@
 }
 
 #build-word-ja-content .content {
-    -fx-background-color: text-area-background ;
+    -fx-background-color: white;
 }
 
 #build-word-en-content {
