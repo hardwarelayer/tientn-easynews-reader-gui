@@ -939,7 +939,7 @@ public class ArticleWordBuildWindowTab extends SimpleFormBase {
     public void onShow() {
         tafArticleJAContent.lookup(".content").setStyle("-fx-background-color: lightgray;");
         tafArticleJAContent.setStyle("-fx-font-size: 14pt;-fx-font-family: Arial;");
-        tafArticleENContent.setStyle("-fx-font-size: 14pt;-fx-font-family: Arial;");
+        tafArticleENContent.setStyle("-fx-font-size: 12pt;-fx-font-family: Arial;");
 
         //always refresh this
         lblJCoinAmount.setText(String.valueOf(this.getDataModel().getJCoin()));

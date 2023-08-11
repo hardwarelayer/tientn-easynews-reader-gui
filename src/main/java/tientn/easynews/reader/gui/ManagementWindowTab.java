@@ -909,6 +909,12 @@ public class ManagementWindowTab extends GridPaneBase {
                     removeArticleFromList();
                 }
                 break;
+            case ENTER:
+                if (articleTableView.isFocused()) {
+                    ManagementArticleTableViewItem item = articleTableView.getSelectionModel().getSelectedItem();
+                    processArticleTableViewDblClick(item);
+                }
+                break;
         }
     }
 

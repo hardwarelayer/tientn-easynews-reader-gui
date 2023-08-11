@@ -55,6 +55,8 @@ import tientn.easynews.reader.data.JBGConstants;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 
+import java.util.Random;
+
 // SimpleFormBase derived class
 public class WordMatchWindowTab extends SimpleStackedFormBase {
 
@@ -506,6 +508,12 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
         lvFourthCol.getItems().add(item.getMeaning());
     }
 
+    private void fillDummyItemToLists(JBGKanjiItem item) {
+        lvSecondCol.getItems().add(item.getHiragana());
+        lvThirdCol.getItems().add(item.getHv());
+        lvFourthCol.getItems().add(item.getMeaning());
+    }
+
     private void updateKanjiSubsetSize() {
         final String val = tfSizeOfWords.getText();
         int i = JBGConstants.DEFAULT_KANJI_SUBSET_SIZE;
@@ -517,6 +525,31 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
         }
         this.getDataModel().setKanjiSubsetSize(i);
 
+    }
+
+    private void loadDummiesForTest() {
+        List<Integer> randDummyIdxs = new ArrayList<Integer>();
+        if (this.lstProblematicWords.size() > 0) {
+            //I use this to add confuse for the tester, only fill hira,hv,meaning columns
+            List<JBGKanjiItem> lstDummyKJ = this.getDataModel().getSpecificKJSubset(this.lstProblematicWords);
+            if (lstDummyKJ != null && lstDummyKJ.size() > 0) {
+                int iMaxDummies = lstDummyKJ.size();
+                if (iMaxDummies > JBGConstants.MAX_DUMMY_IN_WORDMATCH_MODE) {
+                    iMaxDummies = JBGConstants.MAX_DUMMY_IN_WORDMATCH_MODE;
+                }
+                Random rand = new Random();
+                for (int i = 0; i < iMaxDummies; i++) {
+                    int iRndPos = rand.nextInt(lstDummyKJ.size());
+                    while (lstDummyKJ.size() >= JBGConstants.MAX_DUMMY_IN_WORDMATCH_MODE && randDummyIdxs.contains(iRndPos)) {
+                        iRndPos = rand.nextInt(lstDummyKJ.size());
+                    }
+                    randDummyIdxs.add(iRndPos);
+                    JBGKanjiItem item = lstDummyKJ.get(iRndPos);
+                    fillDummyItemToLists(item);
+                }
+
+            }
+        }
     }
 
     private void loadNormalKanjisForTest() {
@@ -535,13 +568,14 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
                 JBGKanjiItem item = lstKJ.get(i);
                 fillItemToLists(item);
             }
+            loadDummiesForTest();
         }
 
         refreshStartButton();
     }
 
     //this is for continuous test, so we don't check starting mode and change button state
-    private void loadAllNewKanjisForContinuousTest() {
+    private int loadAllNewKanjisForContinuousTest() {
         this.updateKanjiSubsetSize();
         List<JBGKanjiItem> lstKJ = this.getDataModel().getAllNewKJSubset();
         this.iCurrentTestKJCount = lstKJ.size();
@@ -553,7 +587,9 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
                 JBGKanjiItem item = lstKJ.get(i);
                 fillItemToLists(item);
             }
+            loadDummiesForTest();
         }
+        return lstKJ.size();
     }
 
     private void loadNextKanjisForTest() {
@@ -571,6 +607,7 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
                 JBGKanjiItem item = lstKJ.get(i);
                 fillItemToLists(item);
             }
+            loadDummiesForTest();
         }
 
         refreshStartButton();
@@ -608,6 +645,7 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
                 JBGKanjiItem item = lstKJ.get(i);
                 fillItemToLists(item);
             }
+            loadDummiesForTest();
         }
 
         refreshStartButton();
@@ -1408,6 +1446,11 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
         if (!this.getDataModel().isTestStarted())
           return;
 
+        if (lvFirstCol.getItems().size() < 1 && lvSecondCol.getItems.size() > 0) {
+            //this case, dummies are still on the list
+            clearLists();
+        }
+
         btnLoadNormalForTest.setDisable(false);
         btnLoadNewForTest.setDisable(false);
         btnLoadNewestLearnPage.setDisable(false);
@@ -1616,13 +1659,16 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
                 //no more word
 
                 if (cbContinuous.isSelected()) {
-                    loadAllNewKanjisForContinuousTest();
-                    shuffleAllListModels();
+                    if (loadAllNewKanjisForContinuousTest() > 0)
+                        shuffleAllListModels();
+                    else
+                        doEndGame();
                 }
                 else {
                     doEndGame();
                 }
-                int iBonusVal = calculateBonusAmount();
+                int iCurrentBonusVal = Integer.parseInt( lblBonusAmount.getText() );
+                int iBonusVal = iCurrentBonusVal+ calculateBonusAmount();
                 lblBonusAmount.setText(String.valueOf(iBonusVal));
                 totalJCoin += iBonusVal;
               }
