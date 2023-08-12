@@ -788,7 +788,7 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
                 else if (lvThirdCol.isFocused()) {
                     if (!sItem.isEmpty()) {
                         lblThirdCol.setText(sItem);
-                        chooseMeaningList();
+                        chooseMeaningList(sItem);
                     }
                 }
                 else if (lvFourthCol.isFocused()) {
@@ -1249,7 +1249,7 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
                     chooseHanVietList();
                     break;
                 case DIGIT4:
-                    chooseMeaningList();
+                    chooseMeaningList("");
                     break;
                 default:
                    this.processColumnListViewKeyEvent(kc, ke.isShiftDown());
@@ -1446,7 +1446,7 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
         if (!this.getDataModel().isTestStarted())
           return;
 
-        if (lvFirstCol.getItems().size() < 1 && lvSecondCol.getItems.size() > 0) {
+        if (lvFirstCol.getItems().size() < 1 && lvSecondCol.getItems().size() > 0) {
             //this case, dummies are still on the list
             clearLists();
         }
@@ -1510,9 +1510,23 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
         lvThirdCol.requestFocus();
     }
 
-    public void chooseMeaningList() {
-        lvFourthCol.scrollTo(0);
-        lvFourthCol.getSelectionModel().select(0);
+    public void chooseMeaningList(final String sPromptText) {
+        if (sPromptText.length() < 1) {
+            lvFourthCol.scrollTo(0);
+            lvFourthCol.getSelectionModel().select(0);
+        }
+        else {
+            ObservableList<String> vnItems = lvFourthCol.getItems();
+            int iItemIdx = 0;
+            for (String vnItem: vnItems) {
+                if (vnItem.equals(sPromptText)) {
+                    lvFourthCol.scrollTo(iItemIdx);
+                    lvFourthCol.getSelectionModel().select(iItemIdx);
+                    break;  
+                }
+                iItemIdx++;
+            }
+        }
         lvFourthCol.requestFocus();
     }
 
