@@ -312,6 +312,7 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
         EventHandler<ActionEvent> fncLoadNormalButtonClick = new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent e) {
                 loadNormalKanjisForTest();
+                shuffleAllListModels();
             }
         };
         btnLoadNormalForTest = createButton(FIRST_LOAD_FOR_MAIN_LIST, fncLoadNormalButtonClick);
@@ -319,6 +320,7 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
         EventHandler<ActionEvent> fncLoadNewButtonClick = new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent e) {
                 loadNextKanjisForTest();
+                shuffleAllListModels();
             }
         };
         btnLoadNewForTest = createButton(SECOND_LOAD_FOR_MAIN_LIST, fncLoadNewButtonClick);
@@ -401,7 +403,7 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
 
         this.addBodyCtl(lblTestStatus, 0, 0);
         this.addBodyCtl(btnReloadKanjis, 1, 0);
-        this.addBodyPane(new HBox(new Label("Current JCoin:"), lblJCoinAmount, lblBonusAmount), 2, 0);
+        this.addBodyPane(new HBox(new Label("Current JCoin:"), lblJCoinAmount, new Label("  "), lblBonusAmount), 2, 0);
         this.addBodyPane(new HBox(new Label("Problematic Words:"), lblProblematicWord), 3, 0);
 
         this.addBodyCtl(lblLoaded, 0, 1);
@@ -818,6 +820,12 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
                 else if (lvFourthCol.isFocused())
                     doMeaningSearchKey(false);
             }
+            else if (kc == KeyCode.BACK_SPACE) {
+                if (lvSecondCol.isFocused() || lvThirdCol.isFocused() || lvFourthCol.isFocused()) {
+                    this.currentSearchKeys = "";
+                    lblSearchKeys.setText(this.currentSearchKeys);
+                }
+            }
             else if (isLetterKey) {
                 saveSearchKeys(kc, isShiftDown);
             }
@@ -1219,9 +1227,11 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
                     break;
                 case L:
                     loadNormalKanjisForTest();
+                    shuffleAllListModels();
                     break;
                 case N:
                     loadNextKanjisForTest();
+                    shuffleAllListModels();
                     break;
                 case P:
                     loadProblematicWordsForTest();
@@ -1340,6 +1350,7 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
             btnReloadKanjis.setDisable(false);
             refreshKanjiStats();
             loadNormalKanjisForTest();
+            shuffleAllListModels();
         }
         else {
             //System.out.println("data is NOT dirty");
@@ -1420,6 +1431,11 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
           return;
 
         if (lvFirstCol.getItems().size() < 1) return;
+
+        if (!cbContinuous.isSelected() && this.showQuestion("Continued Testing?", "Page by page test", "Do you want to do continuous testing???")) {
+            cbContinuous.setSelected(true);
+        }
+
 
         lblTestStatus.setText("Started!");
 
