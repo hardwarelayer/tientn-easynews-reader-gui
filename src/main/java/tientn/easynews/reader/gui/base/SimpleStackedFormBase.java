@@ -61,7 +61,7 @@ public class SimpleStackedFormBase extends VBox {
   @Getter protected Stage primaryStage = null;
   @Getter protected Desktop desktop = null;
   @Getter protected GridPane headerPane = null;
-  @Getter protected Label topBodyLabel = null, midBodyLabel = null, bottomBodyLabel = null;
+  @Getter protected Label topBodyLabel = null, midBodyLabel = null, midBodyDescLabel = null, bottomBodyLabel = null;
   @Getter protected StackPane bodyStackPane = null;
   @Getter protected GridPane bodyPane = null;
   @Getter protected GridPane footerPane = null;
@@ -87,9 +87,10 @@ public class SimpleStackedFormBase extends VBox {
 
     topBodyLabel = new Label("");
     midBodyLabel = new Label("");
+    midBodyDescLabel = new Label(""); //a smaller font below midBody content, to add extra information (see WordMatchWindow)
     bottomBodyLabel = new Label("");
     HBox hb1 = new HBox(this.topBodyLabel);
-    HBox hb2 = new HBox(this.midBodyLabel);
+    HBox hb2 = new HBox(new VBox(this.midBodyLabel, this.midBodyDescLabel));
     HBox hb3 = new HBox(this.bottomBodyLabel);
     VBox vb = new VBox(hb1, hb2, hb3);
     topBodyLabel.setDisable(true);

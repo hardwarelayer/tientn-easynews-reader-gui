@@ -20,6 +20,7 @@ import javafx.event.ActionEvent;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.text.TextAlignment;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.Tooltip;
 
 import javafx.stage.FileChooser;
 import java.io.File;
@@ -56,6 +57,8 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 
 import java.util.Random;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 // SimpleFormBase derived class
 public class WordMatchWindowTab extends SimpleStackedFormBase {
@@ -83,6 +86,7 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
     private Label lblSearchKeys;
 
     private CheckBox cbContinuous;
+    private CheckBox cbFastHvOnlyMode;
 
     private ListView<String> lvFirstCol;
     private ListView<String> lvSecondCol;
@@ -243,6 +247,7 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
         lstProblematicWords = new ArrayList<String>();
 
         this.getMidBodyLabel().setId("wordmatch-middle-kanji-label");
+        this.getMidBodyDescLabel().setId("wm-mid-kj-desc");
         this.getBottomBodyLabel().setId("wordmatch-bottom-kanji-label");
     }
 
@@ -278,6 +283,10 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
 
         cbContinuous = new CheckBox("Continuous test");
         cbContinuous.setIndeterminate(false);
+        cbContinuous.setTooltip(new Tooltip("If enabled, word will be loaded by whole new page, not some new words at a time\n有効にすると、単語は一度にいくつかの新しい単語だけでなく、新しいページ全体として読み込まれます。"));
+        cbFastHvOnlyMode = new CheckBox("Fast HV Mode");
+        cbFastHvOnlyMode.setIndeterminate(false);
+        cbFastHvOnlyMode.setTooltip(new Tooltip("If enabled, word with ascii in hiragana's column will get Fast select mode\n有効にすると、ひらがなの列に ASCII を含む単語が高速選択モードになります。"));
 
         lblFirstCol = createLabel(sWordMatchEmptyValue);
         lblSecondCol = createLabel(sWordMatchEmptyValue);
@@ -407,7 +416,7 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
         this.addBodyCtl(lblLoaded, 0, 1);
         this.addBodyCtl(lblTotalStats, 1, 1);
         this.addBodyPane(new HBox(lblTest, lblTotalTests, cbContinuous), 2, 1);
-        //this.addBodyCtl(lblTotalTests, 3, 1);
+        this.addBodyPane(new HBox(cbFastHvOnlyMode), 3, 1);
 
         this.addBodyCtl(btnLoadNormalForTest, 0, 2);
         HBox bxLoadNextWords = new HBox(btnLoadNewForTest, tfSizeOfWords);
@@ -487,9 +496,14 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
         }
 
 
-        this.getTopBodyLabel().prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.4));
-        this.getBottomBodyLabel().prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.1));
-        this.getMidBodyLabel().prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.5));
+        this.getTopBodyLabel().prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.6));
+        this.getBottomBodyLabel().prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.2));
+        this.getMidBodyLabel().prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.15));
+        this.getMidBodyDescLabel().prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.05));
+
+        this.getBottomBodyLabel().prefWidthProperty().bind(getPrimaryStage().widthProperty().multiply(1));
+        this.getMidBodyLabel().prefWidthProperty().bind(getPrimaryStage().widthProperty().multiply(1));
+        this.getMidBodyDescLabel().prefWidthProperty().bind(getPrimaryStage().widthProperty().multiply(1));
 
         //btnReloadKanjis.setDisable(true); no need to disable
     }
@@ -782,7 +796,12 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
                 if (lvSecondCol.isFocused()) {
                     if (!sItem.isEmpty()) {
                         lblSecondCol.setText(sItem);
-                        chooseHanVietList();
+                        if (cbFastHvOnlyMode.isSelected()) {
+                            if (!doFastHvOnlyMode()) chooseHanVietList();
+                        }
+                        else {
+                            chooseHanVietList();
+                        }
                     }
                 }
                 else if (lvThirdCol.isFocused()) {
@@ -801,6 +820,7 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
                         validateKanjiSelection(isShiftDown);
                     }
                 }
+                this.getMidBodyDescLabel().setText(String.format("%s %s %s", lblSecondCol.getText(), lblThirdCol.getText(), lblFourthCol.getText()));
             }
             else if (kc == KeyCode.SLASH && isShiftDown) {
                 // character / with Shift is ?
@@ -1326,6 +1346,7 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
     public void onShow() {
         //always refresh this
         lblJCoinAmount.setText(String.valueOf(this.getDataModel().getJCoin()));
+        cbFastHvOnlyMode.setSelected(true);
 
         if (this.getDataModel().getCurrentWorkMode() == JBGConstants.TEST_WORD_IN_ARTICLE) {
             btnLoadNormalForTest.setText(FIRST_LOAD_FOR_ARTICLE);
@@ -1388,6 +1409,7 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
         lvFourthCol.getSelectionModel().clearSelection();
 
         this.getMidBodyLabel().setText(sWordMatchEmptyValue);
+        this.getMidBodyDescLabel().setText(sWordMatchEmptyValue);
     }
 
     private void refreshStartButton() {
@@ -1415,10 +1437,52 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
         if (!sItem.isEmpty()) {
             lblFirstCol.setText(sItem);
             this.getMidBodyLabel().setText(sItem);
-            this.getMidBodyLabel().setStyle("-fx-text-fill: white; -fx-opacity: 0.8;");
+            //this.getMidBodyLabel().setStyle("-fx-text-fill: white; -fx-opacity: 0.8;");
+            this.getMidBodyDescLabel().setText(sWordMatchEmptyValue);
 
             chooseHiraganaList();
         }
+    }
+
+    private Boolean doFastHvOnlyMode() {
+        final String kanji = lblFirstCol.getText();
+        final String hira = lblSecondCol.getText();
+
+        if (kanji.length() < 1 || hira.length() < 1) return false;
+
+        //only process if hiragana is latin
+        Pattern pat = Pattern.compile(".*\\p{InHiragana}.*");
+        Matcher m = pat.matcher(hira);
+        if (m.find()) return false;
+
+        JBGKanjiItem item = getKanjiForFastHvOnlyMode(kanji, hira);
+        if (item == null) return false;
+
+        lblThirdCol.setText(item.getHv());
+        int iItemIdx = 0;
+        ObservableList<String> vnItems = lvThirdCol.getItems();
+        for (String vnItem: vnItems) {
+            if (vnItem.equals(lblThirdCol.getText())) {
+                lvThirdCol.scrollTo(iItemIdx);
+                lvThirdCol.getSelectionModel().select(iItemIdx);
+            }
+            iItemIdx++;
+        }
+
+        lblFourthCol.setText(item.getMeaning());
+        iItemIdx = 0;
+        vnItems = lvFourthCol.getItems();
+        for (String vnItem: vnItems) {
+            if (vnItem.equals(lblThirdCol.getText())) {
+                lvFourthCol.scrollTo(iItemIdx);
+                lvFourthCol.getSelectionModel().select(iItemIdx);
+            }
+            iItemIdx++;
+        }
+
+        lvThirdCol.requestFocus();
+
+        return true;
     }
 
     private void doStartGame() {
@@ -1580,6 +1644,17 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
         return res;
     }
 
+    private JBGKanjiItem getKanjiForFastHvOnlyMode(final String kanji, final String hira) {
+        for (JBGKanjiItem item: this.kanjiList) {
+          if (kanji.equals(item.getKanji()) &&
+              hira.equals(item.getHiragana())
+              ) {
+            return item;
+          }
+        }
+        return null;
+    }
+
     private void noteWord(final String kanjiWord) {
         if (!this.lstProblematicWords.contains(kanjiWord))
           this.lstProblematicWords.add(kanjiWord);
@@ -1659,8 +1734,13 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
               }
 
               //restore color
-              this.getMidBodyLabel().setStyle("-fx-text-fill: #000b10; -fx-opacity: 0.5");
-              this.getBottomBodyLabel().setText(kanji);
+              //this.getMidBodyLabel().setStyle("-fx-text-fill: #000b10; -fx-opacity: 0.5");
+              String sRemind = this.getBottomBodyLabel().getText();
+              if (sRemind.length() + kanji.length() >= JBGConstants.WORDMATCH_MAX_REMIND_CHARS) {
+                sRemind = sRemind.replace(sRemind.substring(0, (sRemind.length() + kanji.length())-JBGConstants.WORDMATCH_MAX_REMIND_CHARS), "");
+              }
+              sRemind += kanji;
+              this.getBottomBodyLabel().setText(sRemind);
               setSneekpeekFields(kanji, hira, hv, viet);
 
               if (isShiftDown) {

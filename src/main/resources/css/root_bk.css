@@ -114,7 +114,7 @@
 }
 
 #wordmatch-middle-kanji-label {
- -fx-font-size: 100pt; 
+ -fx-font-size: 150pt; 
  -fx-font-family: Courier;
  -fx-font-weight: bold;
  -fx-background-color: transparent;
@@ -129,6 +129,7 @@
  -fx-background-color: transparent;
  -fx-text-fill: #000d1a;
  -fx-opacity: 0.5;
+ -fx-border: solid 3px black;
 }
 
 #wordmatch-kanji-test {

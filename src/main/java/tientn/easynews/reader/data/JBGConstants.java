@@ -254,6 +254,7 @@ public interface JBGConstants {
   static final int TEST_WORD_IN_ARTICLE = 1;
   static final int DEFAULT_KANJI_SUBSET_SIZE = 11;
   static final int MAX_DUMMY_IN_WORDMATCH_MODE = 5;
+  static final int WORDMATCH_MAX_REMIND_CHARS = 6;
   static final int JCOIN_AMOUNT_FOR_ADD_KANJI_WORD = 2;
 
   static final int MIN_WIDTH=1200;

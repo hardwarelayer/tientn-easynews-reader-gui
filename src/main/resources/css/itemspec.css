@@ -71,6 +71,7 @@
 #kanji-column {
  -fx-font-size: 19pt; 
  -fx-font-family: Verdana;
+ -fx-background-color: transparent;
 }
 #hiragana-column {
  -fx-font-size: 14pt; 
@@ -86,6 +87,23 @@
  -fx-text-wrap: true;
 }
 
+#kanji-column .list-cell {
+  -fx-text-fill: white;
+  -fx-control-inner-background: derive(#434343,15%);
+}
+#hiragana-column .list-cell {
+  -fx-text-fill: white;
+  -fx-control-inner-background: derive(#434343,15%);
+}
+#hv-column .list-cell {
+  -fx-text-fill: white;
+  -fx-control-inner-background: derive(#434343,15%);
+}
+#meaning-column .list-cell {
+  -fx-text-fill: white;
+  -fx-control-inner-background: derive(#434343,15%);
+}
+
 #wordmatch-top-kanji-label {
  -fx-font-size: 140pt; 
  -fx-font-family: Courier;
@@ -96,18 +114,32 @@
 }
 
 #wordmatch-middle-kanji-label {
- -fx-font-size: 100pt; 
+ -fx-font-size: 150pt; 
  -fx-font-family: Courier;
+ -fx-alignment: center;
+ -fx-min-width: 100%;
  -fx-font-weight: bold;
  -fx-background-color: transparent;
- -fx-text-fill: #000b10;
+ -fx-text-fill: white;
  -fx-opacity: 0.4;
 }
 
+#wm-mid-kj-desc {
+ -fx-font-size: 14pt; 
+ -fx-font-family: Verdana;
+ -fx-alignment: center;
+ -fx-min-width: 100%;
+ -fx-font-weight: normal;
+ -fx-text-fill: white;
+ -fx-opacity: 0.6;
+ -fx-effect: dropshadow( one-pass-box, yellow, 8, 0.0, 2, 0);
+}
+
 #wordmatch-bottom-kanji-label {
- -fx-font-size: 140pt; 
+ -fx-font-size: 150pt; 
  -fx-font-family: Courier;
- -fx-font-weight: bold;
+ -fx-alignment: center-right;
+ -fx-font-weight: normal;
  -fx-background-color: transparent;
  -fx-text-fill: #000d1a;
  -fx-opacity: 0.5;
