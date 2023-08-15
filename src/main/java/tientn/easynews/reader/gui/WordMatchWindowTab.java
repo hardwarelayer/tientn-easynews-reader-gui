@@ -312,7 +312,6 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
         EventHandler<ActionEvent> fncLoadNormalButtonClick = new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent e) {
                 loadNormalKanjisForTest();
-                shuffleAllListModels();
             }
         };
         btnLoadNormalForTest = createButton(FIRST_LOAD_FOR_MAIN_LIST, fncLoadNormalButtonClick);
@@ -320,7 +319,6 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
         EventHandler<ActionEvent> fncLoadNewButtonClick = new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent e) {
                 loadNextKanjisForTest();
-                shuffleAllListModels();
             }
         };
         btnLoadNewForTest = createButton(SECOND_LOAD_FOR_MAIN_LIST, fncLoadNewButtonClick);
@@ -1227,11 +1225,9 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
                     break;
                 case L:
                     loadNormalKanjisForTest();
-                    shuffleAllListModels();
                     break;
                 case N:
                     loadNextKanjisForTest();
-                    shuffleAllListModels();
                     break;
                 case P:
                     loadProblematicWordsForTest();
@@ -1350,7 +1346,6 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
             btnReloadKanjis.setDisable(false);
             refreshKanjiStats();
             loadNormalKanjisForTest();
-            shuffleAllListModels();
         }
         else {
             //System.out.println("data is NOT dirty");
