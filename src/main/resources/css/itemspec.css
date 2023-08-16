@@ -47,18 +47,18 @@
 }
 
 .grid-pane {
-  -fx-font-size: 12pt; 
-  -fx-font-family: Courier New;  
+  -fx-font-size: 12pt;
+  -fx-font-family: Courier New;
 }
 
 .simple-form {
   -fx-font-size: 12pt; 
-  -fx-font-family: Courier New;  
+  -fx-font-family: Courier New;
 }
 
 .tab-pane {
   -fx-font-size: 10pt; 
-  -fx-font-family: Arial;    
+  -fx-font-family: Arial;
 }
 
 .vbox {
@@ -89,19 +89,23 @@
 
 #kanji-column .list-cell {
   -fx-text-fill: white;
-  -fx-control-inner-background: derive(#434343,15%);
+  -fx-base: #373e43;
+  -fx-control-inner-background: derive(-fx-base, 32%);
 }
 #hiragana-column .list-cell {
   -fx-text-fill: white;
-  -fx-control-inner-background: derive(#434343,15%);
+  -fx-base: #373e43;
+  -fx-control-inner-background: derive(-fx-base, 32%);
 }
 #hv-column .list-cell {
   -fx-text-fill: white;
-  -fx-control-inner-background: derive(#434343,15%);
+  -fx-base: #373e43;
+  -fx-control-inner-background: derive(-fx-base, 32%);
 }
 #meaning-column .list-cell {
   -fx-text-fill: white;
-  -fx-control-inner-background: derive(#434343,15%);
+  -fx-base: #373e43;
+  -fx-control-inner-background: derive(-fx-base, 32%);
 }
 
 #wordmatch-top-kanji-label {
