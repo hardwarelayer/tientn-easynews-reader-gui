@@ -87,6 +87,7 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
 
     private CheckBox cbContinuous;
     private CheckBox cbFastHvOnlyMode;
+    private CheckBox cbHighlightKanjiInFastHVOnlyMode;
 
     private ListView<String> lvFirstCol;
     private ListView<String> lvSecondCol;
@@ -287,6 +288,8 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
         cbFastHvOnlyMode = new CheckBox("Fast HV Mode");
         cbFastHvOnlyMode.setIndeterminate(false);
         cbFastHvOnlyMode.setTooltip(new Tooltip("If enabled, word with ascii in hiragana's column will get Fast select mode\n有効にすると、ひらがなの列に ASCII を含む単語が高速選択モードになります。"));
+        cbHighlightKanjiInFastHVOnlyMode = new CheckBox("Highlight in FastHVMode");
+        cbHighlightKanjiInFastHVOnlyMode.setIndeterminate(false);
 
         lblFirstCol = createLabel(sWordMatchEmptyValue);
         lblSecondCol = createLabel(sWordMatchEmptyValue);
@@ -416,7 +419,7 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
         this.addBodyCtl(lblLoaded, 0, 1);
         this.addBodyCtl(lblTotalStats, 1, 1);
         this.addBodyPane(new HBox(lblTest, lblTotalTests, cbContinuous), 2, 1);
-        this.addBodyPane(new HBox(cbFastHvOnlyMode), 3, 1);
+        this.addBodyPane(new HBox(cbFastHvOnlyMode, cbHighlightKanjiInFastHVOnlyMode), 3, 1);
 
         this.addBodyCtl(btnLoadNormalForTest, 0, 2);
         HBox bxLoadNextWords = new HBox(btnLoadNewForTest, tfSizeOfWords);
@@ -797,7 +800,13 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
                     if (!sItem.isEmpty()) {
                         lblSecondCol.setText(sItem);
                         if (cbFastHvOnlyMode.isSelected()) {
-                            if (!doFastHvOnlyMode()) chooseHanVietList();
+                            if (!doFastHvOnlyMode())
+                                chooseHanVietList();
+                            else {
+                                //this mode ensure that correct meaning is chosen
+                                if (cbHighlightKanjiInFastHVOnlyMode.isSelected())
+                                    this.getMidBodyLabel().setStyle("-fx-opacity: 0.8;-fx-effect: dropshadow( one-pass-box, lightblue, 8, 0.0, 2, 0);");
+                            }
                         }
                         else {
                             chooseHanVietList();
@@ -813,6 +822,8 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
                 else if (lvFourthCol.isFocused()) {
                     if (lblFourthCol.getText() != sItem) {
                         lblFourthCol.setText(sItem);
+                        if (cbHighlightKanjiInFastHVOnlyMode.isSelected())
+                          this.getMidBodyLabel().setStyle("-fx-opacity: 0.8;-fx-effect: dropshadow( one-pass-box, lightyellow, 8, 0.0, 2, 0);");
                     }
                     else {
                         //double ENTER on fourth list
@@ -1734,7 +1745,8 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
               }
 
               //restore color
-              //this.getMidBodyLabel().setStyle("-fx-text-fill: #000b10; -fx-opacity: 0.5");
+              if (cbHighlightKanjiInFastHVOnlyMode.isSelected())
+                this.getMidBodyLabel().setStyle("-fx-opacity: 0.4; -fx-effect: none;");
               String sRemind = this.getBottomBodyLabel().getText();
               if (sRemind.length() + kanji.length() >= JBGConstants.WORDMATCH_MAX_REMIND_CHARS) {
                 sRemind = sRemind.replace(sRemind.substring(0, (sRemind.length() + kanji.length())-JBGConstants.WORDMATCH_MAX_REMIND_CHARS), "");
