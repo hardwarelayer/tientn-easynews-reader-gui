@@ -69,7 +69,7 @@ public final class AppGUI extends TabbedAppBase {
         setDefaultArgs("Article Learn&Read - (c) Tran Ngoc Tien 2021", JBGConstants.MIN_WIDTH, JBGConstants.MIN_HEIGHT);
 
         this.dataModel = new ReaderModel();
-        System.out.println(this.dataModel.toString());
+        //System.out.println(this.dataModel.toString());
 
         MainTabbedPane tabPane = new MainTabbedPane(getDesktop(), primaryStage, this.dataModel);
         tabPane.initTabs();

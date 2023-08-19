@@ -437,7 +437,7 @@ public class KanjiDictionaryTab extends SimpleStackedFormBase {
     }
 
     @Override
-    protected void processKeyPress(final KeyEvent ke) {
+    protected void processKeypressEvent(final KeyEvent ke) {
         KeyCode kc = ke.getCode();
         if (kc == KeyCode.ENTER) {
             doSearchKanji();

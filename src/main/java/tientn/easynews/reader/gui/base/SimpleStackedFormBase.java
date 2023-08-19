@@ -119,20 +119,23 @@ public class SimpleStackedFormBase extends VBox {
 
     initForm();
 
+    //because, now we have forward the keyevent from tabpane directly to function processKeypressEvent
+    //we don't need to register this, or the event will be duplicated.
+    //this feature now only need if the class is used outside TabPaneBase
+    /*
     this.addEventFilter(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {
         //or scene.setOnKeyPressed((KeyEvent ke) -> {}
         public void handle(KeyEvent ke) {
             if (!(ke.getCode() == KeyCode.W) && !(ke.isMetaDown() || ke.isControlDown())) {
                 //System.out.println("SimpleStackedFormBase KeyPressed event: " + ke.getCode());
-                processKeyPress(ke);
+                processKeypressEvent(ke);
             }
         }
       });
-
+    */
   }
 
-  protected void processKeyPress(final KeyEvent ke) {
-  }
+  protected void processKeypressEvent(final KeyEvent ke) {}
 
   public void addHeaderPane(final Pane pane, final int col, final int row) {
     this.headerPane.add(pane, col, row);

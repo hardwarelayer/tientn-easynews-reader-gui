@@ -19,6 +19,8 @@ import javafx.event.ActionEvent;
 import javafx.geometry.Pos;
 import javafx.geometry.VPos;
 import javafx.geometry.Insets;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 
 import javafx.stage.FileChooser;
 import java.awt.Desktop;
@@ -68,6 +70,7 @@ public class TabPaneBase extends TabPane {
 
   protected void processTabChangeEvent(final int tabIdx) {}
   protected void processFirstShowEvent() {}
+  protected void processKeypressEvent(KeyEvent ke) {}
 
   public Tab addSimpleFormAsTab(final String tabTitle, final SimpleFormBase frm) {
     Tab tabCtl = new Tab(tabTitle, frm);

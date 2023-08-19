@@ -86,14 +86,16 @@ public abstract class TabbedAppBase extends Application {
             //or scene.setOnKeyPressed((KeyEvent ke) -> {}
             public void handle(KeyEvent ke) {
                 if (ke.getCode() == KeyCode.W && (ke.isMetaDown() || ke.isControlDown())) {
-                    System.out.println("Key Pressed: " + ke.getCode());
+                    //System.out.println("Close key Pressed: " + ke.getCode());
                     ke.consume(); // <-- stops passing the event to next node
                     //exiting
                     Platform.exit();
                     System.exit(0);
                 }
                 else {
-                    //normal key press
+                    //normal key press, we'll pass to nodes
+                    //System.out.println("Key Pressed: " + ke.getCode());
+                    ctl.processKeypressEvent(ke);
                 }
             }
         });

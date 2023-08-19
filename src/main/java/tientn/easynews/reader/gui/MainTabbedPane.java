@@ -25,6 +25,8 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Platform;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 
 import javafx.scene.control.TabPane;
 import javafx.scene.control.Tab;
@@ -104,6 +106,20 @@ public final class MainTabbedPane extends TabPaneBase {
     @Override
     protected void processFirstShowEvent() {
         paneManagement.processFirstShowEvent();
+    }
+
+    @Override
+    protected void processKeypressEvent(KeyEvent ke) {
+        int iSelTab = this.getSelectionModel().getSelectedIndex();
+        System.out.println("Current selected tab: "+String.valueOf(iSelTab));
+        switch (iSelTab) {
+            case 2:
+                //wordmatch window
+                if (paneWordMatch != null) {
+                    paneWordMatch.processKeypressEvent(ke);
+                }
+                break;
+        }
     }
 
     public void initTabs() {
