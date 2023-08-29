@@ -111,7 +111,7 @@ public final class MainTabbedPane extends TabPaneBase {
     @Override
     protected void processKeypressEvent(KeyEvent ke) {
         int iSelTab = this.getSelectionModel().getSelectedIndex();
-        System.out.println("Current selected tab: "+String.valueOf(iSelTab));
+        //System.out.println("Current selected tab: "+String.valueOf(iSelTab));
         switch (iSelTab) {
             case 2:
                 //wordmatch window

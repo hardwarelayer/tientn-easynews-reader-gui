@@ -111,7 +111,7 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
 
     private static final String FIRST_LOAD_FOR_MAIN_LIST = "(L)oad Normal";
     private static final String SECOND_LOAD_FOR_MAIN_LIST = "Load (N)ew ";
-    private static final String FIRST_LOAD_FOR_ARTICLE = "(L)oad Previous";
+    private static final String FIRST_LOAD_FOR_ARTICLE = "(L)oad Current";
     private static final String SECOND_LOAD_FOR_ARTICLE = "Load (N)ext ";
 
     private TextField tfSizeOfWords;
@@ -1796,6 +1796,8 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
               if (totalJCoin > 0) totalJCoin--;
               noteWord(kanji);
               chooseKanjiList();
+              if (cbHighlightKanjiInFastHVOnlyMode.isSelected())
+                this.getMidBodyLabel().setStyle("-fx-opacity: 0.4; -fx-effect: none;");
             }
             //update the statistic of word
             if (!updateWordStat(matchRes[0], matchRes[1])) {
