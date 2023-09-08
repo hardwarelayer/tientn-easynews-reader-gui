@@ -12,3 +12,8 @@ CREATE TABLE worktemp (
   last_tfmt VARCHAR(255)
 );
 INSERT INTO worktemp VALUES('');
+
+
+### build
+
+   % gradle clean build war

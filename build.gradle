@@ -16,6 +16,7 @@ plugins {
     // Apply the application plugin to add support for building a CLI application.
     id 'application'
 
+    id 'war'
 }
 
 repositories {
@@ -34,15 +35,15 @@ dependencies {
     compileOnly 'org.projectlombok:lombok:1.18.20'
     annotationProcessor 'org.projectlombok:lombok:1.18.20'
 
-    compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.8.8'
-    compile group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.8.8'
-    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.8.8'
-    compile 'com.googlecode.json-simple:json-simple:1.1.1'
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.8.8'
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.8.8'
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.8.8'
+    implementation 'com.googlecode.json-simple:json-simple:1.1.1'
 
     //mysql
     //note: 8.0.15 has this issue when closing conn: javax.net.ssl.SSLException: closing inbound before receiving peer's close_notify
-    compile group: 'mysql', name: 'mysql-connector-java', version: '8.0.15'
-    runtime "mysql:mysql-connector-java:8.0.20"
+    implementation group: 'mysql', name: 'mysql-connector-java', version: '8.0.15'
+    runtimeOnly "mysql:mysql-connector-java:8.0.20"
 }
 
 application {
@@ -59,4 +60,12 @@ javafx {
 
 test {
     testLogging.showStandardStreams = true
+}
+
+war {
+    enabled=true
+    manifest {
+        from 'META-INF/MANIFEST.txt'
+        attributes 'Main-Class': mainClassName
+    }
 }
