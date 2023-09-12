@@ -15,8 +15,6 @@ plugins {
 
     // Apply the application plugin to add support for building a CLI application.
     id 'application'
-
-    id 'war'
 }
 
 repositories {
@@ -54,7 +52,7 @@ application {
 //<----- and here
 //javafx has several bugs, we should use latest release: https://en.wikipedia.org/wiki/JavaFX
 javafx {
-    version = '16'
+    version = '20'
     modules = [ 'javafx.controls', 'javafx.fxml', 'javafx.media' ]
 }
 
@@ -62,7 +60,7 @@ test {
     testLogging.showStandardStreams = true
 }
 
-war {
+jar {
     enabled=true
     manifest {
         from 'META-INF/MANIFEST.txt'

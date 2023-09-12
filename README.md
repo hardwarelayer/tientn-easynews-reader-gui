@@ -16,4 +16,5 @@ INSERT INTO worktemp VALUES('');
 
 ### build
 
-   % gradle clean build war
+   % gradle clean build jar
+
