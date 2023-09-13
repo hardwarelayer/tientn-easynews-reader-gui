@@ -21,6 +21,16 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.text.TextAlignment;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Tooltip;
+import javafx.animation.Timeline;
+import javafx.animation.KeyFrame;
+import javafx.animation.Animation;
+import javafx.util.Duration;
+import javafx.animation.FadeTransition;
+import javafx.animation.PauseTransition;
+import javafx.animation.RotateTransition;
+import javafx.animation.ScaleTransition;
+import javafx.animation.SequentialTransition;
+import javafx.animation.TranslateTransition;
 
 import javafx.stage.FileChooser;
 import java.io.File;
@@ -123,6 +133,7 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
     private int iContinuousCorrectTestBonus = 0;
 
     private String currentSearchKeys = "";
+    Timeline kjBlinkTimeline = null;
 
     List<String> lstProblematicWords;
 
@@ -585,7 +596,6 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
                 JBGKanjiItem item = lstKJ.get(i);
                 fillItemToLists(item);
             }
-            loadDummiesForTest();
         }
 
         refreshStartButton();
@@ -624,7 +634,6 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
                 JBGKanjiItem item = lstKJ.get(i);
                 fillItemToLists(item);
             }
-            loadDummiesForTest();
         }
 
         refreshStartButton();
@@ -662,7 +671,6 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
                 JBGKanjiItem item = lstKJ.get(i);
                 fillItemToLists(item);
             }
-            loadDummiesForTest();
         }
 
         refreshStartButton();
@@ -1506,6 +1514,7 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
             cbContinuous.setSelected(true);
         }
 
+        loadDummiesForTest();
 
         lblTestStatus.setText("Started!");
 
@@ -1523,6 +1532,18 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
 
         lvFirstCol.setDisable(true);
         autoSelectKanji();
+
+        if (this.kjBlinkTimeline == null) {
+            this.kjBlinkTimeline = new Timeline(
+               new KeyFrame(Duration.seconds(0.8), evt -> this.getMidBodyLabel().setVisible(false)),
+               new KeyFrame(Duration.seconds(0.1), evt -> this.getMidBodyLabel().setVisible(true)));
+            kjBlinkTimeline.setCycleCount(Animation.INDEFINITE);
+        }
+
+        if (cbHighlightKanjiInFastHVOnlyMode.isSelected()) {
+            kjBlinkTimeline.play();
+        }
+
         //chooseKanjiList();
 
         this.getDataModel().setTestStarted(true);
@@ -1547,6 +1568,10 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
         clearWordListSelection();
 
         lvFirstCol.setDisable(false);
+
+        if (kjBlinkTimeline != null && kjBlinkTimeline.getStatus() != Animation.Status.STOPPED) {
+            kjBlinkTimeline.stop();
+        }
 
         this.getDataModel().setTestStarted(false);
     }
@@ -1745,8 +1770,9 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
               }
 
               //restore color
-              if (cbHighlightKanjiInFastHVOnlyMode.isSelected())
-                this.getMidBodyLabel().setStyle("-fx-opacity: 0.4; -fx-effect: none;");
+              if (cbHighlightKanjiInFastHVOnlyMode.isSelected()) {
+                  this.getMidBodyLabel().setStyle("-fx-opacity: 0.4; -fx-effect: none;");
+              }
               String sRemind = this.getBottomBodyLabel().getText();
               if (sRemind.length() + kanji.length() >= JBGConstants.WORDMATCH_MAX_REMIND_CHARS) {
                 sRemind = sRemind.replace(sRemind.substring(0, (sRemind.length() + kanji.length())-JBGConstants.WORDMATCH_MAX_REMIND_CHARS), "");
