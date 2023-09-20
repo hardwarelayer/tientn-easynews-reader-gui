@@ -450,6 +450,7 @@ public class KanjiDictionaryTab extends SimpleStackedFormBase {
         return;
     }
 
+    public void onStopShow() {}
 
     private int removeItemFromList(ListView<String> lv, final String sText) {
         ObservableList<String> items = lv.getItems();

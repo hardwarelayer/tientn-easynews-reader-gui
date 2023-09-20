@@ -936,6 +936,8 @@ public class ArticleWordBuildWindowTab extends SimpleFormBase {
         return sSelected;
     }
 
+    public void onStopShow() {}
+
     public void onShow() {
         tafArticleJAContent.lookup(".content").setStyle("-fx-background-color: lightgray;");
         tafArticleJAContent.setStyle("-fx-font-size: 14pt;-fx-font-family: Arial;");

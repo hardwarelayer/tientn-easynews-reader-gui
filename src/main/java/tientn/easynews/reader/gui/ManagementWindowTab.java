@@ -968,4 +968,7 @@ public class ManagementWindowTab extends GridPaneBase {
 
     public void onShow() {
     }
+
+    public void onStopShow() {}
+
 }

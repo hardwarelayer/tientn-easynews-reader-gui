@@ -786,6 +786,8 @@ System.out.println("Sentence: " + s.getSentence() + " MP3:" + sRet);
         return iTotal;
     }
 
+    public void onStopShow() {}
+
     public void onShow() {
         //always refresh this
         lblJCoinAmount.setText(String.valueOf(this.getDataModel().getJCoin()));

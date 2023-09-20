@@ -234,6 +234,8 @@ public class EmptyWindowTab extends SimpleFormBase {
         return sSelected;
     }
 
+    public void onStopShow() {}
+
     public void onShow() {
         System.out.println("OnShow BuildWord");
     }

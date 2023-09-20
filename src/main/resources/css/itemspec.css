@@ -269,6 +269,55 @@
     -fx-pref-height: 8;
 }
 
+#auto-kanji-top-kanji-label {
+ -fx-font-size: 140pt; 
+ -fx-font-family: Courier;
+ -fx-font-weight: bold;
+ -fx-background-color: transparent;
+ -fx-text-fill: #000d1a;
+ -fx-opacity: 0.5;
+}
+
+#auto-kanji-middle-kanji-label {
+ -fx-font-size: 180pt; 
+ -fx-font-family: Courier;
+ -fx-alignment: center;
+ -fx-min-width: 100%;
+ -fx-font-weight: bold;
+ -fx-background-color: transparent;
+ -fx-text-fill: white;
+ -fx-opacity: 0.8;
+}
+
+#auto-kanji-bottom-kanji-label {
+ -fx-font-size: 150pt; 
+ -fx-font-family: Courier;
+ -fx-alignment: center-right;
+ -fx-font-weight: normal;
+ -fx-background-color: transparent;
+ -fx-text-fill: #000d1a;
+ -fx-opacity: 0.5;
+}
+
+#auto-kanji-loaded-kanji-column {
+  -fx-font-size: 12pt;
+}
+
+#auto-kanji-shown-hira-label {
+  -fx-font-size: 32px;
+ -fx-font-family: Courier;
+ -fx-font-weight: bold;
+}
+#auto-kanji-shown-hv-label {
+  -fx-font-size: 32px;
+ -fx-font-family: Courier;
+ -fx-font-weight: bold;
+}
+#auto-kanji-shown-meaning-label {
+  -fx-font-size: 32px;
+ -fx-font-family: Courier;
+ -fx-font-weight: bold;
+}
 
 /* ------------------------ ArticleWord -------------------------*/
 #build-word-ja-content {

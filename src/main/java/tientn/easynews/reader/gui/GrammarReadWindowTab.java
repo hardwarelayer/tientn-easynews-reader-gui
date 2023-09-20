@@ -604,6 +604,8 @@ public class GrammarReadWindowTab extends SimpleFormBase {
         return iTotal;
     }
 
+    public void onStopShow() {}
+
     public void onShow() {
         //always refresh this
         lblJCoinAmount.setText(String.valueOf(this.getDataModel().getJCoin()));

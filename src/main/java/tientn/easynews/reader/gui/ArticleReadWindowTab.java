@@ -533,6 +533,7 @@ public class ArticleReadWindowTab extends SimpleFormBase {
         if (this.getDataModel().isReadStarted()) return;
 
         this.currentTNA = this.getDataModel().getSelectedTNA();
+        if (this.currentTNA == null) return;
 
         String sTNAId = this.getDataModel().getSelectedArticleId();
         lblSelectedArticleId.setText(sTNAId);
@@ -643,6 +644,8 @@ public class ArticleReadWindowTab extends SimpleFormBase {
         }
         return iTotal;
     }
+
+    public void onStopShow() {}
 
     public void onShow() {
         //always refresh this

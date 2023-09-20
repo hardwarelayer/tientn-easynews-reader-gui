@@ -82,6 +82,14 @@ public abstract class TabbedAppBase extends Application {
         // Top level container for all view content
         Scene scene = new Scene(root, this.maxWidth, this.maxHeight);
 
+        scene.addEventFilter(MouseEvent.MOUSE_PRESSED, new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent me) {
+                //System.out.println("mouse click detected! " + mouseEvent.getSource());
+                ctl.processMouseEvent(me);
+            }
+        });
+
         scene.addEventFilter(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {
             //or scene.setOnKeyPressed((KeyEvent ke) -> {}
             public void handle(KeyEvent ke) {

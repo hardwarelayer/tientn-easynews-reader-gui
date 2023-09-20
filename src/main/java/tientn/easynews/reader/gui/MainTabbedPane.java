@@ -67,10 +67,13 @@ public final class MainTabbedPane extends TabPaneBase {
     WordMatchWindowTab paneWordMatch;
     ArticleWordBuildWindowTab paneTNAWordBuilder;
     ArticleReadWindowTab paneArticleRead;
+    KanjiAutoDisplayTab paneArticleAutoDisplay;
     GrammarReadWindowTab paneGrammarRead;
     GrammarListenWindowTab paneGrammarListen;
     TableViewTab tblViewTab;
     KanjiDictionaryTab kanjiDictTab;
+
+    private int iLastShownTab = 0, iCurrentShownTab = 0;
 
     public MainTabbedPane(Desktop desktop, Stage primStage, final ReaderModel model) {
         super();
@@ -92,14 +95,46 @@ public final class MainTabbedPane extends TabPaneBase {
             paneWordMatch.onShow();
             break;
         case 3:
-            paneArticleRead.onShow();
+            paneArticleAutoDisplay.onShow();
             break;
         case 4:
-            paneGrammarRead.onShow();
+            paneArticleRead.onShow();
             break;
         case 5:
+            paneGrammarRead.onShow();
+            break;
+        case 6:
             paneGrammarListen.onShow();
             break;
+        }
+        iLastShownTab = iCurrentShownTab;
+        iCurrentShownTab = tabIdx;
+
+        if (iLastShownTab != iCurrentShownTab) {
+            //notify last tab about this switch
+            switch (iLastShownTab) {
+            case 0:
+                paneManagement.onStopShow();
+                break;
+            case 1:
+                paneTNAWordBuilder.onStopShow();
+                break;
+            case 2:
+                paneWordMatch.onStopShow();
+                break;
+            case 3:
+                paneArticleAutoDisplay.onStopShow();
+                break;
+            case 4:
+                paneArticleRead.onStopShow();
+                break;
+            case 5:
+                paneGrammarRead.onStopShow();
+                break;
+            case 6:
+                paneGrammarListen.onStopShow();
+                break;
+            }
         }
     }
 
@@ -122,6 +157,20 @@ public final class MainTabbedPane extends TabPaneBase {
         }
     }
 
+    @Override
+    protected void processMouseEvent(MouseEvent me) {
+        int iSelTab = this.getSelectionModel().getSelectedIndex();
+        //System.out.println("Current selected tab: "+String.valueOf(iSelTab));
+        switch (iSelTab) {
+            case 2:
+                //wordmatch window
+                if (paneWordMatch != null) {
+                    paneWordMatch.processMouseEvent(me);
+                }
+                break;
+        }
+    }
+
     public void initTabs() {
 
         paneManagement = new ManagementWindowTab("Management", getDesktop(), primaryStage, this.dataModel, this);
@@ -130,6 +179,7 @@ public final class MainTabbedPane extends TabPaneBase {
 
         paneTNAWordBuilder = new ArticleWordBuildWindowTab(JBGConstants.MIN_WIDTH, JBGConstants.MIN_HEIGHT, getDesktop(), primaryStage, this.dataModel, this);
         paneWordMatch = new WordMatchWindowTab(JBGConstants.MIN_WIDTH, JBGConstants.MIN_HEIGHT, getDesktop(), primaryStage, this.dataModel);
+        paneArticleAutoDisplay = new KanjiAutoDisplayTab(JBGConstants.MIN_WIDTH, JBGConstants.MIN_HEIGHT, getDesktop(), primaryStage, this.dataModel);
         paneArticleRead = new ArticleReadWindowTab(JBGConstants.MIN_WIDTH, JBGConstants.MIN_HEIGHT, getDesktop(), primaryStage, this.dataModel);
         paneGrammarRead = new GrammarReadWindowTab(JBGConstants.MIN_WIDTH, JBGConstants.MIN_HEIGHT, getDesktop(), primaryStage, this.dataModel);
         paneGrammarListen = new GrammarListenWindowTab(JBGConstants.MIN_WIDTH, JBGConstants.MIN_HEIGHT, getDesktop(), primaryStage, this.dataModel);
@@ -140,6 +190,7 @@ public final class MainTabbedPane extends TabPaneBase {
         this.addPaneAsTab("Management", paneManagement);
         this.addSimpleFormAsTab("ArticleWords", paneTNAWordBuilder);
         this.addSimpleStackedFormAsTab("WordMatch", paneWordMatch);
+        this.addSimpleStackedFormAsTab("Auto Kanji Display", paneArticleAutoDisplay);
         this.addSimpleFormAsTab("ArticleRead", paneArticleRead);
         this.addSimpleFormAsTab("GrammarRead", paneGrammarRead);
         this.addSimpleFormAsTab("GrammarListen", paneGrammarListen);

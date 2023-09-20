@@ -71,6 +71,7 @@ public class TabPaneBase extends TabPane {
   protected void processTabChangeEvent(final int tabIdx) {}
   protected void processFirstShowEvent() {}
   protected void processKeypressEvent(KeyEvent ke) {}
+  protected void processMouseEvent(MouseEvent me) {}
 
   public Tab addSimpleFormAsTab(final String tabTitle, final SimpleFormBase frm) {
     Tab tabCtl = new Tab(tabTitle, frm);

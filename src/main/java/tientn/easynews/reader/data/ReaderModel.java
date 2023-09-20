@@ -537,6 +537,22 @@ public class ReaderModel {
 
   }
 
+  public String getArticleKJSubsetStat() {
+   if (this.currentWorkMode == JBGConstants.TEST_WORD_IN_ARTICLE) {
+      TFMTTNAData currentTNA = getSelectedTNA();
+      if (currentTNA != null) {
+        int iTotalKJ = currentTNA.getKanjisForTest().size();
+
+        return new StringBuilder(
+            String.valueOf(this.kanjiSubsetStart) +
+            "/" +
+            String.valueOf(iTotalKJ)
+            ).toString();
+      }
+    }
+    return null;
+  }
+
   public List<JBGKanjiItem> getSpecificKJSubset(List<String> lstKanjiWords) {
     if (this.currentWorkMode == JBGConstants.TEST_WORD_IN_MAJOR_LIST) {
       //only load the kanjis in the string list

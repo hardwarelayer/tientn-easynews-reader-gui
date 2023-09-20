@@ -136,6 +136,7 @@ public class SimpleStackedFormBase extends VBox {
   }
 
   protected void processKeypressEvent(final KeyEvent ke) {}
+  protected void processMouseEvent(final MouseEvent me) {}
 
   public void addHeaderPane(final Pane pane, final int col, final int row) {
     this.headerPane.add(pane, col, row);
