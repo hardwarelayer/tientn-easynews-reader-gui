@@ -418,7 +418,7 @@ public class KanjiAutoDisplayTab extends SimpleStackedFormBase {
                     }
                 }
                 else {
-                    if (this.iCurrentKanjiOnDisplay < lvFirstCol.getItems().size()) {
+                    if (this.iCurrentKanjiOnDisplay + 1 < lvFirstCol.getItems().size()) {
                         this.iCurrentKanjiOnDisplay++;
                     }
                     else {
