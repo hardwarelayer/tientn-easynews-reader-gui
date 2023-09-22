@@ -19,14 +19,24 @@ import javafx.event.EventHandler;
 import javafx.event.ActionEvent;
 import javafx.scene.input.KeyEvent;
 import javafx.geometry.VPos;
+import javafx.scene.control.Alert;
+import javafx.scene.control.DialogPane;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 
 import javafx.stage.FileChooser;
 import java.awt.Desktop;
+import java.awt.desktop.QuitEvent;
+import java.awt.desktop.QuitResponse;
+import java.awt.desktop.QuitHandler;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.Optional;
+
 import javafx.application.Platform;
 
 import javafx.scene.layout.VBox;
@@ -95,10 +105,17 @@ public abstract class TabbedAppBase extends Application {
             public void handle(KeyEvent ke) {
                 if (ke.getCode() == KeyCode.W && (ke.isMetaDown() || ke.isControlDown())) {
                     //System.out.println("Close key Pressed: " + ke.getCode());
-                    ke.consume(); // <-- stops passing the event to next node
-                    //exiting
-                    Platform.exit();
-                    System.exit(0);
+
+                    if (showQuestion("Exit confirmation", "Confirm", "Do you really want to exit?")) {
+                        ke.consume(); // <-- stops passing the event to next node
+                        //exiting
+                        Platform.exit();
+                        System.exit(0);
+                    }
+                    else
+                    {
+                        ke.consume(); // <-- stops passing the event to next node
+                    }
                 }
                 else {
                     //normal key press, we'll pass to nodes
@@ -108,12 +125,32 @@ public abstract class TabbedAppBase extends Application {
             }
         });
 
+        //no use
+        if (Desktop.isDesktopSupported()) {
+            Desktop desktop = Desktop.getDesktop();
+            desktop.setQuitHandler(new QuitHandler()
+            {
+                @Override
+                public void handleQuitRequestWith(QuitEvent evt, QuitResponse res)
+                {
+                    System.out.println("quit request detected!");
+                    // TODO: Handle the quit request
+                    // res.cancelQuit();  // Cancel the quit request
+                }
+            });
+        }
+
         primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
             @Override
             public void handle(WindowEvent t) {
                 //If you have non-daemon threads running, Platform.exit() will not forcibly shut them down, but System.exit() will.
-                Platform.exit();
-                System.exit(0);
+                if (showQuestion("Exit confirmation", "Confirm", "Do you really want to exit?")) {
+                    Platform.exit();
+                    System.exit(0);
+                }
+                else {
+                    t.consume();
+                }
             }
         });
         scene.getStylesheets().add("/css/darktheme.css");//root.css");
@@ -125,5 +162,23 @@ public abstract class TabbedAppBase extends Application {
         primaryStage.show();
 
         ctl.processFirstShowEvent();
+    }
+
+    protected boolean showQuestion(final String title, final String header, final String msg) {
+      Alert alert = new Alert(AlertType.CONFIRMATION);
+      alert.setTitle(title);
+      alert.setHeaderText(header);
+      alert.setContentText(msg);
+
+      DialogPane dialogPane = alert.getDialogPane();
+      dialogPane.getStylesheets().add(
+              getClass().getResource("/css/dialog.css").toExternalForm());
+
+      Optional<ButtonType> result = alert.showAndWait();
+      if (result.get() == ButtonType.OK){
+          return true;
+      } else {
+          return false;
+      }
     }
 }
