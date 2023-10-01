@@ -6,12 +6,14 @@ import javafx.scene.control.Control;
 import javafx.scene.control.Label;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.TilePane;
 import javafx.scene.layout.Pane;
 import javafx.scene.control.Alert;
 import javafx.scene.control.DialogPane;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.TextInputDialog;
 
 import java.util.Optional;
 import javafx.stage.Stage;
@@ -25,8 +27,13 @@ import javafx.scene.input.KeyCode;
 import javafx.event.EventHandler;
 import javafx.event.ActionEvent;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.control.TextField;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.Dialog;
 
 import javafx.geometry.VPos;
+import javafx.geometry.HPos;
+import javafx.geometry.Insets;
 
 import javafx.stage.FileChooser;
 import java.awt.Desktop;
@@ -35,6 +42,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.util.Pair;
 import javafx.application.Platform;
 
 import javafx.scene.control.TabPane;
@@ -172,6 +180,56 @@ public class SimpleFormBase extends VBox {
               getClass().getResource("/css/dialog.css").toExternalForm());
 
       Optional<ButtonType> result = alert.showAndWait();
+  }
+
+  protected void showTextInputDialog(final String header, final String title, final String prompt) {
+    TextInputDialog td = new TextInputDialog(header);
+    td.setHeaderText(header);
+    td.setTitle(title);
+    td.setContentText(prompt);
+    td.show();
+  }
+
+  protected String showMultilineTextInputDialog(final String title, final String prompt) {
+
+    Dialog<String> dialog = new Dialog<>();
+    dialog.setTitle(title);
+
+    // Set the button types.
+    ButtonType loginButtonType = new ButtonType("OK", ButtonData.OK_DONE);
+    dialog.getDialogPane().getButtonTypes().addAll(loginButtonType, ButtonType.CANCEL);
+    dialog.getDialogPane().getStylesheets().add(
+              getClass().getResource("/css/dialog.css").toExternalForm());
+
+    TextArea newText = new TextArea();
+    newText.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.2));
+    newText.prefWidthProperty().bind(getPrimaryStage().widthProperty().multiply(0.5));
+    newText.setId("build-word-ja-content");
+    newText.setWrapText(true);
+
+    newText.setPromptText(prompt);
+
+    HBox pane = new HBox(newText);
+    //pane.setHgap(10);
+    //pane.setVgap(10);
+    //pane.setPadding(new Insets(20, 150, 10, 10));
+    dialog.getDialogPane().setContent(pane);
+
+    // Request focus on the username field by default.
+    Platform.runLater(() -> newText.requestFocus());
+
+    // Convert the result to a username-password-pair when the login button is clicked.
+    dialog.setResultConverter(dialogButton -> {
+        if (dialogButton == loginButtonType) {
+            return new String(newText.getText());
+        }
+        return null;
+    });
+
+    Optional<String> result = dialog.showAndWait();
+
+    if (result.isEmpty()) return null;
+    return result.get();
   }
 
 }

@@ -29,6 +29,8 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.OverrunStyle;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.Tooltip;
 import javafx.animation.Timeline;
 import javafx.animation.KeyFrame;
 import javafx.animation.Animation;
@@ -66,6 +68,8 @@ import javafx.scene.control.SelectionMode;
 import javafx.collections.ObservableList;
 import javafx.scene.input.KeyCode;
 import javax.swing.KeyStroke;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 
 import tientn.easynews.reader.gui.base.SimpleStackedFormBase;
 import tientn.easynews.reader.data.ReaderModel;
@@ -92,6 +96,9 @@ public class KanjiAutoDisplayTab extends SimpleStackedFormBase {
     private Label lblStartAnchor;
     private Label lblEndAnchor;
     private Label lblShownHira, lblShownHv, lblShownMeaning;
+    private Label lblBottomKanji, lblBottomInfo, lblBottomLastInfo, lblBottomRemind;
+
+    private CheckBox cbMinimalAutoDisplay;
 
     private TextField tfMaxWordDisplaySteps;
 
@@ -122,7 +129,7 @@ public class KanjiAutoDisplayTab extends SimpleStackedFormBase {
         this.getMidBodyLabel().setId("auto-kanji-middle-kanji-label");
         this.getBottomBodyLabel().setId("auto-kanji-bottom-kanji-label");
 
-        this.getMidBodyLabel().setStyle("-fx-opacity: 0.5;-fx-effect: none;");
+        this.setMidBodyLabelStyle("-fx-opacity: 0.5;-fx-effect: none;");
         this.getMidBodyLabel().setWrapText(true);
         this.getMidBodyLabel().setTextOverrun(OverrunStyle.CLIP);
     }
@@ -145,6 +152,17 @@ public class KanjiAutoDisplayTab extends SimpleStackedFormBase {
         this.addBodyColumn(100);
 
         Label lblLoadedKanjis = new Label("Total Kanjis Loaded:");
+        cbMinimalAutoDisplay = new CheckBox("Minimal display");
+        cbMinimalAutoDisplay.setIndeterminate(false);
+        cbMinimalAutoDisplay.setTooltip(new Tooltip("If enabled, word will be shown in minimal display inside the bottom bar.\n有効にすると、単語が下部バー内の最小限の表示で表示されます。"));
+
+        cbMinimalAutoDisplay.selectedProperty().addListener(new ChangeListener<Boolean>() {
+            @Override
+            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+                toggleBigKanjiFields(!newValue);
+            }
+        });
+
         lblTotalKanjis = createLabel(String.format("%d/%d", 0, this.getDataModel().getDataKanjiItems().size()));
         lblJCoinAmount = createLabel("0");
         lblJCoinAmount.setId("wordmatch-coin-amount");
@@ -215,16 +233,35 @@ public class KanjiAutoDisplayTab extends SimpleStackedFormBase {
 
         VBox bxShownContent = new VBox(lblShownHira, lblShownHv, lblShownMeaning);
         bxShownContent.prefWidthProperty().bind(getPrimaryStage().widthProperty().multiply(1));
+        bxShownContent.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.43));
         bxShownContent.setAlignment(CENTER);
         HBox bxControlBox = new HBox(new Label("Kanjis"), lblTotalKanjis, btnStartAutoDisplay, 
             new Label("Current JCoin:"), lblJCoinAmount,
             new Label("Display Steps:"), tfMaxWordDisplaySteps,
             new Label("Start Anchor:"), lblStartAnchor,
             new Label("End Anchor:"), lblEndAnchor, 
-            btnStopAutoDisplay);
+            btnStopAutoDisplay,
+            cbMinimalAutoDisplay);
         this.addBodyPane(bxControlBox, 0, 0);
         this.addBodyCtl(lvFirstCol, 0, 1);
         this.addBodyPane(bxShownContent, 0, 2);
+
+        lblBottomKanji = new Label("...");
+        lblBottomInfo = new Label("...");
+        lblBottomLastInfo = new Label("...");
+        lblBottomRemind = new Label("...");
+        lblBottomKanji.prefWidthProperty().bind(getPrimaryStage().widthProperty().multiply(0.08));
+        lblBottomInfo.prefWidthProperty().bind(getPrimaryStage().widthProperty().multiply(0.08));
+        lblBottomLastInfo.prefWidthProperty().bind(getPrimaryStage().widthProperty().multiply(0.08));
+        lblBottomRemind.prefWidthProperty().bind(getPrimaryStage().widthProperty().multiply(0.76));
+        lblBottomInfo.setId("auto-kanji-min-bottom-info-label");
+        lblBottomLastInfo.setId("auto-kanji-min-bottom-info-label");
+
+        HBox bxBottomHBar = new HBox(lblBottomKanji, lblBottomInfo, lblBottomLastInfo, lblBottomRemind);
+        bxBottomHBar.setSpacing(2);
+        VBox bxBottomVBar = new VBox(bxBottomHBar);
+        bxBottomVBar.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.11));
+        this.addBodyPane(bxBottomVBar, 0, 3);
     }
 
     private void createTableViewColumn(final TableView<DictKanjiTableViewItem> tblView, final String title, final double width)
@@ -308,6 +345,25 @@ public class KanjiAutoDisplayTab extends SimpleStackedFormBase {
         this.lblShownHira.setText("");
         this.lblShownHv.setText("");
         this.lblShownMeaning.setText("");
+    }
+
+    private void toggleBigKanjiFields(final boolean flg) {
+        this.getMidBodyLabel().setVisible(flg);
+        this.getBottomBodyLabel().setVisible(flg);
+        lblShownHira.setVisible(flg);
+        lblShownHv.setVisible(flg);
+        lblShownMeaning.setVisible(flg);
+        lvFirstCol.setVisible(flg);
+    }
+
+    private void setMidBodyLabelStyle(final String css) {
+        if (cbMinimalAutoDisplay.isSelected()) return;
+        this.getMidBodyLabel().setStyle(css);
+    }
+
+    private void setMidBodyLabelVisible(final boolean flg) {
+        if (cbMinimalAutoDisplay.isSelected() && flg) return;
+        this.getMidBodyLabel().setVisible(flg);
     }
 
     private void processLoadTNA() {
@@ -428,12 +484,24 @@ public class KanjiAutoDisplayTab extends SimpleStackedFormBase {
 
                 //save last kanji to remind row
                 String kanji = this.getMidBodyLabel().getText();
-                String sRemind = this.getBottomBodyLabel().getText();
-                if (sRemind.length() + kanji.length() >= JBGConstants.WORDMATCH_MAX_REMIND_CHARS) {
-                  sRemind = sRemind.replace(sRemind.substring(0, (sRemind.length() + kanji.length())-JBGConstants.WORDMATCH_MAX_REMIND_CHARS), "");
+
+                if (cbMinimalAutoDisplay.isSelected()) {
+                    String sMinDispRemind = lblBottomRemind.getText();
+                    if (sMinDispRemind.length() + kanji.length() >= JBGConstants.AUTODISP_REMIND_CHARS_LIMIT) {
+                      sMinDispRemind = sMinDispRemind.substring(0, JBGConstants.AUTODISP_REMIND_CHARS_LIMIT-kanji.length());
+                    }
+                    sMinDispRemind = kanji + sMinDispRemind;
+                    this.lblBottomRemind.setText(sMinDispRemind);
+                    lblBottomLastInfo.setText(lblBottomInfo.getText());
                 }
-                sRemind += kanji;
-                this.getBottomBodyLabel().setText(sRemind);
+                else {
+                    String sRemind = this.getBottomBodyLabel().getText();
+                    if (sRemind.length() + kanji.length() >= JBGConstants.WORDMATCH_MAX_REMIND_CHARS) {
+                      sRemind = sRemind.replace(sRemind.substring(0, (sRemind.length() + kanji.length())-JBGConstants.WORDMATCH_MAX_REMIND_CHARS), "");
+                    }
+                    sRemind += kanji;
+                    this.getBottomBodyLabel().setText(sRemind);
+                }
 
                 this.iCurrentDisplayStep = 1;
                 //increase kanji count and jcoin if possible
@@ -446,28 +514,37 @@ public class KanjiAutoDisplayTab extends SimpleStackedFormBase {
             }
 
             lvFirstCol.getSelectionModel().select(this.iCurrentKanjiOnDisplay);
-            lvFirstCol.scrollTo(this.iCurrentKanjiOnDisplay);
+            if (!cbMinimalAutoDisplay.isSelected()) lvFirstCol.scrollTo(this.iCurrentKanjiOnDisplay);
+
+            final String sLastShownKanji = this.getMidBodyLabel().getText();
+
             DictKanjiTableViewItem tblItem = lvFirstCol.getItems().get(iCurrentKanjiOnDisplay);
             this.getMidBodyLabel().setText(tblItem.getKanji());
-            this.getMidBodyLabel().setVisible(true);
+            this.setMidBodyLabelVisible(true);
 
             lblShownHira.setText(tblItem.getHiragana());
             lblShownHv.setText(tblItem.getHv());
             lblShownMeaning.setText(tblItem.getMeaning());
+
+            if (cbMinimalAutoDisplay.isSelected()) {
+                if (!sLastShownKanji.equals(tblItem.getKanji()))
+                    lblBottomKanji.setText(String.format("%s\n  %s", tblItem.getKanji(), sLastShownKanji));
+                lblBottomInfo.setText(String.format("%s\n%s\n%s", tblItem.getHiragana(), tblItem.getHv(), tblItem.getMeaning()));
+            }
         }
         else if (step == 1) { //after 2 secs visible
-            this.getMidBodyLabel().setVisible(false);
+            this.setMidBodyLabelVisible(false);
         }
 
         if (step == 0 && this.iCurrentDisplayStep >= this.iMaxWordDisplaySteps) {
-            this.getMidBodyLabel().setStyle("-fx-opacity: 1.0;-fx-effect: dropshadow( one-pass-box, lightblue, 8, 0.0, 2, 0);");
+            this.setMidBodyLabelStyle("-fx-opacity: 1.0;-fx-effect: dropshadow( one-pass-box, lightblue, 8, 0.0, 2, 0);");
         }
         else {
             if (this.iCurrentDisplayStep > 1) {
-                this.getMidBodyLabel().setStyle("-fx-opacity: 0.8;-fx-effect: dropshadow( one-pass-box, lightblue, 8, 0.0, 2, 0);");
+                this.setMidBodyLabelStyle("-fx-opacity: 0.8;-fx-effect: dropshadow( one-pass-box, lightblue, 8, 0.0, 2, 0);");
             }
             else {
-                this.getMidBodyLabel().setStyle("-fx-opacity: 0.6;-fx-effect: none;");
+                this.setMidBodyLabelStyle("-fx-opacity: 0.6;-fx-effect: none;");
             }
         }
     }

@@ -142,20 +142,36 @@ public class ArticleWordBuildWindowTab extends SimpleFormBase {
         this.addHeaderPane(firstSection, 0, 2);
 
         lvTNASentences = createSingleSelectStringListView(0);
-        lvTNASentences.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.4));
+        lvTNASentences.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.25));
         lvTNASentences.prefWidthProperty().bind(getPrimaryStage().widthProperty().multiply(1));
         lvTNASentences.setId("article-build-word-sentence-list");
         this.addHeaderCtl(lvTNASentences, 0, 3);
 
+        ContextMenu cmTNASens = new ContextMenu();
+        MenuItem mi1 = new MenuItem("Add Sentences");
+        cmTNASens.getItems().add(mi1);
+
+        mi1.setOnAction((ActionEvent event) -> {
+            this.addMoreSentenceToTNA();
+        });
+        lvTNASentences.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent t) {
+                if(t.getButton() == MouseButton.SECONDARY) {
+                    cmTNASens.show(lvTNASentences, t.getScreenX(), t.getScreenY());
+                }
+            }
+        });
+
         tafArticleJAContent = new TextArea();
-        tafArticleJAContent.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.13));
+        tafArticleJAContent.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.05));
         tafArticleJAContent.prefWidthProperty().bind(getPrimaryStage().widthProperty().multiply(0.5));
         tafArticleJAContent.setId("build-word-ja-content");
         tafArticleJAContent.setWrapText(true);
         tafArticleJAContent.getStyleClass().add("bright_background_textfield");
 
         tafArticleENContent = new TextArea();
-        tafArticleENContent.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.13));
+        tafArticleENContent.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.05));
         tafArticleENContent.prefWidthProperty().bind(getPrimaryStage().widthProperty().multiply(0.5));
         tafArticleENContent.setId("build-word-en-content");
         tafArticleENContent.setWrapText(true);
@@ -292,10 +308,10 @@ public class ArticleWordBuildWindowTab extends SimpleFormBase {
             }
         });
 
-        lvTNAKanjiWords.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.28));
-        lvTNADetailKanjis.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.28));
-        tafKanjiMeaning.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.28));
-        tvBuiltWords.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.28));
+        lvTNAKanjiWords.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.5));
+        lvTNADetailKanjis.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.5));
+        tafKanjiMeaning.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.5));
+        tvBuiltWords.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.5));
 
         this.addBodyCtl(new Label("Selected Word"), 0, 0);
         this.addBodyCtl(new Label("Hiragana"), 1, 0);
@@ -400,6 +416,12 @@ public class ArticleWordBuildWindowTab extends SimpleFormBase {
             tvBuiltWords.getItems().add(showItem);
         }
 
+    }
+
+    private void addMoreSentenceToTNA() {
+        System.out.println("add sen");
+        String sVal = this.showMultilineTextInputDialog("test", "new sen");
+        System.out.println(sVal);
     }
 
     private void mergeAllBuiltWordList() {

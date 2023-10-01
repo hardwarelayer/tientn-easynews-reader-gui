@@ -319,6 +319,12 @@
  -fx-font-weight: bold;
 }
 
+#auto-kanji-min-bottom-info-label {
+ -fx-font-size: 10px;
+ -fx-font-family: Courier;
+ -fx-font-style: italic;
+}
+
 /* ------------------------ ArticleWord -------------------------*/
 #build-word-ja-content {
   -fx-font-size: 11pt; 

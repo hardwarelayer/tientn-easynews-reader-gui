@@ -713,12 +713,12 @@ public class ReaderModel {
         int ttlTNATestCorrects = getIntFromJson(articleItem, "totalCorrectTests");
         int ttlTNAKanjiTests = getIntFromJson(articleItem, "testTotalOfKanjiForTest");
 
-        System.out.println("  Loading article " + sArticleId + " " + sArticleTitle);
-        System.out.println("    Total sentences: " + String.valueOf(sentenceList.size()));
-        System.out.println("    Total kanjis: " + String.valueOf(articleKanjiList.size()));
-        System.out.println("    Total built words for test: " + String.valueOf(lstBuiltWords.size()));
-        if (lstProblematicWords != null)
-          System.out.println("    Total problematic words: " + String.valueOf(lstProblematicWords.size()));
+        //System.out.println("  Loading article " + sArticleId + " " + sArticleTitle);
+        //System.out.println("    Total sentences: " + String.valueOf(sentenceList.size()));
+        //System.out.println("    Total kanjis: " + String.valueOf(articleKanjiList.size()));
+        //System.out.println("    Total built words for test: " + String.valueOf(lstBuiltWords.size()));
+        //if (lstProblematicWords != null)
+          //System.out.println("    Total problematic words: " + String.valueOf(lstProblematicWords.size()));
 
         List<TFMTTNASentenceData> lstTNASentences = new ArrayList<TFMTTNASentenceData>();
         if (sentenceList != null) {
@@ -867,10 +867,10 @@ public class ReaderModel {
           int ttlTNGTests = getIntFromJson(grammarItem, "totalTests");
           int ttlTNGTestCorrects = getIntFromJson(grammarItem, "totalCorrectTests");
 
-          System.out.println("  Loading grammar " + sGrammarId + " " + sGrammarTitle);
-          System.out.println("    Total grammar patterns: " + String.valueOf(patternList.size()));
-          if (grammarProblematicIdList != null)
-            System.out.println("    Total problematic patterns: " + String.valueOf(grammarProblematicIdList.size()));
+          //System.out.println("  Loading grammar " + sGrammarId + " " + sGrammarTitle);
+          //System.out.println("    Total grammar patterns: " + String.valueOf(patternList.size()));
+          //if (grammarProblematicIdList != null)
+            //System.out.println("    Total problematic patterns: " + String.valueOf(grammarProblematicIdList.size()));
 
           List<TFMTTNGPatternData> lstTNGPatterns = new ArrayList<TFMTTNGPatternData>();
           if (patternList != null) {
@@ -981,9 +981,9 @@ public class ReaderModel {
       int ttlTNATestCorrects = 0; //getIntFromJson(dataPart, "totalCorrectTests");
       int ttlTNAKanjiTests = 0; //getIntFromJson(dataPart, "testTotalOfKanjiForTest");
 
-      System.out.println(sArticleTitle); 
-      System.out.println("Total loaded kanjis: " + String.valueOf(kanjiDict.size()));
-      System.out.println("Total loaded sentences: " + String.valueOf(sentenceList.size()));
+      //System.out.println(sArticleTitle); 
+      //System.out.println("Total loaded kanjis: " + String.valueOf(kanjiDict.size()));
+      //System.out.println("Total loaded sentences: " + String.valueOf(sentenceList.size()));
 
       //if (kanjiDict.size() < 1) return false;
 
@@ -1253,8 +1253,8 @@ public class ReaderModel {
 
       if (patternList.size() < 1) return false;
 
-        System.out.println("  Loading grammar: " + sGrammarTitle);
-        System.out.println("    Total grammar patterns: " + String.valueOf(patternList.size()));
+        //System.out.println("  Loading grammar: " + sGrammarTitle);
+        //System.out.println("    Total grammar patterns: " + String.valueOf(patternList.size()));
 
         List<TFMTTNGPatternData> lstTNGPatterns = new ArrayList<TFMTTNGPatternData>();
         if (patternList != null) {
