@@ -383,6 +383,11 @@ public class KanjiAutoDisplayTab extends SimpleStackedFormBase {
         lblShownHv.setVisible(flg);
         lblShownMeaning.setVisible(flg);
         lvFirstCol.setVisible(flg);
+        lblNextShownKanji.setVisible(flg);
+        lblLastShownKanji.setVisible(flg);
+        lblLastShownHira.setVisible(flg);
+        lblLastShowHv.setVisible(flg);
+        lblLastShownMeaning.setVisible(flg);
     }
 
     private void setMidBodyLabelStyle(final String css) {
