@@ -325,6 +325,13 @@
  -fx-font-style: italic;
 }
 
+#auto-kanji-next-shown-kanji {
+ -fx-font-size: 72px;
+}
+#auto-kanji-last-shown {
+ -fx-font-size: 52px;
+}
+
 /* ------------------------ ArticleWord -------------------------*/
 #build-word-ja-content {
   -fx-font-size: 11pt; 

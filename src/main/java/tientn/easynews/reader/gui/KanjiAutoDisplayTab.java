@@ -96,6 +96,8 @@ public class KanjiAutoDisplayTab extends SimpleStackedFormBase {
     private Label lblStartAnchor;
     private Label lblEndAnchor;
     private Label lblShownHira, lblShownHv, lblShownMeaning;
+    private Label lblLastShownKanji, lblLastShownHira, lblLastShowHv, lblLastShownMeaning;
+    private Label lblNextShownKanji;
     private Label lblBottomKanji, lblBottomInfo, lblBottomLastInfo, lblBottomRemind;
 
     private CheckBox cbMinimalAutoDisplay;
@@ -176,6 +178,16 @@ public class KanjiAutoDisplayTab extends SimpleStackedFormBase {
         lblShownHv.setId("auto-kanji-shown-hv-label");
         lblShownMeaning.setId("auto-kanji-shown-meaning-label");
 
+        lblLastShownKanji = new Label("...");
+        lblLastShownHira = new Label("...");
+        lblLastShowHv = new Label("...");
+        lblLastShownMeaning = new Label("...");
+        lblLastShownKanji.setId("auto-kanji-last-shown");
+        lblLastShownHira.setId("auto-kanji-last-shown");
+
+        lblNextShownKanji = new Label("...");
+        lblNextShownKanji.setId("auto-kanji-next-shown-kanji");
+
         this.iMaxWordDisplaySteps = 4; //this function goes before class declaration?
         tfMaxWordDisplaySteps = new TextField(String.valueOf(this.iMaxWordDisplaySteps));
         tfMaxWordDisplaySteps.prefWidthProperty().bind(getPrimaryStage().widthProperty().multiply(0.04));
@@ -232,9 +244,18 @@ public class KanjiAutoDisplayTab extends SimpleStackedFormBase {
         //this.addBodyPane(new HBox(lblLoadedKanjis, lblTotalKanjis), 0, 1);
 
         VBox bxShownContent = new VBox(lblShownHira, lblShownHv, lblShownMeaning);
-        bxShownContent.prefWidthProperty().bind(getPrimaryStage().widthProperty().multiply(1));
-        bxShownContent.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.43));
+        bxShownContent.prefWidthProperty().bind(getPrimaryStage().widthProperty().multiply(0.5));
+        bxShownContent.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.22));
         bxShownContent.setAlignment(CENTER);
+
+        VBox bxLastShownContent = new VBox(lblLastShownKanji, lblLastShownHira, lblLastShowHv, lblLastShownMeaning);
+        bxLastShownContent.prefWidthProperty().bind(getPrimaryStage().widthProperty().multiply(0.25));
+        bxLastShownContent.setAlignment(CENTER);
+
+        VBox bxNextShownContent = new VBox(lblNextShownKanji);
+        bxNextShownContent.prefWidthProperty().bind(getPrimaryStage().widthProperty().multiply(0.25));
+        bxNextShownContent.setAlignment(CENTER);
+
         HBox bxControlBox = new HBox(new Label("Kanjis"), lblTotalKanjis, btnStartAutoDisplay, 
             new Label("Current JCoin:"), lblJCoinAmount,
             new Label("Display Steps:"), tfMaxWordDisplaySteps,
@@ -244,7 +265,15 @@ public class KanjiAutoDisplayTab extends SimpleStackedFormBase {
             cbMinimalAutoDisplay);
         this.addBodyPane(bxControlBox, 0, 0);
         this.addBodyCtl(lvFirstCol, 0, 1);
-        this.addBodyPane(bxShownContent, 0, 2);
+
+        HBox hbxKanjiSupplementalBox= new HBox(bxNextShownContent, bxShownContent, bxLastShownContent);
+        //hbxKanjiSupplementalBox.setAlignment(CENTER);
+        this.addBodyPane(hbxKanjiSupplementalBox, 0, 2);
+
+        VBox bxPlaceHolderBar = new VBox(new Label("..."));
+        bxPlaceHolderBar.setAlignment(CENTER);
+        bxPlaceHolderBar.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.25));
+        this.addBodyPane(bxPlaceHolderBar, 0, 3);
 
         lblBottomKanji = new Label("...");
         lblBottomInfo = new Label("...");
@@ -261,7 +290,7 @@ public class KanjiAutoDisplayTab extends SimpleStackedFormBase {
         bxBottomHBar.setSpacing(2);
         VBox bxBottomVBar = new VBox(bxBottomHBar);
         bxBottomVBar.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.11));
-        this.addBodyPane(bxBottomVBar, 0, 3);
+        this.addBodyPane(bxBottomVBar, 0, 4);
     }
 
     private void createTableViewColumn(final TableView<DictKanjiTableViewItem> tblView, final String title, final double width)
@@ -416,7 +445,7 @@ public class KanjiAutoDisplayTab extends SimpleStackedFormBase {
 
     private void startAutoDisplay() {
 
-        if (this.isAutoDisplaying) return;
+        if (this.isAutoDisplaying || this.currentTNA == null) return;
 
         this.iMaxWordDisplaySteps = Integer.valueOf(this.tfMaxWordDisplaySteps.getText());
 
@@ -495,6 +524,12 @@ public class KanjiAutoDisplayTab extends SimpleStackedFormBase {
                     lblBottomLastInfo.setText(lblBottomInfo.getText());
                 }
                 else {
+
+                    lblLastShownKanji.setText(kanji);
+                    lblLastShownHira.setText(lblShownHira.getText());
+                    lblLastShowHv.setText(lblShownHv.getText());
+                    lblLastShownMeaning.setText(lblShownMeaning.getText());
+
                     String sRemind = this.getBottomBodyLabel().getText();
                     if (sRemind.length() + kanji.length() >= JBGConstants.WORDMATCH_MAX_REMIND_CHARS) {
                       sRemind = sRemind.replace(sRemind.substring(0, (sRemind.length() + kanji.length())-JBGConstants.WORDMATCH_MAX_REMIND_CHARS), "");
@@ -521,6 +556,13 @@ public class KanjiAutoDisplayTab extends SimpleStackedFormBase {
             DictKanjiTableViewItem tblItem = lvFirstCol.getItems().get(iCurrentKanjiOnDisplay);
             this.getMidBodyLabel().setText(tblItem.getKanji());
             this.setMidBodyLabelVisible(true);
+
+            DictKanjiTableViewItem nextTblItem = null;
+            if (iCurrentKanjiOnDisplay + 1 < lvFirstCol.getItems().size())
+                nextTblItem = lvFirstCol.getItems().get(iCurrentKanjiOnDisplay+1);
+            else
+                nextTblItem = lvFirstCol.getItems().get(0);
+            if (nextTblItem != null) this.lblNextShownKanji.setText(nextTblItem.getKanji());
 
             lblShownHira.setText(tblItem.getHiragana());
             lblShownHv.setText(tblItem.getHv());
