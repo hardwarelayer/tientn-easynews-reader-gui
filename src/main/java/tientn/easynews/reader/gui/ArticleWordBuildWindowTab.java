@@ -148,11 +148,11 @@ public class ArticleWordBuildWindowTab extends SimpleFormBase {
         this.addHeaderCtl(lvTNASentences, 0, 3);
 
         ContextMenu cmTNASens = new ContextMenu();
-        MenuItem mi1 = new MenuItem("Add Sentences");
+        MenuItem mi1 = new MenuItem("Edit Sentences");
         cmTNASens.getItems().add(mi1);
 
         mi1.setOnAction((ActionEvent event) -> {
-            this.addMoreSentenceToTNA();
+            this.editTNASentences();
         });
         lvTNASentences.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
             @Override
@@ -418,10 +418,89 @@ public class ArticleWordBuildWindowTab extends SimpleFormBase {
 
     }
 
-    private void addMoreSentenceToTNA() {
-        System.out.println("add sen");
-        String sVal = this.showMultilineTextInputDialog("test", "new sen");
-        System.out.println(sVal);
+    private void editTNASentences() {
+        StringBuilder sb = new StringBuilder();
+        boolean bFirstLine = true;
+        for (TFMTTNASentenceData sen: currentTNA.getArticleSentences()) {
+            if (!bFirstLine) sb.append("\n");
+            sb.append(sen.getSentence());
+            //System.out.println(sen.toString());
+            bFirstLine = false;
+        }
+        List<TFMTTNASentenceData> lstOldSentences = new ArrayList<TFMTTNASentenceData>(currentTNA.getArticleSentences());
+        String sVal = this.showMultilineTextInputDialog("edit content", "content here", sb.toString(), 0.8, 0.8);
+        if (sVal != null) {
+            //System.out.println(sVal);
+            String[] lstNewSentenceStrs = sVal.split("\n");
+            List<TFMTTNASentenceData> lstNewSentences = new ArrayList<TFMTTNASentenceData>();
+            for (String s:lstNewSentenceStrs) {
+                if (s.length() < 1 || s.trim().length() < 1) continue;
+                //System.out.println(s);
+                String sEnglishVal = "";
+                for (TFMTTNASentenceData sen: lstOldSentences) {
+                    if (s.equals(sen.getSentence())) {
+                        sEnglishVal = sen.getEnglishMeaning();
+                        //System.out.println(sEnglishVal);
+                        break;
+                    }
+                }
+                TFMTTNASentenceData newSen = new TFMTTNASentenceData(s, sEnglishVal, new ArrayList<String>());
+                //System.out.print("newSentence is:");
+                //System.out.println(newSen);
+                lstNewSentences.add(newSen);
+            }
+            currentTNA.rebuildSentences(lstNewSentences);
+            reloadTNASentenceList();
+        }
+    }
+
+    @Override
+    protected void multilineTextSearchEvent(final String selText) {
+
+        boolean isArticleKJFound = false;
+        for (int i = 0; i < currentTNA.getArticleKanjis().size(); i++) {
+            currentTNAKanji = currentTNA.getArticleKanjis().get(i);
+            if (currentTNAKanji.getKanji().equals(selText)) {
+                isArticleKJFound = true;
+                break;
+            }
+        }
+
+        JBGKanjiItem mainItem = this.getDataModel().getKanjiFromMainKanjiList(selText);
+
+        StringBuilder sb = new StringBuilder();
+
+        if (mainItem != null) {
+            sb.append(
+                "Main dictionary:" +
+                mainItem.getKanji() + " / " +
+                mainItem.getHiragana() + "/ " +
+                mainItem.getHv() + " / " +
+                mainItem.getMeaning() + "\n"
+                );
+        }
+        
+        if (isArticleKJFound && currentTNAKanji != null) {
+            sb.append(
+                "In article:" +
+                currentTNAKanji.getKanji() + " / " +
+                currentTNAKanji.getHv() + "\n"
+                );
+        }
+
+        List<JBGKanjiItem> lstRelatedKanjis = this.getDataModel().getRelatedKanjiFromMainKanjiList(selText);
+        if (lstRelatedKanjis.size() > 0) {
+            sb.append("Related:\n");
+            for (JBGKanjiItem item: lstRelatedKanjis) {
+                sb.append(item.getKanji() + " / " +
+                    item.getHiragana() + " / " +
+                    item.getHv() + " / " +
+                    item.getMeaning() + "\n"
+                    );
+            }
+        }
+        sb.append("\n\n\n");
+        showInformation(selText, sb.toString());
     }
 
     private void mergeAllBuiltWordList() {

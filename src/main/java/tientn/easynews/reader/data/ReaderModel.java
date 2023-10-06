@@ -277,6 +277,17 @@ public class ReaderModel {
     return null;
   }
 
+  public List<JBGKanjiItem> getRelatedKanjiFromMainKanjiList(final String kanji) {
+    List<JBGKanjiItem> lstRes = new ArrayList<JBGKanjiItem>();
+    for (JBGKanjiItem item: this.dataKanjiItems) {
+      if (item.getKanji().contains(kanji) || kanji.contains(item.getKanji())) {
+        if (!item.getKanji().equals(kanji)) //not include same kanji
+          lstRes.add(item);
+      }
+    }
+    return lstRes;
+  }
+
   private boolean isKanjiInList(final String kanji, List<JBGKanjiItem> lst) {
     for (JBGKanjiItem item: lst) {
       if (item.getKanji().equals(kanji)) {

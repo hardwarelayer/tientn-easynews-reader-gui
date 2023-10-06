@@ -25,7 +25,11 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 
+import javafx.geometry.Point2D;
+import javafx.geometry.Rectangle2D;
+
 import javafx.stage.FileChooser;
+import javafx.stage.Screen;
 import java.awt.Desktop;
 import java.awt.desktop.QuitEvent;
 import java.awt.desktop.QuitResponse;
@@ -47,6 +51,7 @@ import tientn.easynews.reader.gui.base.TabPaneBase;
 
 public abstract class TabbedAppBase extends Application {
 
+    @Getter protected Stage primaryStage = null;
     @Getter private Desktop desktop = Desktop.getDesktop();
     @Getter private int maxWidth;
     @Getter private int maxHeight;
@@ -77,6 +82,8 @@ public abstract class TabbedAppBase extends Application {
     // JavaFX entry point
     @Override
     public void start(Stage primaryStage) throws Exception {
+
+        this.primaryStage = primaryStage;
 
         TabPaneBase ctl = initSceneElements(primaryStage);
 
@@ -165,10 +172,20 @@ public abstract class TabbedAppBase extends Application {
     }
 
     protected boolean showQuestion(final String title, final String header, final String msg) {
+      Point2D currentStageXY = new Point2D(primaryStage.getX(), primaryStage.getY());
+      Screen currentScreen = Screen.getScreens().stream()
+        .filter(screen -> screen.getBounds().contains(currentStageXY))
+        .findAny().get();
+      Rectangle2D screenBounds = currentScreen.getBounds();
+      double screenCenterX = screenBounds.getMinX() + screenBounds.getWidth()/2 ;
+      double screenCenterY = screenBounds.getMinY() + screenBounds.getHeight()/2 ;
+
       Alert alert = new Alert(AlertType.CONFIRMATION);
       alert.setTitle(title);
       alert.setHeaderText(header);
       alert.setContentText(msg);
+      alert.setX(primaryStage.getX()+100);
+      alert.setY(screenCenterY);
 
       DialogPane dialogPane = alert.getDialogPane();
       dialogPane.getStylesheets().add(

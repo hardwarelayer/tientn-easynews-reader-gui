@@ -150,6 +150,10 @@ public class TFMTTNAData {
     this.totalCorrectTests = 0;
   }
 
+  public void rebuildSentences(final List<TFMTTNASentenceData> lstSentences) {
+    this.articleSentences = lstSentences;
+  }
+
   public int getTestTotalOfKanjiForTest() {
     int iRes = 0;
     for (JBGKanjiItem item: this.kanjisForTest) {

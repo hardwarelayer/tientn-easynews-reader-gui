@@ -66,4 +66,19 @@ public class TFMTTNASentenceData {
     this.englishMeaning = englishMeaning;
   }
 
+  @Override
+  public String toString() {
+    StringBuilder sb = new StringBuilder(
+      this.sentence + "|" +  
+      this.englishMeaning + "|");
+    if (this.sentenceKanjis.size() < 1)
+      sb.append("<no_kanji>");
+    else {
+      for (String s: this.sentenceKanjis) {
+        sb.append(s.toString());
+      }
+    }
+    return sb.toString();
+  }
+
 }

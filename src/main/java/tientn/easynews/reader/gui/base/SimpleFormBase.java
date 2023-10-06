@@ -14,6 +14,12 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.DialogPane;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.TextInputDialog;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.input.MouseButton;
+import javafx.scene.layout.Region;
+import javafx.event.EventHandler;
 
 import java.util.Optional;
 import javafx.stage.Stage;
@@ -34,8 +40,11 @@ import javafx.scene.control.Dialog;
 import javafx.geometry.VPos;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
+import javafx.geometry.Point2D;
+import javafx.geometry.Rectangle2D;
 
 import javafx.stage.FileChooser;
+import javafx.stage.Screen;
 import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
@@ -152,10 +161,21 @@ public class SimpleFormBase extends VBox {
   }
 
   protected boolean showQuestion(final String title, final String header, final String msg) {
+
+      Point2D currentStageXY = new Point2D(primaryStage.getX(), primaryStage.getY());
+      Screen currentScreen = Screen.getScreens().stream()
+        .filter(screen -> screen.getBounds().contains(currentStageXY))
+        .findAny().get();
+      Rectangle2D screenBounds = currentScreen.getBounds();
+      double screenCenterX = screenBounds.getMinX() + screenBounds.getWidth()/2 ;
+      double screenCenterY = screenBounds.getMinY() + screenBounds.getHeight()/2 ;
+
       Alert alert = new Alert(AlertType.CONFIRMATION);
       alert.setTitle(title);
       alert.setHeaderText(header);
       alert.setContentText(msg);
+      alert.setX(primaryStage.getX()+100);
+      alert.setY(screenCenterY);
 
       DialogPane dialogPane = alert.getDialogPane();
       dialogPane.getStylesheets().add(
@@ -170,10 +190,24 @@ public class SimpleFormBase extends VBox {
   }
 
   protected void showInformation(final String header, final String msg) {
+
+      Point2D currentStageXY = new Point2D(primaryStage.getX(), primaryStage.getY());
+      Screen currentScreen = Screen.getScreens().stream()
+        .filter(screen -> screen.getBounds().contains(currentStageXY))
+        .findAny().get();
+      Rectangle2D screenBounds = currentScreen.getBounds();
+      double screenCenterX = screenBounds.getMinX() + screenBounds.getWidth()/2 ;
+      double screenCenterY = screenBounds.getMinY() + screenBounds.getHeight()/2 ;
+
       Alert alert = new Alert(AlertType.INFORMATION);
       alert.setTitle("Information");
       alert.setHeaderText(header);
       alert.setContentText(msg);
+      alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
+      alert.getDialogPane().setMinWidth(600);
+      alert.setResizable(true);
+      alert.setX(primaryStage.getX()+100);
+      alert.setY(screenCenterY);
 
       DialogPane dialogPane = alert.getDialogPane();
       dialogPane.getStylesheets().add(
@@ -190,37 +224,55 @@ public class SimpleFormBase extends VBox {
     td.show();
   }
 
-  protected String showMultilineTextInputDialog(final String title, final String prompt) {
+  protected void multilineTextSearchEvent(final String selText) {}
+  protected String showMultilineTextInputDialog(final String sTitle, final String sPrompt, final String sValue, final double fWidth, final double fHeight) {
+
+    Point2D currentStageXY = new Point2D(primaryStage.getX(), primaryStage.getY());
+    Screen currentScreen = Screen.getScreens().stream()
+      .filter(screen -> screen.getBounds().contains(currentStageXY))
+      .findAny().get();
+    Rectangle2D screenBounds = currentScreen.getBounds();
 
     Dialog<String> dialog = new Dialog<>();
-    dialog.setTitle(title);
+    dialog.setTitle(sTitle);
 
     // Set the button types.
-    ButtonType loginButtonType = new ButtonType("OK", ButtonData.OK_DONE);
-    dialog.getDialogPane().getButtonTypes().addAll(loginButtonType, ButtonType.CANCEL);
+    ButtonType okButtonType = new ButtonType("OK", ButtonData.OK_DONE);
+    dialog.getDialogPane().getButtonTypes().addAll(okButtonType, ButtonType.CANCEL);
     dialog.getDialogPane().getStylesheets().add(
               getClass().getResource("/css/dialog.css").toExternalForm());
 
     TextArea newText = new TextArea();
-    newText.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.2));
-    newText.prefWidthProperty().bind(getPrimaryStage().widthProperty().multiply(0.5));
-    newText.setId("build-word-ja-content");
+    newText.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(fHeight));
+    newText.prefWidthProperty().bind(getPrimaryStage().widthProperty().multiply(fWidth));
+    newText.setId("edit-content-dialog-text");
     newText.setWrapText(true);
 
-    newText.setPromptText(prompt);
+    newText.setPromptText(sPrompt);
+    newText.setText(sValue);
+
+    ContextMenu cmTextSel = new ContextMenu();
+    MenuItem mi1 = new MenuItem("Search");
+    cmTextSel.getItems().add(mi1);
+    mi1.setOnAction((ActionEvent event) -> {
+        this.multilineTextSearchEvent(newText.getSelectedText());
+    });
+    newText.setContextMenu(cmTextSel);
 
     HBox pane = new HBox(newText);
     //pane.setHgap(10);
     //pane.setVgap(10);
     //pane.setPadding(new Insets(20, 150, 10, 10));
     dialog.getDialogPane().setContent(pane);
+    dialog.setX(primaryStage.getX() + 50);
+    dialog.setY(primaryStage.getY() + 50);
 
     // Request focus on the username field by default.
     Platform.runLater(() -> newText.requestFocus());
 
     // Convert the result to a username-password-pair when the login button is clicked.
     dialog.setResultConverter(dialogButton -> {
-        if (dialogButton == loginButtonType) {
+        if (dialogButton == okButtonType) {
             return new String(newText.getText());
         }
         return null;

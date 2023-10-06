@@ -59,3 +59,10 @@
   -fx-padding: 10 20 10 20;
     -fx-effect: innershadow( three-pass-box , rgba(0,0,0,0.1) , 2, 0.0 , 0 , 1);
 }
+
+#edit-content-dialog-text {
+  -fx-font-size: 15pt; 
+  -fx-font-family: Verdana;
+  text-area-background: darkgray;
+  -fx-text-fill: black;
+}
