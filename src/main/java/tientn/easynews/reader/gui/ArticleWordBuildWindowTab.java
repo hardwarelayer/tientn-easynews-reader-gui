@@ -142,7 +142,7 @@ public class ArticleWordBuildWindowTab extends SimpleFormBase {
         this.addHeaderPane(firstSection, 0, 2);
 
         lvTNASentences = createSingleSelectStringListView(0);
-        lvTNASentences.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.25));
+        lvTNASentences.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.20));
         lvTNASentences.prefWidthProperty().bind(getPrimaryStage().widthProperty().multiply(1));
         lvTNASentences.setId("article-build-word-sentence-list");
         this.addHeaderCtl(lvTNASentences, 0, 3);
@@ -164,14 +164,27 @@ public class ArticleWordBuildWindowTab extends SimpleFormBase {
         });
 
         tafArticleJAContent = new TextArea();
-        tafArticleJAContent.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.05));
+        tafArticleJAContent.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.1));
         tafArticleJAContent.prefWidthProperty().bind(getPrimaryStage().widthProperty().multiply(0.5));
         tafArticleJAContent.setId("build-word-ja-content");
         tafArticleJAContent.setWrapText(true);
         tafArticleJAContent.getStyleClass().add("bright_background_textfield");
 
+        ContextMenu cmJASenKanjiSearch = new ContextMenu();
+        if (cmJASenKanjiSearch != null) {
+            MenuItem miKJLookup = new MenuItem("Kanji Lookup");
+            cmJASenKanjiSearch.getItems().add(miKJLookup);
+            miKJLookup.setOnAction((ActionEvent event) -> {
+                String s = tafArticleJAContent.getSelectedText();
+                if (s != null && s.length() > 0)
+                    this.lookupKanji(tafArticleJAContent.getSelectedText());
+            });
+            tafArticleJAContent.setContextMenu(cmJASenKanjiSearch);
+        }
+
+
         tafArticleENContent = new TextArea();
-        tafArticleENContent.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.05));
+        tafArticleENContent.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.1));
         tafArticleENContent.prefWidthProperty().bind(getPrimaryStage().widthProperty().multiply(0.5));
         tafArticleENContent.setId("build-word-en-content");
         tafArticleENContent.setWrapText(true);
@@ -456,7 +469,10 @@ public class ArticleWordBuildWindowTab extends SimpleFormBase {
 
     @Override
     protected void multilineTextSearchEvent(final String selText) {
+        this.lookupKanji(selText);
+    }
 
+    private void lookupKanji(final String selText) {
         boolean isArticleKJFound = false;
         for (int i = 0; i < currentTNA.getArticleKanjis().size(); i++) {
             currentTNAKanji = currentTNA.getArticleKanjis().get(i);
