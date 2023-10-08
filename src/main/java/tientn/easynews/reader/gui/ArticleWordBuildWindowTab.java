@@ -444,7 +444,7 @@ public class ArticleWordBuildWindowTab extends SimpleFormBase {
             bFirstLine = false;
         }
         List<TFMTTNASentenceData> lstOldSentences = new ArrayList<TFMTTNASentenceData>(currentTNA.getArticleSentences());
-        String sVal = this.showMultilineTextInputDialog("edit content", "content here", sb.toString(), 0.8, 0.8);
+        String sVal = this.showMultilineTextInputDialog("Article's sentences editor", "content here", sb.toString(), 0.8, 0.8);
         if (sVal != null) {
             //System.out.println(sVal);
             String[] lstNewSentenceStrs = sVal.split("\n");
@@ -488,7 +488,7 @@ public class ArticleWordBuildWindowTab extends SimpleFormBase {
         String s = taObj.getSelectedText();
         if (s!=null && s.length() > 0) {
             this.curSentenceEditorSelIndex = taObj.getSelection();
-            System.out.println(curSentenceEditorSelIndex.toString());
+            //System.out.println(curSentenceEditorSelIndex.toString());
         }
     }
 
