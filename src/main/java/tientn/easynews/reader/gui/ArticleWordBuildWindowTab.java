@@ -29,6 +29,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.layout.HBox;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.IndexRange;
 
 import javafx.stage.FileChooser;
 import java.io.File;
@@ -83,6 +84,8 @@ public class ArticleWordBuildWindowTab extends SimpleFormBase {
     private TextArea tafArticleJAContent;
     private TextArea tafArticleENContent;
     private TextArea tafKanjiMeaning;
+
+    IndexRange curSentenceEditorSelIndex = null;
 
     private TextField tfSelectedWord;
     private TextField tfSelectedHiragana;
@@ -468,8 +471,25 @@ public class ArticleWordBuildWindowTab extends SimpleFormBase {
     }
 
     @Override
-    protected void multilineTextSearchEvent(final String selText) {
+    protected void multilineTextInputSearchEvent(final String selText) {
         this.lookupKanji(selText);
+    }
+
+    @Override
+    protected void multilineTextInputPreShowEvent(TextArea taObj) {
+        if (this.curSentenceEditorSelIndex != null) {
+            taObj.selectRange(this.curSentenceEditorSelIndex.getStart(), 
+                this.curSentenceEditorSelIndex.getEnd());
+        }
+    }
+
+    @Override
+    protected void multilineTextInputOKEvent(TextArea taObj) {
+        String s = taObj.getSelectedText();
+        if (s!=null && s.length() > 0) {
+            this.curSentenceEditorSelIndex = taObj.getSelection();
+            System.out.println(curSentenceEditorSelIndex.toString());
+        }
     }
 
     private void lookupKanji(final String selText) {

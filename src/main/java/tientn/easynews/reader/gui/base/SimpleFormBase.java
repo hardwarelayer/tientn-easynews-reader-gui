@@ -224,7 +224,9 @@ public class SimpleFormBase extends VBox {
     td.show();
   }
 
-  protected void multilineTextSearchEvent(final String selText) {}
+  protected void multilineTextInputSearchEvent(final String selText) {}
+  protected void multilineTextInputOKEvent(TextArea taObj) {}
+  protected void multilineTextInputPreShowEvent(TextArea taObj) {}
   protected String showMultilineTextInputDialog(final String sTitle, final String sPrompt, final String sValue, final double fWidth, final double fHeight) {
 
     Point2D currentStageXY = new Point2D(primaryStage.getX(), primaryStage.getY());
@@ -255,7 +257,7 @@ public class SimpleFormBase extends VBox {
     MenuItem mi1 = new MenuItem("Search");
     cmTextSel.getItems().add(mi1);
     mi1.setOnAction((ActionEvent event) -> {
-        this.multilineTextSearchEvent(newText.getSelectedText());
+        this.multilineTextInputSearchEvent(newText.getSelectedText());
     });
     newText.setContextMenu(cmTextSel);
 
@@ -273,11 +275,13 @@ public class SimpleFormBase extends VBox {
     // Convert the result to a username-password-pair when the login button is clicked.
     dialog.setResultConverter(dialogButton -> {
         if (dialogButton == okButtonType) {
-            return new String(newText.getText());
+          this.multilineTextInputOKEvent(newText);
+          return new String(newText.getText());
         }
         return null;
     });
 
+    this.multilineTextInputPreShowEvent(newText);
     Optional<String> result = dialog.showAndWait();
 
     if (result.isEmpty()) return null;

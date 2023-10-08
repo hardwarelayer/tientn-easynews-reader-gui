@@ -265,6 +265,8 @@ public class SimpleStackedFormBase extends VBox {
   }
 
   protected void multilineTextSearchEvent(final String selText) {}
+  protected void multilineOKEvent(TextArea taObj) {}
+  protected void multilineTextInputPreShowEvent(TextArea taObj) {}
   protected String showMultilineTextInputDialog(final String sTitle, final String sPrompt, final String sValue, final double fWidth, final double fHeight) {
 
     Point2D currentStageXY = new Point2D(primaryStage.getX(), primaryStage.getY());
@@ -313,11 +315,13 @@ public class SimpleStackedFormBase extends VBox {
     // Convert the result to a username-password-pair when the login button is clicked.
     dialog.setResultConverter(dialogButton -> {
         if (dialogButton == okButtonType) {
-            return new String(newText.getText());
+          this.multilineOKEvent(newText);
+          return new String(newText.getText());
         }
         return null;
     });
 
+    this.multilineTextInputPreShowEvent(newText);
     Optional<String> result = dialog.showAndWait();
 
     if (result.isEmpty()) return null;
