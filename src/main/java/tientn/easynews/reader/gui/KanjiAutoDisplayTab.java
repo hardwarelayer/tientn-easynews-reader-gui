@@ -100,12 +100,12 @@ public class KanjiAutoDisplayTab extends SimpleStackedFormBase {
     private Label lblNextShownKanji;
     private Label lblBottomKanji, lblBottomInfo, lblBottomLastInfo, lblBottomRemind;
 
+    private CheckBox cbSortKanjiByRelation;
     private CheckBox cbMinimalAutoDisplay;
 
     private TextField tfMaxWordDisplaySteps;
 
-    private TableView<DictKanjiTableViewItem> lvFirstCol;
-    private TableView<DictKanjiTableViewItem> lvSecondCol;
+    private TableView<DictKanjiTableViewItem> tvKanjiForDisplay;
 
     private Button btnStartAutoDisplay;
     private Button btnStopAutoDisplay;
@@ -153,11 +153,20 @@ public class KanjiAutoDisplayTab extends SimpleStackedFormBase {
 
         this.addBodyColumn(100);
 
-        Label lblLoadedKanjis = new Label("Total Kanjis Loaded:");
+        cbSortKanjiByRelation = new CheckBox("Sort kanjis by relation");
+        cbSortKanjiByRelation.setIndeterminate(false);
+        cbSortKanjiByRelation.setTooltip(new Tooltip("If enabled, word in main list will be shown in related kanji order. Otherwise, it will be listed by article kanjis order(default)"));
+
+        cbSortKanjiByRelation.selectedProperty().addListener(new ChangeListener<Boolean>() {
+            @Override
+            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+                processLoadKanjisFromTNA();
+            }
+        });
+
         cbMinimalAutoDisplay = new CheckBox("Minimal display");
         cbMinimalAutoDisplay.setIndeterminate(false);
         cbMinimalAutoDisplay.setTooltip(new Tooltip("If enabled, word will be shown in minimal display inside the bottom bar.\n有効にすると、単語が下部バー内の最小限の表示で表示されます。"));
-
         cbMinimalAutoDisplay.selectedProperty().addListener(new ChangeListener<Boolean>() {
             @Override
             public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
@@ -205,16 +214,16 @@ public class KanjiAutoDisplayTab extends SimpleStackedFormBase {
         };
         btnStopAutoDisplay = createButton(STOP_BTN_LABEL, fncStopAutoDisplay);
 
-        lvFirstCol = createTableView(0, 1);
-        lvFirstCol.setId("auto-kanji-loaded-kanji-column");
-        createTableViewColumn(lvFirstCol, "Id", 0.05);
-        createTableViewColumn(lvFirstCol, "Kanji", 0.2);
-        createTableViewColumn(lvFirstCol, "HV", 0.2);
-        createTableViewColumn(lvFirstCol, "Hiragana", 0.2);
-        createTableViewColumn(lvFirstCol, "Meaning", 0.3);
+        tvKanjiForDisplay = createTableView(0, 1);
+        tvKanjiForDisplay.setId("auto-kanji-loaded-kanji-column");
+        createTableViewColumn(tvKanjiForDisplay, "Id", 0.05);
+        createTableViewColumn(tvKanjiForDisplay, "Kanji", 0.2);
+        createTableViewColumn(tvKanjiForDisplay, "HV", 0.2);
+        createTableViewColumn(tvKanjiForDisplay, "Hiragana", 0.2);
+        createTableViewColumn(tvKanjiForDisplay, "Meaning", 0.3);
 
-        lvFirstCol.getStyleClass().add("wordmatch-scroll-bar");
-        lvFirstCol.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.50));
+        tvKanjiForDisplay.getStyleClass().add("wordmatch-scroll-bar");
+        tvKanjiForDisplay.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.50));
 
         ContextMenu articleCM = new ContextMenu();
         MenuItem acmMi1 = new MenuItem("Set Start Anchor");
@@ -232,16 +241,14 @@ public class KanjiAutoDisplayTab extends SimpleStackedFormBase {
         acmMi3.setOnAction((ActionEvent event) -> {
             this.clearAnchors();
         });
-        lvFirstCol.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
+        tvKanjiForDisplay.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent t) {
                 if(t.getButton() == MouseButton.SECONDARY) {
-                    articleCM.show(lvFirstCol, t.getScreenX(), t.getScreenY());
+                    articleCM.show(tvKanjiForDisplay, t.getScreenX(), t.getScreenY());
                 }
             }
         });
-
-        //this.addBodyPane(new HBox(lblLoadedKanjis, lblTotalKanjis), 0, 1);
 
         VBox bxShownContent = new VBox(lblShownHira, lblShownHv, lblShownMeaning);
         bxShownContent.prefWidthProperty().bind(getPrimaryStage().widthProperty().multiply(0.5));
@@ -262,9 +269,10 @@ public class KanjiAutoDisplayTab extends SimpleStackedFormBase {
             new Label("Start Anchor:"), lblStartAnchor,
             new Label("End Anchor:"), lblEndAnchor, 
             btnStopAutoDisplay,
+            cbSortKanjiByRelation,
             cbMinimalAutoDisplay);
         this.addBodyPane(bxControlBox, 0, 0);
-        this.addBodyCtl(lvFirstCol, 0, 1);
+        this.addBodyCtl(tvKanjiForDisplay, 0, 1);
 
         HBox hbxKanjiSupplementalBox= new HBox(bxNextShownContent, bxShownContent, bxLastShownContent);
         //hbxKanjiSupplementalBox.setAlignment(CENTER);
@@ -329,7 +337,7 @@ public class KanjiAutoDisplayTab extends SimpleStackedFormBase {
 
     private void processTableViewDblClick(int iCtl, DictKanjiTableViewItem rowData) {
         if (iCtl == 0) {
-            this.getTopBodyLabel().setText(rowData.getKanji());
+            //this.getTopBodyLabel().setText(rowData.getKanji());
             //tafKanjiMeaning.setText(rowData.toString().replace("|", "\n"));
         }
         else {
@@ -340,24 +348,46 @@ public class KanjiAutoDisplayTab extends SimpleStackedFormBase {
         //this.parentPane.switchToTab(1);
     }
 
-    private int reloadTNAWordList(final String sPromptText) {
+    private int reloadTNAWordList() {
         int iTotalLoad = 0;
-        boolean bNeedPrompt = true;
         if (currentTNA == null) return 0;
-        if (sPromptText.length() < 1) bNeedPrompt = false;
-        for (JBGKanjiItem kItem: currentTNA.getKanjisForTest()) {
-            if (!bNeedPrompt)
-                addWordToKanjiList(lvFirstCol, 
-                    kItem.getId().toString(), kItem.getKanji(), kItem.getHv(), kItem.getHiragana(), kItem.getMeaning());
-            else {
-                String[] subSenWords = sPromptText.split("\\s+");
-                for (String wrd : subSenWords) {
-                    if (kItem.getKanji().contains(wrd) || wrd.contains(kItem.getKanji())) {
-                        addWordToKanjiList(lvFirstCol, 
-                            kItem.getId().toString(), kItem.getKanji(), kItem.getHv(), kItem.getHiragana(), kItem.getMeaning());
+
+        List<JBGKanjiItem> lstSortedBuffer = null;
+
+        if (cbSortKanjiByRelation.isSelected()) {
+
+            lstSortedBuffer = new ArrayList<JBGKanjiItem>();
+            List<JBGKanjiItem> lstBuffer = new ArrayList<JBGKanjiItem>(currentTNA.getKanjisForTest());
+            while (lstSortedBuffer.size() < currentTNA.getKanjisForTest().size()) {
+                JBGKanjiItem kItem = lstBuffer.get(0);
+                lstBuffer.remove(0);
+                lstSortedBuffer.add(kItem);
+                String sKanjiChar = kItem.getKanji();
+                for (String sChar: sKanjiChar.split("")) {
+                    boolean flgFoundSimilar = true;
+                    while (flgFoundSimilar && lstBuffer.size() > 0) {
+                        flgFoundSimilar = false;
+                        for (int i = 0; i < lstBuffer.size(); i++) {
+                            if (lstBuffer.get(i).getKanji().contains(sChar)) {
+                                lstSortedBuffer.add(lstBuffer.get(i));
+                                lstBuffer.remove(i);
+                                flgFoundSimilar = true;
+                                break;
+                            }
+                        }
                     }
                 }
             }
+
+        }
+        else {
+            lstSortedBuffer = new ArrayList<JBGKanjiItem>(currentTNA.getKanjisForTest());
+        }
+
+        for (JBGKanjiItem kItem: lstSortedBuffer) {
+            addWordToKanjiList(tvKanjiForDisplay, 
+                kItem.getId().toString(), kItem.getKanji(), kItem.getHv(), kItem.getHiragana(), kItem.getMeaning());
+            iTotalLoad++;
         }
 
         lblJCoinAmount.setText(String.valueOf(this.getDataModel().getJCoin()));
@@ -366,7 +396,7 @@ public class KanjiAutoDisplayTab extends SimpleStackedFormBase {
     }
 
     private void clearLists() {
-        lvFirstCol.getItems().clear();
+        tvKanjiForDisplay.getItems().clear();
     }
 
     private void clearFields() {
@@ -377,12 +407,13 @@ public class KanjiAutoDisplayTab extends SimpleStackedFormBase {
     }
 
     private void toggleBigKanjiFields(final boolean flg) {
+        this.getTopBodyLabel().setVisible(flg);
         this.getMidBodyLabel().setVisible(flg);
         this.getBottomBodyLabel().setVisible(flg);
         lblShownHira.setVisible(flg);
         lblShownHv.setVisible(flg);
         lblShownMeaning.setVisible(flg);
-        lvFirstCol.setVisible(flg);
+        tvKanjiForDisplay.setVisible(flg);
         lblNextShownKanji.setVisible(flg);
         lblLastShownKanji.setVisible(flg);
         lblLastShownHira.setVisible(flg);
@@ -400,18 +431,20 @@ public class KanjiAutoDisplayTab extends SimpleStackedFormBase {
         this.getMidBodyLabel().setVisible(flg);
     }
 
-    private void processLoadTNA() {
+    private void processLoadKanjisFromTNA() {
         clearLists();
 
         currentTNA = this.getDataModel().getSelectedTNA();
         if (currentTNA != null) {
-            reloadTNAWordList("");
+            reloadTNAWordList();
         }
     }
 
     private void setStartAnchor() {
-        int iSelectedItem = lvFirstCol.getSelectionModel().getSelectedIndex();
-        if (iSelectedItem < 0 || iSelectedItem >= lvFirstCol.getItems().size()) {
+        if (this.isAutoDisplaying || this.currentTNA == null) return;
+
+        int iSelectedItem = tvKanjiForDisplay.getSelectionModel().getSelectedIndex();
+        if (iSelectedItem < 0 || iSelectedItem >= tvKanjiForDisplay.getItems().size()) {
             return;
         }
         if (iEndAnchor >= 0 && iSelectedItem >= iEndAnchor) {
@@ -423,8 +456,10 @@ public class KanjiAutoDisplayTab extends SimpleStackedFormBase {
     }
 
     private void setEndAnchor() {
-        int iSelectedItem = lvFirstCol.getSelectionModel().getSelectedIndex();
-        if (iSelectedItem < 0 || iSelectedItem >= lvFirstCol.getItems().size()) {
+        if (this.isAutoDisplaying || this.currentTNA == null) return;
+
+        int iSelectedItem = tvKanjiForDisplay.getSelectionModel().getSelectedIndex();
+        if (iSelectedItem < 0 || iSelectedItem >= tvKanjiForDisplay.getItems().size()) {
             return;
         }
         if (iStartAnchor >=0) {
@@ -442,6 +477,8 @@ public class KanjiAutoDisplayTab extends SimpleStackedFormBase {
     }
 
     private void clearAnchors() {
+        if (this.isAutoDisplaying || this.currentTNA == null) return;
+
         iStartAnchor = -1;
         iEndAnchor = -1;
         lblStartAnchor.setText("");
@@ -454,9 +491,9 @@ public class KanjiAutoDisplayTab extends SimpleStackedFormBase {
 
         this.iMaxWordDisplaySteps = Integer.valueOf(this.tfMaxWordDisplaySteps.getText());
 
-        int iSelectedItem = lvFirstCol.getSelectionModel().getSelectedIndex();
+        int iSelectedItem = tvKanjiForDisplay.getSelectionModel().getSelectedIndex();
         if (this.iStartAnchor >= 0) iSelectedItem = this.iStartAnchor;
-        if (iSelectedItem != -1 && iSelectedItem < lvFirstCol.getItems().size()) {
+        if (iSelectedItem != -1 && iSelectedItem < tvKanjiForDisplay.getItems().size()) {
             iCurrentKanjiOnDisplay = iSelectedItem; //start auto display from here
         }
         else {
@@ -508,7 +545,7 @@ public class KanjiAutoDisplayTab extends SimpleStackedFormBase {
                     }
                 }
                 else {
-                    if (this.iCurrentKanjiOnDisplay + 1 < lvFirstCol.getItems().size()) {
+                    if (this.iCurrentKanjiOnDisplay + 1 < tvKanjiForDisplay.getItems().size()) {
                         this.iCurrentKanjiOnDisplay++;
                     }
                     else {
@@ -535,12 +572,22 @@ public class KanjiAutoDisplayTab extends SimpleStackedFormBase {
                     lblLastShowHv.setText(lblShownHv.getText());
                     lblLastShownMeaning.setText(lblShownMeaning.getText());
 
-                    String sRemind = this.getBottomBodyLabel().getText();
-                    if (sRemind.length() + kanji.length() >= JBGConstants.WORDMATCH_MAX_REMIND_CHARS) {
-                      sRemind = sRemind.replace(sRemind.substring(0, (sRemind.length() + kanji.length())-JBGConstants.WORDMATCH_MAX_REMIND_CHARS), "");
+                    String sRemindLine1 = this.getBottomBodyLabel().getText();
+                    String sRemindLine2 = this.getTopBodyLabel().getText();
+                    String sCutKanjiOfLine1 = "";
+                    if (sRemindLine1.length() + kanji.length() >= JBGConstants.WORDMATCH_MAX_REMIND_CHARS) {
+                      sCutKanjiOfLine1 = sRemindLine1.substring(0, (sRemindLine1.length() + kanji.length())-JBGConstants.WORDMATCH_MAX_REMIND_CHARS);
+                      sRemindLine1 = sRemindLine1.replace(sCutKanjiOfLine1, "");
                     }
-                    sRemind += kanji;
-                    this.getBottomBodyLabel().setText(sRemind);
+                    sRemindLine1 += kanji;
+                    if (sCutKanjiOfLine1.length() > 0) {
+                        if (sRemindLine2.length() + sCutKanjiOfLine1.length() >= JBGConstants.WORDMATCH_MAX_REMIND_CHARS) {
+                          sRemindLine2 = sRemindLine2.replace(sRemindLine2.substring(0, (sRemindLine2.length() + sCutKanjiOfLine1.length())-JBGConstants.WORDMATCH_MAX_REMIND_CHARS), "");
+                        }
+                        sRemindLine2 += sCutKanjiOfLine1;
+                        this.getTopBodyLabel().setText(sRemindLine2);
+                    }
+                    this.getBottomBodyLabel().setText(sRemindLine1);
                 }
 
                 this.iCurrentDisplayStep = 1;
@@ -553,20 +600,20 @@ public class KanjiAutoDisplayTab extends SimpleStackedFormBase {
                 }
             }
 
-            lvFirstCol.getSelectionModel().select(this.iCurrentKanjiOnDisplay);
-            if (!cbMinimalAutoDisplay.isSelected()) lvFirstCol.scrollTo(this.iCurrentKanjiOnDisplay);
+            tvKanjiForDisplay.getSelectionModel().select(this.iCurrentKanjiOnDisplay);
+            if (!cbMinimalAutoDisplay.isSelected()) tvKanjiForDisplay.scrollTo(this.iCurrentKanjiOnDisplay);
 
             final String sLastShownKanji = this.getMidBodyLabel().getText();
 
-            DictKanjiTableViewItem tblItem = lvFirstCol.getItems().get(iCurrentKanjiOnDisplay);
+            DictKanjiTableViewItem tblItem = tvKanjiForDisplay.getItems().get(iCurrentKanjiOnDisplay);
             this.getMidBodyLabel().setText(tblItem.getKanji());
             this.setMidBodyLabelVisible(true);
 
             DictKanjiTableViewItem nextTblItem = null;
-            if (iCurrentKanjiOnDisplay + 1 < lvFirstCol.getItems().size())
-                nextTblItem = lvFirstCol.getItems().get(iCurrentKanjiOnDisplay+1);
+            if (iCurrentKanjiOnDisplay + 1 < tvKanjiForDisplay.getItems().size())
+                nextTblItem = tvKanjiForDisplay.getItems().get(iCurrentKanjiOnDisplay+1);
             else
-                nextTblItem = lvFirstCol.getItems().get(0);
+                nextTblItem = tvKanjiForDisplay.getItems().get(0);
             if (nextTblItem != null) this.lblNextShownKanji.setText(nextTblItem.getKanji());
 
             lblShownHira.setText(tblItem.getHiragana());
@@ -611,10 +658,7 @@ public class KanjiAutoDisplayTab extends SimpleStackedFormBase {
 
         switch(iCol) {
         case 0:
-            tv = lvFirstCol;
-            break;
-        case 1:
-            tv = lvSecondCol;
+            tv = tvKanjiForDisplay;
             break;
         }
 
@@ -656,38 +700,6 @@ public class KanjiAutoDisplayTab extends SimpleStackedFormBase {
         return btnCtl;
     }
 
-    private Button createColumnButton(final int iCol) {
-        Button btnCtl = new Button();
-        DropShadow shadow = new DropShadow();
-
-        EventHandler<ActionEvent> fncButtonClick = new EventHandler<ActionEvent>() {
-            @Override public void handle(ActionEvent e) {
-                processColumnButtonClick(iCol);
-            }
-        };
-        EventHandler<MouseEvent> fncBtnMouseEntered = new EventHandler<MouseEvent>() {
-                @Override public void handle(MouseEvent e) {
-                    btnCtl.setEffect(shadow);
-                }
-        };
-
-        EventHandler<MouseEvent> fncBtnMouseExited = new EventHandler<MouseEvent>() {
-                @Override public void handle(MouseEvent e) {
-                    btnCtl.setEffect(null);
-                }
-        };
-
-        btnCtl.setText("Test Button in TabWindow");
-        btnCtl.setOnAction(fncButtonClick);
-
-        //Adding the shadow when the mouse cursor is on
-        btnCtl.addEventHandler(MouseEvent.MOUSE_ENTERED, fncBtnMouseEntered);
-        //Removing the shadow when the mouse cursor is off
-        btnCtl.addEventHandler(MouseEvent.MOUSE_EXITED, fncBtnMouseExited);
-
-        return btnCtl;
-    }
-
     @Override
     protected void processKeypressEvent(final KeyEvent ke) {
         KeyCode kc = ke.getCode();
@@ -703,7 +715,7 @@ public class KanjiAutoDisplayTab extends SimpleStackedFormBase {
     public void onShow() {
         //always refresh this
         if (this.isAutoDisplaying) return;
-        processLoadTNA();
+        processLoadKanjisFromTNA();
         this.btnStopAutoDisplay.setDisable(true);
     }
 
