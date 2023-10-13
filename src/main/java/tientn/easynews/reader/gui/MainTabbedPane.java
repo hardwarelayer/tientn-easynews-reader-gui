@@ -65,6 +65,7 @@ public final class MainTabbedPane extends TabPaneBase {
 
     ManagementWindowTab paneManagement;
     WordMatchWindowTab paneWordMatch;
+    WordMatch2WindowTab paneWordMatch2;
     ArticleWordBuildWindowTab paneTNAWordBuilder;
     ArticleReadWindowTab paneArticleRead;
     KanjiAutoDisplayTab paneArticleAutoDisplay;
@@ -95,15 +96,18 @@ public final class MainTabbedPane extends TabPaneBase {
             paneWordMatch.onShow();
             break;
         case 3:
-            paneArticleAutoDisplay.onShow();
+            paneWordMatch2.onShow();
             break;
         case 4:
-            paneArticleRead.onShow();
+            paneArticleAutoDisplay.onShow();
             break;
         case 5:
-            paneGrammarRead.onShow();
+            paneArticleRead.onShow();
             break;
         case 6:
+            paneGrammarRead.onShow();
+            break;
+        case 7:
             paneGrammarListen.onShow();
             break;
         }
@@ -123,15 +127,18 @@ public final class MainTabbedPane extends TabPaneBase {
                 paneWordMatch.onStopShow();
                 break;
             case 3:
-                paneArticleAutoDisplay.onStopShow();
+                paneWordMatch2.onStopShow();
                 break;
             case 4:
-                paneArticleRead.onStopShow();
+                paneArticleAutoDisplay.onStopShow();
                 break;
             case 5:
-                paneGrammarRead.onStopShow();
+                paneArticleRead.onStopShow();
                 break;
             case 6:
+                paneGrammarRead.onStopShow();
+                break;
+            case 7:
                 paneGrammarListen.onStopShow();
                 break;
             }
@@ -179,6 +186,7 @@ public final class MainTabbedPane extends TabPaneBase {
 
         paneTNAWordBuilder = new ArticleWordBuildWindowTab(JBGConstants.MIN_WIDTH, JBGConstants.MIN_HEIGHT, getDesktop(), primaryStage, this.dataModel, this);
         paneWordMatch = new WordMatchWindowTab(JBGConstants.MIN_WIDTH, JBGConstants.MIN_HEIGHT, getDesktop(), primaryStage, this.dataModel);
+        paneWordMatch2 = new WordMatch2WindowTab(JBGConstants.MIN_WIDTH, JBGConstants.MIN_HEIGHT, getDesktop(), primaryStage, this.dataModel);
         paneArticleAutoDisplay = new KanjiAutoDisplayTab(JBGConstants.MIN_WIDTH, JBGConstants.MIN_HEIGHT, getDesktop(), primaryStage, this.dataModel);
         paneArticleRead = new ArticleReadWindowTab(JBGConstants.MIN_WIDTH, JBGConstants.MIN_HEIGHT, getDesktop(), primaryStage, this.dataModel);
         paneGrammarRead = new GrammarReadWindowTab(JBGConstants.MIN_WIDTH, JBGConstants.MIN_HEIGHT, getDesktop(), primaryStage, this.dataModel);
@@ -190,6 +198,7 @@ public final class MainTabbedPane extends TabPaneBase {
         this.addPaneAsTab("Management", paneManagement);
         this.addSimpleFormAsTab("ArticleWords", paneTNAWordBuilder);
         this.addSimpleStackedFormAsTab("WordMatch", paneWordMatch);
+        this.addSimpleStackedFormAsTab("WordMatch2", paneWordMatch2);
         this.addSimpleStackedFormAsTab("Auto Kanji Display", paneArticleAutoDisplay);
         this.addSimpleFormAsTab("ArticleRead", paneArticleRead);
         this.addSimpleFormAsTab("GrammarRead", paneGrammarRead);

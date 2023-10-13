@@ -96,6 +96,7 @@ public class ArticleWordBuildWindowTab extends SimpleFormBase {
     private Button btnLoadArticle;
     private Button btnBuildSelectedWord;
     private Button btnStartWordMatchTest;
+    private Button btnStartWordMatch2Test;
     private Button btnStartArticleRead;
 
     int WORD_SCORE_MULTIPLIER = JBGConstants.JCOIN_AMOUNT_FOR_ADD_KANJI_WORD;
@@ -271,6 +272,13 @@ public class ArticleWordBuildWindowTab extends SimpleFormBase {
             }
         };
         btnStartWordMatchTest = createButton("WordMatch", fncStartWordMatchButtonClick);
+        EventHandler<ActionEvent> fncStartWordMatch2ButtonClick = new EventHandler<ActionEvent>() {
+            @Override 
+            public void handle(ActionEvent e) {
+                processStartWordMatch2ButtonClick();
+            }
+        };
+        btnStartWordMatch2Test = createButton("WordMatch2", fncStartWordMatch2ButtonClick);
 
         EventHandler<ActionEvent> fncStartArticleReadButtonClick = new EventHandler<ActionEvent>() {
             @Override 
@@ -340,7 +348,7 @@ public class ArticleWordBuildWindowTab extends SimpleFormBase {
         this.addBodyCtl(tfMeaning, 3, 1);
 
         this.addBodyCtl(cbSelectedWord, 0, 2);
-        HBox wordCmdPane = new HBox(btnBuildSelectedWord, btnStartWordMatchTest, btnStartArticleRead, lblTNAWordCount);
+        HBox wordCmdPane = new HBox(btnBuildSelectedWord, btnStartWordMatchTest, btnStartWordMatch2Test, btnStartArticleRead, lblTNAWordCount);
         wordCmdPane.setAlignment(Pos.CENTER);
         this.addBodyPane(wordCmdPane, 3, 2);
 
@@ -676,7 +684,7 @@ public class ArticleWordBuildWindowTab extends SimpleFormBase {
         if (currentTNA == null) return;
 
         this.getDataModel().setNeedRefresh(true);
-        this.parentPane.switchToTab(3);
+        this.parentPane.switchToTab(4);
     }
 
     private void processArticleSentenceListClick() {
@@ -867,6 +875,19 @@ public class ArticleWordBuildWindowTab extends SimpleFormBase {
         this.getDataModel().setCurrentWorkMode(JBGConstants.TEST_WORD_IN_ARTICLE);
         this.getDataModel().setNeedRefresh(true);
         this.parentPane.switchToTab(2);
+
+    }
+
+    private void processStartWordMatch2ButtonClick() {
+        if (currentTNA == null) return;
+        if (this.getDataModel().isTestStarted()) {
+            this.showInformation("Cannot switch tab!", "You are currently in a match, complete or stop it first!");
+            return;
+        }
+
+        this.getDataModel().setCurrentWorkMode(JBGConstants.TEST_WORD_IN_ARTICLE);
+        this.getDataModel().setNeedRefresh(true);
+        this.parentPane.switchToTab(3);
 
     }
 

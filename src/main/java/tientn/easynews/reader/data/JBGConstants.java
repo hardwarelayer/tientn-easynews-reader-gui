@@ -259,6 +259,7 @@ public interface JBGConstants {
   static final int JCOIN_AMOUNT_FOR_ADD_KANJI_WORD = 2;
   static final int WORDMATCH_NORMAL_WORD_TIME = 25;
   static final int AUTO_KANJI_DISPLAY_WORD_PER_POINT = 10;
+  static final int WORDMATCH2_KANJI_REPEAT = 2;
 
   static final int MIN_WIDTH=1200;
   static final int MIN_HEIGHT=1000;
