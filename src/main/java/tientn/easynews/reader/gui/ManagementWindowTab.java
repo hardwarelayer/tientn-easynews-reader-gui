@@ -727,14 +727,14 @@ public class ManagementWindowTab extends GridPaneBase {
     }
 
     private void processArticleTableViewDblClick(ManagementArticleTableViewItem rowData) {
-        System.out.println(rowData.toString());
+        //System.out.println(rowData.toString());
         String sTNAId = rowData.getId().toString();
         this.dataModel.setSelectedArticleId(sTNAId); //this will also set needRefresh
         this.parentPane.switchToTab(1);
     }
 
     private void processGrammarTableViewDblClick(ManagementGrammarTableViewItem rowData) {
-        System.out.println(rowData.toString());
+        //System.out.println(rowData.toString());
         String sTNGId = rowData.getId().toString();
         this.dataModel.setSelectedGrammarId(sTNGId); //this will also set needRefresh
         this.dataModel.setNeedRefresh(true);

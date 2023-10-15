@@ -96,7 +96,7 @@ public class WordMatch2WindowTab extends SimpleStackedFormBase {
     private Label lblStartAnchor;
     private Label lblEndAnchor;
     private Label lblShownKanji, lblShownHira, lblShownHv, lblShownMeaning;
-    private Label lblLastShownKanji, lblLastShownHira, lblLastShowHv, lblLastShownMeaning;
+    private Label lblLastShownKanji, lblLastShownHira, lblLastShownHv, lblLastShownMeaning;
     private Label lblNextShownKanji;
     private Label lblBottomKanji, lblBottomInfo, lblBottomLastInfo, lblBottomRemind;
 
@@ -212,10 +212,9 @@ public class WordMatch2WindowTab extends SimpleStackedFormBase {
 
         lblLastShownKanji = new Label("...");
         lblLastShownHira = new Label("...");
-        lblLastShowHv = new Label("...");
+        lblLastShownHv = new Label("...");
         lblLastShownMeaning = new Label("...");
         lblLastShownKanji.setId("auto-kanji-last-shown");
-        lblLastShownHira.setId("auto-kanji-last-shown");
 
         lblNextShownKanji = new Label("...");
         lblNextShownKanji.setId("auto-kanji-next-shown-kanji");
@@ -229,7 +228,7 @@ public class WordMatch2WindowTab extends SimpleStackedFormBase {
         createTableViewColumn(tvKanjiForDisplay, "Meaning", 0.3);
 
         tvKanjiForDisplay.getStyleClass().add("wordmatch-scroll-bar");
-        tvKanjiForDisplay.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(1));
+        tvKanjiForDisplay.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.9));
 
         ContextMenu articleCM = new ContextMenu();
         MenuItem acmMi1 = new MenuItem("Set Start Anchor");
@@ -275,13 +274,13 @@ public class WordMatch2WindowTab extends SimpleStackedFormBase {
         bxShownContent.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.05));
         bxShownContent.setAlignment(CENTER);
 
-        this.addBodyPane(new VBox(bxShownContent, gpMainArea), 1, 1);
-
-/*
-        VBox bxLastShownContent = new VBox(lblLastShownKanji, lblLastShownHira, lblLastShowHv, lblLastShownMeaning);
+        HBox bxLastShownContent = new HBox(lblLastShownKanji, lblLastShownHira, lblLastShownHv, lblLastShownMeaning);
         bxLastShownContent.prefWidthProperty().bind(getPrimaryStage().widthProperty().multiply(0.25));
         bxLastShownContent.setAlignment(CENTER);
 
+        this.addBodyPane(new VBox(bxShownContent, gpMainArea, bxLastShownContent), 1, 1);
+
+/*
         VBox bxNextShownContent = new VBox(lblNextShownKanji);
         bxNextShownContent.prefWidthProperty().bind(getPrimaryStage().widthProperty().multiply(0.25));
         bxNextShownContent.setAlignment(CENTER);
@@ -420,6 +419,10 @@ public class WordMatch2WindowTab extends SimpleStackedFormBase {
         this.lblShownHira.setText("");
         this.lblShownHv.setText("");
         this.lblShownMeaning.setText("");
+        this.lblLastShownKanji.setText("");
+        this.lblLastShownHira.setText("");
+        this.lblLastShownHv.setText("");
+        this.lblLastShownMeaning.setText("");
         this.lstSelectedButtons.clear();
         this.gpMainArea.getChildren().clear();
     }
@@ -534,6 +537,12 @@ public class WordMatch2WindowTab extends SimpleStackedFormBase {
                     lblJCoinAmount.setText(String.valueOf(totalJCoin));
 
                     this.lstSelectedButtons.clear();
+
+                    lblLastShownKanji.setText(lblShownKanji.getText());
+                    lblLastShownHira.setText(lblShownHira.getText());
+                    lblLastShownHv.setText(lblShownHv.getText());
+                    lblLastShownMeaning.setText(lblShownMeaning.getText());
+
                     lblShownKanji.setText("");
                     lblShownHira.setText("");
                     lblShownHv.setText("");

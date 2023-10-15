@@ -689,6 +689,7 @@ public class WordMatchWindowTab extends SimpleStackedFormBase {
           return;
 
         List<JBGKanjiItem> lstKJ = this.getDataModel().getNewestLearnKJSubset();
+        if (lstKJ == null) return;
         this.iCurrentTestKJCount = lstKJ.size();
 
         if (lstKJ != null && lstKJ.size() > 0) {

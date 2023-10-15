@@ -368,6 +368,12 @@
   -fx-effect: innershadow( three-pass-box , rgba(0,0,0,0.1) , 2, 0.0 , 0 , 1);
 }
 
+#wordmatch2-shown-kanji-label {
+ -fx-font-size: 32px;
+ -fx-font-family: Courier;
+ -fx-font-weight: bold;
+ -fx-text-fill: #FFFFFF;
+}
 /* ------------------------ ArticleWord -------------------------*/
 #build-word-ja-content {
   -fx-font-size: 11pt; 
