@@ -233,7 +233,7 @@ public class KanjiDictionaryTab extends SimpleStackedFormBase {
 
     private void doSearchKanji() {
         //reloadKanjiList();
-        int iTotalDbKanjis = countDbKanjis();
+        int iTotalDbKanjis = this.getDataModel().dbKanjisCount();
         lblTotalDictKanjis.setText(String.format("%d/%d", 0, iTotalDbKanjis));
 
         String sSearchWord = tfDictSearchWord.getText();
@@ -281,63 +281,15 @@ public class KanjiDictionaryTab extends SimpleStackedFormBase {
         lblTotalKanjis.setText(String.format("%d/%d", iTotalFound, this.getDataModel().getDataKanjiItems().size()));
     }
 
-    private int countDbKanjis() {
-        int iVal = 0;
-        try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            Connection con = DriverManager.getConnection(
-                "jdbc:mysql://localhost:3306/doctiengnhat","tientn","123");  
-            Statement stmt=con.createStatement();  
-            ResultSet rs=stmt.executeQuery("select count(*) from consolidated_kanji_dict");  
-            if (rs.next())
-                iVal = rs.getInt(1);  
-            con.close();
-        }
-        catch(Exception e) {
-            System.out.println(e);
-        }
-        return iVal;
-    }
-
     private void searchKanjiInDb(final String sKanji) {
         int iRecId = 0;
-        try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            Connection con = DriverManager.getConnection(
-                "jdbc:mysql://localhost:3306/doctiengnhat","tientn","123");  
-            Statement stmt=con.createStatement();  
-            ResultSet rs=stmt.executeQuery(
-                String.format("SELECT * FROM consolidated_kanji_dict WHERE kanji_char='%s'", sKanji));  
-            while (rs.next()) {
-                iRecId = rs.getInt(1);
-                addWordToKanjiList(lvSecondCol, String.valueOf(iRecId), 
-                    rs.getString("kanji_char"), rs.getString("hv_phonetic"), rs.getString("on_kun"), 
-                    rs.getString("meaning"));
-            }
-            con.close();
-        }
-        catch(Exception e) {
-            System.out.println(e);
-        }
-    }
-
-    private void loadNextKanjisForTest() {
-        return;
-
-        /*
-        this.updateKanjiSubsetSize();
-        List<JBGKanjiItem> lstKJ = this.getDataModel().getNewKJSubset();
-        this.iCurrentTestKJCount = lstKJ.size();
-
-        if (lstKJ != null && lstKJ.size() > 0) {
-            this.kanjiList = lstKJ;
-            clearLists();
-            for (int i = 0; i < lstKJ.size(); i++) {
-                JBGKanjiItem item = lstKJ.get(i);
-                fillItemToLists(item);
+        List<JBGKanjiItem> lstRes = this.getDataModel().dbKanjiSearch(sKanji);
+        if (lstRes.size() > 0) {
+            for (JBGKanjiItem item: lstRes) {
+                addWordToKanjiList(lvSecondCol, item.getId().toString(), 
+                    item.getKanji(), item.getHv(), item.getHiragana(), item.getMeaning());
             }
         }
-        */
     }
 
     //event

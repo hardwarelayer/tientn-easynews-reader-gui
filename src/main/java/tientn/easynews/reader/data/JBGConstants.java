@@ -264,4 +264,9 @@ public interface JBGConstants {
   static final int MIN_WIDTH=1200;
   static final int MIN_HEIGHT=1000;
 
+  static final String JDBC_DRIVER = "com.mysql.cj.jdbc.Driver";
+  static final String JDBC_CON_STR = "jdbc:mysql://localhost:3306/doctiengnhat";
+  static final String DB_USER = "tientn";
+  static final String DB_PASSWORD = "123";  
+
 }

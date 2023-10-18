@@ -501,48 +501,8 @@ public class ArticleWordBuildWindowTab extends SimpleFormBase {
     }
 
     private void lookupKanji(final String selText) {
-        boolean isArticleKJFound = false;
-        for (int i = 0; i < currentTNA.getArticleKanjis().size(); i++) {
-            currentTNAKanji = currentTNA.getArticleKanjis().get(i);
-            if (currentTNAKanji.getKanji().equals(selText)) {
-                isArticleKJFound = true;
-                break;
-            }
-        }
-
-        JBGKanjiItem mainItem = this.getDataModel().getKanjiFromMainKanjiList(selText);
-
         StringBuilder sb = new StringBuilder();
-
-        if (mainItem != null) {
-            sb.append(
-                "Main dictionary:" +
-                mainItem.getKanji() + " / " +
-                mainItem.getHiragana() + "/ " +
-                mainItem.getHv() + " / " +
-                mainItem.getMeaning() + "\n"
-                );
-        }
-        
-        if (isArticleKJFound && currentTNAKanji != null) {
-            sb.append(
-                "In article:" +
-                currentTNAKanji.getKanji() + " / " +
-                currentTNAKanji.getHv() + "\n"
-                );
-        }
-
-        List<JBGKanjiItem> lstRelatedKanjis = this.getDataModel().getRelatedKanjiFromMainKanjiList(selText);
-        if (lstRelatedKanjis.size() > 0) {
-            sb.append("Related:\n");
-            for (JBGKanjiItem item: lstRelatedKanjis) {
-                sb.append(item.getKanji() + " / " +
-                    item.getHiragana() + " / " +
-                    item.getHv() + " / " +
-                    item.getMeaning() + "\n"
-                    );
-            }
-        }
+        sb.append(this.getDataModel().lookupKanjiValues(selText));
         sb.append("\n\n\n");
         showInformation(selText, sb.toString());
     }
@@ -660,7 +620,7 @@ public class ArticleWordBuildWindowTab extends SimpleFormBase {
             cbSelectedWord.getItems().add(sDynKanjis);
         }
         if (cbSelectedWord.getItems().size() > 0) {
-            //cbSelectedWord.show();
+            cbSelectedWord.show();
         }
     }
 

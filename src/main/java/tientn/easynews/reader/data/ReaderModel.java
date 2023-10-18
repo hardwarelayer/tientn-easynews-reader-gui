@@ -42,6 +42,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import tientn.easynews.reader.data.JBGConstants;
+import java.sql.*;
 
 public class ReaderModel {
 
@@ -1366,4 +1367,126 @@ public class ReaderModel {
     this.jCoin -= step;
     return true;
   }
+
+  public int dbKanjisCount() {
+      int iVal = 0;
+      try {
+          Class.forName(JBGConstants.JDBC_DRIVER);
+          Connection con = DriverManager.getConnection(JBGConstants.JDBC_CON_STR, 
+            JBGConstants.DB_USER, JBGConstants.DB_PASSWORD);
+          Statement stmt=con.createStatement();  
+          ResultSet rs=stmt.executeQuery("select count(*) from consolidated_kanji_dict");  
+          if (rs.next())
+              iVal = rs.getInt(1);  
+          con.close();
+      }
+      catch(Exception e) {
+          System.out.println(e);
+      }
+      return iVal;
+  }
+
+  public List<JBGKanjiItem> dbKanjiSearch(final String sKanji) {
+      List<JBGKanjiItem> lstRes = new ArrayList<JBGKanjiItem>();
+      int iRecId = 0;
+      try {
+          Class.forName(JBGConstants.JDBC_DRIVER);
+          Connection con = DriverManager.getConnection(JBGConstants.JDBC_CON_STR, 
+            JBGConstants.DB_USER, JBGConstants.DB_PASSWORD);
+          Statement stmt=con.createStatement();  
+          ResultSet rs=stmt.executeQuery(
+              String.format("SELECT * FROM consolidated_kanji_dict WHERE kanji_char='%s'", sKanji));  
+          while (rs.next()) {
+              iRecId = rs.getInt(1);
+
+              JBGKanjiItem kjItem = new JBGKanjiItem( 
+                  rs.getString("kanji_char"), rs.getString("hv_phonetic"), rs.getString("on_kun"), 
+                  rs.getString("meaning"));
+              lstRes.add(kjItem);
+
+          }
+          con.close();
+      }
+      catch(Exception e) {
+          System.out.println(e);
+      }
+      return lstRes;
+  }
+
+  public List<JBGKanjiItem> dbKanjiSearchString(final String sKanjiString) {
+      List<JBGKanjiItem> lstRes = new ArrayList<JBGKanjiItem>();
+      for (String s: sKanjiString.split("")) {
+        String sT = s.trim();
+        List<JBGKanjiItem> lst = dbKanjiSearch(sT);
+        if (lst.size() > 0) {
+          for (JBGKanjiItem item: lst)
+            lstRes.add(item);
+        }
+      }
+      return lstRes;
+  }
+
+  public String lookupKanjiValues(final String selText) {
+      boolean isArticleKJFound = false;
+      TFMTTNAData currentTNA = getSelectedTNA();
+      TFMTTNAKanjiData currentTNAKanji = null;
+      StringBuilder sb = new StringBuilder();
+
+      if (currentTNA != null) {
+        for (int i = 0; i < currentTNA.getArticleKanjis().size(); i++) {
+            currentTNAKanji = currentTNA.getArticleKanjis().get(i);
+            if (currentTNAKanji.getKanji().equals(selText)) {
+                isArticleKJFound = true;
+                break;
+            }
+        }
+
+        if (isArticleKJFound && currentTNAKanji != null) {
+            sb.append(
+                "In article:" +
+                currentTNAKanji.getKanji() + " / " +
+                currentTNAKanji.getHv() + "\n"
+                );
+        }
+
+      }
+
+      JBGKanjiItem mainItem = this.getKanjiFromMainKanjiList(selText);
+
+      if (mainItem != null) {
+          sb.append(
+              "Main dictionary:" +
+              mainItem.getKanji() + " / " +
+              mainItem.getHiragana() + "/ " +
+              mainItem.getHv() + " / " +
+              mainItem.getMeaning() + "\n"
+              );
+      }
+      
+      List<JBGKanjiItem> lstRelatedKanjis = this.getRelatedKanjiFromMainKanjiList(selText);
+      if (lstRelatedKanjis.size() > 0) {
+          sb.append("Related:\n");
+          for (JBGKanjiItem item: lstRelatedKanjis) {
+              sb.append(item.getKanji() + " / " +
+                  item.getHiragana() + " / " +
+                  item.getHv() + " / " +
+                  item.getMeaning() + "\n"
+                  );
+          }
+      }
+
+      List<JBGKanjiItem> lstRelatedKanjisInDb = this.dbKanjiSearchString(selText);
+      if (lstRelatedKanjisInDb.size() > 0) {
+          sb.append("KanjiDict:\n");
+          for (JBGKanjiItem item: lstRelatedKanjisInDb) {
+              sb.append(item.getKanji() + " / " +
+                  item.getHiragana() + " / " +
+                  item.getHv() + " / " //+
+                  //item.getMeaning().replace("<br>", "\n") + "\n"
+                  );
+          }
+      }
+      return sb.toString().trim();
+  }
+
 }

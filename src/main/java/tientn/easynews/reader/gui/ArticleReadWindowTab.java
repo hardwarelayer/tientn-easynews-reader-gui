@@ -54,6 +54,7 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Animation;
 import javafx.util.Duration;
 import javafx.scene.control.Tooltip;
+import javafx.scene.control.CheckBox;
 
 import java.lang.Character.UnicodeBlock;
 
@@ -94,14 +95,15 @@ public class ArticleReadWindowTab extends SimpleFormBase {
     private Button btnRnLComplete;
     private Button btnListenToArticle;
 
+    private CheckBox cbQuickTooltip;
+
     private MediaPlayer mediaPlayer = null;
 
     private TFMTTNAData currentTNA = null;
     private boolean isTNAFound = false;
-    private TFMTTNAKanjiData currentTNAKanji = null;
     private String sCurrentSelectedText = "";
     private long lSelectedTextStart = 0;
-    Timeline kjBlinkTimeline = null;
+    Timeline tmlTextSelectChecker = null;
     Tooltip tooltipArticle = null;
 
     private List<String> arrSentences;
@@ -154,9 +156,13 @@ public class ArticleReadWindowTab extends SimpleFormBase {
         lblSelectedArticleId = new Label("...");
         lblSelectedArticleTitle = new Label("...");
 
+        cbQuickTooltip = new CheckBox("Quick search with tooltip");
+        cbQuickTooltip.setIndeterminate(false);
+        cbQuickTooltip.setTooltip(new Tooltip("If enabled, content of selected kanjis will be shown in tooltip"));
+
         HBox titleRow = new HBox(btnRefresh, lblSelectedArticleId, lblSelectedArticleTitle);
         HBox coinRow = new HBox(lblCoin, lblJCoinAmount, lblSentenceVal, lblCurrentSentenceValue, 
-            new Label("  Listening Bonus:"), lblCurrentListeningBonusValue);
+            new Label("  Listening Bonus:"), lblCurrentListeningBonusValue, cbQuickTooltip);
 
         tafArticleContent = new TextArea();
         tafArticleContent.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.64));
@@ -183,13 +189,13 @@ public class ArticleReadWindowTab extends SimpleFormBase {
                 String text = tafArticleContent.getSelectedText();
                 if (text.length() > 0 && text.equals(this.sCurrentSelectedText)) {
                     if (System.currentTimeMillis() - this.lSelectedTextStart > 150) {
-                        if (this.kjBlinkTimeline == null) {
-                            this.kjBlinkTimeline = new Timeline(
+                        if (this.tmlTextSelectChecker == null) {
+                            this.tmlTextSelectChecker = new Timeline(
                                new KeyFrame(Duration.millis(500), evt -> fncShowLookupTooltip()) //end duration event
                                );
-                            kjBlinkTimeline.setCycleCount(1);
+                            tmlTextSelectChecker.setCycleCount(1);
                         }
-                        kjBlinkTimeline.play();
+                        tmlTextSelectChecker.play();
                         //System.out.println(text);
                     }
                 }
@@ -349,6 +355,7 @@ public class ArticleReadWindowTab extends SimpleFormBase {
     }
 
     private void fncShowLookupTooltip() {
+        if (!cbQuickTooltip.isSelected()) return;
         String sText = tafArticleContent.getSelectedText().trim();
         if (sText.equals(this.sCurrentSelectedText)) {
             //neu da select text va sau 500 millis chua change
@@ -356,7 +363,7 @@ public class ArticleReadWindowTab extends SimpleFormBase {
                 this.tooltipArticle = new Tooltip("...");
                 Tooltip.install(this.tafArticleContent, this.tooltipArticle);
             }
-            String sValues = String.format("%s\n%s", sText, getKanjiValues(sText));
+            String sValues = String.format("%s\n%s", sText, this.getDataModel().lookupKanjiValues(sText));
             tooltipArticle.setText(sValues);
             //System.out.println(sText);
         }
@@ -717,54 +724,7 @@ public class ArticleReadWindowTab extends SimpleFormBase {
     }
 
     private void showKanjiDlg(final String selText) {
-        showInformation(selText, this.getKanjiValues(selText));
-    }
-
-    private String getKanjiValues(final String selText) {
-        boolean isArticleKJFound = false;
-        for (int i = 0; i < currentTNA.getArticleKanjis().size(); i++) {
-            currentTNAKanji = currentTNA.getArticleKanjis().get(i);
-            if (currentTNAKanji.getKanji().equals(selText)) {
-                isArticleKJFound = true;
-                break;
-            }
-        }
-
-        JBGKanjiItem mainItem = this.getDataModel().getKanjiFromMainKanjiList(selText);
-
-        StringBuilder sb = new StringBuilder();
-
-        if (mainItem != null) {
-            sb.append(
-                "Main dictionary:" +
-                mainItem.getKanji() + " / " +
-                mainItem.getHiragana() + "/ " +
-                mainItem.getHv() + " / " +
-                mainItem.getMeaning() + "\n"
-                );
-        }
-        
-        if (isArticleKJFound && currentTNAKanji != null) {
-            sb.append(
-                "In article:" +
-                currentTNAKanji.getKanji() + " / " +
-                currentTNAKanji.getHv() + "\n"
-                );
-        }
-
-        List<JBGKanjiItem> lstRelatedKanjis = this.getDataModel().getRelatedKanjiFromMainKanjiList(selText);
-        if (lstRelatedKanjis.size() > 0) {
-            sb.append("Related:\n");
-            for (JBGKanjiItem item: lstRelatedKanjis) {
-                sb.append(item.getKanji() + " / " +
-                    item.getHiragana() + " / " +
-                    item.getHv() + " / " +
-                    item.getMeaning() + "\n"
-                    );
-            }
-        }
-        sb.append("\n\n\n");
-        return sb.toString().trim();
+        showInformation(selText, String.format("%s\n\n\n", this.getDataModel().lookupKanjiValues(selText)));
     }
 
     private int countKanjiInString(String s) {
