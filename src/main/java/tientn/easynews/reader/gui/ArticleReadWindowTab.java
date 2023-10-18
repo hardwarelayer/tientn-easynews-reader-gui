@@ -16,6 +16,7 @@ import javafx.scene.text.Text;
 import javafx.scene.paint.Color;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.input.MouseButton;
 import javafx.event.EventHandler;
 import javafx.event.ActionEvent;
 import javafx.scene.input.KeyEvent;
@@ -43,6 +44,8 @@ import javafx.scene.control.SelectionModel;
 import javafx.scene.control.SelectionMode;
 import javafx.collections.ObservableList;
 import javafx.scene.input.KeyCode;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
 
 import java.lang.Character.UnicodeBlock;
 
@@ -50,6 +53,7 @@ import tientn.easynews.reader.gui.base.SimpleFormBase;
 import tientn.easynews.reader.data.ReaderModel;
 import tientn.easynews.reader.data.JBGKanjiItem;
 import tientn.easynews.reader.data.JBGConstants;
+import tientn.easynews.reader.data.TFMTTNAKanjiData;
 
 import tientn.easynews.reader.data.TFMTTNAData;
 import tientn.easynews.reader.data.TFMTTNASentenceData;
@@ -85,10 +89,13 @@ public class ArticleReadWindowTab extends SimpleFormBase {
     private MediaPlayer mediaPlayer = null;
 
     private TFMTTNAData currentTNA = null;
+    private boolean isTNAFound = false;
+    private TFMTTNAKanjiData currentTNAKanji = null;
+
     private List<String> arrSentences;
-    private String currentTestSentence;
-    private int currentTestSentenceIdx;
-    private int currentTestSentenceVal;
+    private String sCurrentTestSentence;
+    private int sCurrentTestSentenceIdx;
+    private int sCurrentTestSentenceVal;
     private int currentListeningSentenceCount = 0;
     private int currentListeningBonusVal;
 
@@ -145,6 +152,16 @@ public class ArticleReadWindowTab extends SimpleFormBase {
         tafArticleContent.setId("read-article-content");
         tafArticleContent.setWrapText(true);
         tafArticleContent.setEditable(false);
+
+        ContextMenu cmTNASens = new ContextMenu();
+        MenuItem mi1 = new MenuItem("Dictionary");
+        cmTNASens.getItems().add(mi1);
+
+        mi1.setOnAction((ActionEvent event) -> {
+            if (tafArticleContent.getSelectedText().length() > 0)
+              this.lookupKanji(tafArticleContent.getSelectedText());
+        });
+        tafArticleContent.setContextMenu(cmTNASens);
 
         tafSentenceInput = new TextArea();
         tafSentenceInput.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.1));
@@ -251,8 +268,12 @@ public class ArticleReadWindowTab extends SimpleFormBase {
         KeyCode kc = ke.getCode(); 
         switch (kc) {
             case ENTER:
-                if (!ke.isShiftDown()) return;
-                processInputEnter();
+                if (ke.isShiftDown()) {
+                    processInputEnter(false);
+                }
+                else if (ke.isControlDown() || ke.isAltDown() || ke.isMetaDown()) {
+                    processInputEnter(true);
+                }
                 break;
             case BACK_QUOTE:
                 if (!ke.isShiftDown())
@@ -286,10 +307,16 @@ public class ArticleReadWindowTab extends SimpleFormBase {
         }
     }
 
-    private void processInputEnter() {
+    private void processInputEnter(final boolean flgSkip) {
         if (!this.getDataModel().isReadStarted()) return;
 
-        validateSentence();
+        if (!flgSkip) {
+            validateSentence();
+        }
+        else {
+            tafSentenceInput.setText(sCurrentTestSentence);
+            validateSentence();
+        }
     }
 
     private void processListenToSentence() {
@@ -355,17 +382,17 @@ public class ArticleReadWindowTab extends SimpleFormBase {
         if (sText == null) return;
         sText = sText.trim();
 
-        //System.out.println("trial: " + currentTestSentence);
+        //System.out.println("trial: " + sCurrentTestSentence);
         //System.out.println("enter: " + sText);
 
-        if (sText.equals(currentTestSentence)) {
-            //System.out.println("valid match!");
-            this.getDataModel().increaseJCoin(this.currentTestSentenceVal);
+        if (sText.equals(sCurrentTestSentence)) {
+            //System.out.println("valid match!" + String.valueOf(this.sCurrentTestSentenceVal));
+            this.getDataModel().increaseJCoin(this.sCurrentTestSentenceVal);
             lblJCoinAmount.setText(String.valueOf(this.getDataModel().getJCoin()));
             if (stepUpTestSentence()) {
                 //System.out.println("stepped up!");
-                lblCurrentSentenceValue.setText(String.valueOf(this.currentTestSentenceVal));
-                appendTextToContent(currentTestSentence, true);
+                lblCurrentSentenceValue.setText(String.valueOf(this.sCurrentTestSentenceVal));
+                appendTextToContent(sCurrentTestSentence, true);
                 tafSentenceInput.clear();
                 tafSentenceInput.requestFocus();
             }
@@ -375,9 +402,9 @@ public class ArticleReadWindowTab extends SimpleFormBase {
             }
         }
         else {
-            System.out.println("NOMATCH trial: " + currentTestSentence);
-            System.out.println("NOMATCH enter: " + sText);
-            int iDiffPos = getIndexOfDifferent(sText, currentTestSentence);
+            //System.out.println("NOMATCH trial: " + sCurrentTestSentence);
+            //System.out.println("NOMATCH enter: " + sText);
+            int iDiffPos = getIndexOfDifferent(sText, sCurrentTestSentence);
             if (iDiffPos >= 0) {
                 int iRemainLength = sText.length() - iDiffPos;
                 tafSentenceInput.positionCaret(iDiffPos);
@@ -401,18 +428,18 @@ public class ArticleReadWindowTab extends SimpleFormBase {
     private void playCurrentSentenceMP3() {
         if (!this.getDataModel().isReadStarted()) return;
         if (mediaPlayer != null) return;
-        if (currentTestSentenceIdx < 0) return;
+        if (sCurrentTestSentenceIdx < 0) return;
         if (currentTNA == null) return;
 
         final String currentArticleMP3FolderPath = getCurrentArticleEachSentenceMP3Folder();
         if (currentArticleMP3FolderPath != null) {
             // do something
-            final String sentenceMP3FullPath = String.format("%s/%03d.mp3", currentArticleMP3FolderPath, currentTestSentenceIdx-1);
+            final String sentenceMP3FullPath = String.format("%s/%03d.mp3", currentArticleMP3FolderPath, sCurrentTestSentenceIdx-1);
 //System.out.println(sentenceMP3FullPath);
             File f = new File(sentenceMP3FullPath);
             if(f.exists() && !f.isDirectory()) {
                 increaseListenBonusCounter();
-                this.getDataModel().increaseJCoin((this.currentTestSentenceVal / 3) + this.currentListeningBonusVal); //listen only gain 30%
+                this.getDataModel().increaseJCoin((this.sCurrentTestSentenceVal / 3) + this.currentListeningBonusVal); //listen only gain 30%
                 lblJCoinAmount.setText(String.valueOf(this.getDataModel().getJCoin()));
                 playMP3(sentenceMP3FullPath);
             }
@@ -439,19 +466,19 @@ public class ArticleReadWindowTab extends SimpleFormBase {
         if (!this.getDataModel().isReadStarted()) return;
         if (mediaPlayer != null) return;
         if (currentTNA == null) return;
-        String sText = currentTestSentence;
+        String sText = sCurrentTestSentence;
         if (sText == null) return;
 
         //no mp3 for each sentence, do nothing
         if (getCurrentArticleEachSentenceMP3Folder() == null) return;
 
         increaseListenBonusCounter();
-        this.getDataModel().increaseJCoin((this.currentTestSentenceVal / 2) + this.currentListeningBonusVal); //listen only gain 50%
+        this.getDataModel().increaseJCoin((this.sCurrentTestSentenceVal / 2) + this.currentListeningBonusVal); //listen only gain 50%
         lblJCoinAmount.setText(String.valueOf(this.getDataModel().getJCoin()));
         if (stepUpTestSentence()) {
             //System.out.println("stepped up!");
-            lblCurrentSentenceValue.setText(String.valueOf(this.currentTestSentenceVal));
-            appendTextToContent(currentTestSentence, true);
+            lblCurrentSentenceValue.setText(String.valueOf(this.sCurrentTestSentenceVal));
+            appendTextToContent(sCurrentTestSentence, true);
             tafSentenceInput.clear();
             tafSentenceInput.requestFocus();
             //listen to newly loaded sentence
@@ -574,10 +601,10 @@ public class ArticleReadWindowTab extends SimpleFormBase {
         this.getDataModel().setReadStarted(true);
         clearFields();
 
-        this.currentTestSentenceIdx = 0;
+        this.sCurrentTestSentenceIdx = 0;
         if (!stepUpTestSentence()) return;
-        lblCurrentSentenceValue.setText(String.valueOf(this.currentTestSentenceVal));
-        appendTextToContent(this.currentTestSentence, true);
+        lblCurrentSentenceValue.setText(String.valueOf(this.sCurrentTestSentenceVal));
+        appendTextToContent(this.sCurrentTestSentence, true);
 
         tafSentenceInput.setEditable(true);
         tafSentenceInput.requestFocus();
@@ -606,8 +633,8 @@ public class ArticleReadWindowTab extends SimpleFormBase {
         tafArticleContent.selectRange(0,0);
         tafSentenceInput.setEditable(false);
 
-        this.currentTestSentenceIdx = 0;
-        this.currentTestSentenceVal = 0;
+        this.sCurrentTestSentenceIdx = 0;
+        this.sCurrentTestSentenceVal = 0;
         this.lblCurrentSentenceValue.setText("0");
         this.btnLoadArticle.setDisable(false);
         this.tafReadOnlyTestInput.setEditable(true);
@@ -622,16 +649,63 @@ public class ArticleReadWindowTab extends SimpleFormBase {
     }
 
     private boolean stepUpTestSentence() {
-        if (this.currentTestSentenceIdx + 1 > this.arrSentences.size()) {
-            //System.out.println("can't step up: " + String.valueOf(this.currentTestSentenceIdx+1) + "/" + String.valueOf(this.arrSentences.size()));
+        if (this.sCurrentTestSentenceIdx + 1 > this.arrSentences.size()) {
+            //System.out.println("can't step up: " + String.valueOf(this.sCurrentTestSentenceIdx+1) + "/" + String.valueOf(this.arrSentences.size()));
             return false;
         }
-        this.currentTestSentenceIdx += 1;
-        String sen = this.arrSentences.get(this.currentTestSentenceIdx - 1);
+        this.sCurrentTestSentenceIdx += 1;
+        String sen = this.arrSentences.get(this.sCurrentTestSentenceIdx - 1);
         if (skipSentence(sen)) return stepUpTestSentence();
-        this.currentTestSentence = normalizeSentenceForTest(sen);
-        this.currentTestSentenceVal = countKanjiInString(sen);
+        this.sCurrentTestSentence = normalizeSentenceForTest(sen);
+        this.sCurrentTestSentenceVal = countKanjiInString(sen);
         return true;
+    }
+
+    private void lookupKanji(final String selText) {
+        boolean isArticleKJFound = false;
+        for (int i = 0; i < currentTNA.getArticleKanjis().size(); i++) {
+            currentTNAKanji = currentTNA.getArticleKanjis().get(i);
+            if (currentTNAKanji.getKanji().equals(selText)) {
+                isArticleKJFound = true;
+                break;
+            }
+        }
+
+        JBGKanjiItem mainItem = this.getDataModel().getKanjiFromMainKanjiList(selText);
+
+        StringBuilder sb = new StringBuilder();
+
+        if (mainItem != null) {
+            sb.append(
+                "Main dictionary:" +
+                mainItem.getKanji() + " / " +
+                mainItem.getHiragana() + "/ " +
+                mainItem.getHv() + " / " +
+                mainItem.getMeaning() + "\n"
+                );
+        }
+        
+        if (isArticleKJFound && currentTNAKanji != null) {
+            sb.append(
+                "In article:" +
+                currentTNAKanji.getKanji() + " / " +
+                currentTNAKanji.getHv() + "\n"
+                );
+        }
+
+        List<JBGKanjiItem> lstRelatedKanjis = this.getDataModel().getRelatedKanjiFromMainKanjiList(selText);
+        if (lstRelatedKanjis.size() > 0) {
+            sb.append("Related:\n");
+            for (JBGKanjiItem item: lstRelatedKanjis) {
+                sb.append(item.getKanji() + " / " +
+                    item.getHiragana() + " / " +
+                    item.getHv() + " / " +
+                    item.getMeaning() + "\n"
+                    );
+            }
+        }
+        sb.append("\n\n\n");
+        showInformation(selText, sb.toString());
     }
 
     private int countKanjiInString(String s) {

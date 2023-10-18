@@ -684,7 +684,7 @@ public class ArticleWordBuildWindowTab extends SimpleFormBase {
         if (currentTNA == null) return;
 
         this.getDataModel().setNeedRefresh(true);
-        this.parentPane.switchToTab(4);
+        this.parentPane.switchToTab(5);
     }
 
     private void processArticleSentenceListClick() {
