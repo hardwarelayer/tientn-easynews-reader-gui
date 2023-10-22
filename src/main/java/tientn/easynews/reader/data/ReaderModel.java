@@ -443,11 +443,11 @@ public class ReaderModel {
       TFMTTNAData currentTNA = getSelectedTNA();
       if (currentTNA != null) {
         int iSize = currentTNA.getKanjisForTest().size();
-        if ((this.kanjiSubsetStart + 1 + this.kanjiSubsetSize) < iSize) {
+        if ((this.kanjiSubsetStart + this.kanjiSubsetSize) < iSize) {
           this.kanjiSubsetStart++;
           int iToIdx = this.kanjiSubsetStart + this.kanjiSubsetSize;
           if (iToIdx >= iSize)
-            iToIdx = iSize - 1;
+            iToIdx = iSize;
           this.subsetRecords = currentTNA.getKanjisForTest().subList(this.kanjiSubsetStart, iToIdx);
         }
         else {
@@ -502,18 +502,29 @@ public class ReaderModel {
   Now only work for article words
   */
   public List<JBGKanjiItem> getNewestLearnKJSubset() {
+    boolean bFoundUnlearn = false;
 
-   if (this.currentWorkMode == JBGConstants.TEST_WORD_IN_ARTICLE) {
+    if (this.currentWorkMode == JBGConstants.TEST_WORD_IN_ARTICLE) {
       TFMTTNAData currentTNA = getSelectedTNA();
+      int iSize = currentTNA.getKanjisForTest().size();
       if (currentTNA != null) {
         //first, find the latest learn kanji
         int iLatestLearn = -1;
         int iKjIdxCount = 0;
         for (JBGKanjiItem kj: currentTNA.getKanjisForTest()) {
           if (kj.getTestCount() == 0) {
+            bFoundUnlearn = true;
             break;
           }
           iKjIdxCount++;
+        }
+
+        if (!bFoundUnlearn) {
+          //if every kanji got learnt, we load the last ones in the list
+          this.kanjiSubsetStart = iSize - this.kanjiSubsetSize;
+          if (this.kanjiSubsetStart < 0) this.kanjiSubsetStart = 0;
+          this.subsetRecords = currentTNA.getKanjisForTest().subList(this.kanjiSubsetStart, iSize);
+          return this.subsetRecords;
         }
 
         if (iKjIdxCount + 1 < currentTNA.getKanjisForTest().size()) {
@@ -527,7 +538,6 @@ public class ReaderModel {
           this.kanjiSubsetStart = iKjIdxCount - this.kanjiSubsetSize;
         }
 
-        int iSize = currentTNA.getKanjisForTest().size();
         if ((this.kanjiSubsetStart + 1 + this.kanjiSubsetSize) < iSize) {
           this.kanjiSubsetStart++;
           int iToIdx = this.kanjiSubsetStart + this.kanjiSubsetSize;
@@ -542,8 +552,8 @@ public class ReaderModel {
           this.subsetRecords = currentTNA.getKanjisForTest().subList(0, this.kanjiSubsetSize);
         }
         return this.subsetRecords;
-      }
-    }
+       }
+     }
 
     return null;
 
@@ -1481,7 +1491,7 @@ public class ReaderModel {
           for (JBGKanjiItem item: lstRelatedKanjisInDb) {
               sb.append(item.getKanji() + " / " +
                   item.getHiragana() + " / " +
-                  item.getHv() + " / " //+
+                  item.getHv() + "\n" //+
                   //item.getMeaning().replace("<br>", "\n") + "\n"
                   );
           }
