@@ -513,16 +513,15 @@ public class WordMatch2WindowTab extends SimpleStackedFormBase {
                     lblShownHira.setText("");
                     lblShownHv.setText("");
                     lblShownMeaning.setText("");
+                    return;
                 }
             }
             else if (this.lstSelectedButtons.size() == 1) {
+                //reset selected one, choose new one
                 this.lstSelectedButtons.get(0).setDisable(false);
                 this.lstSelectedButtons.clear();
-                this.lstSelectedButtons.add(btnObj);
-                btnObj.setDisable(true);
                 lblShownKanji.setText(btnObj.getText());
             }
-            return;
         }
 
         //first kanji
