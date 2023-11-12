@@ -266,7 +266,7 @@ public class GrammarReadWindowTab extends SimpleFormBase {
 
         final String patId = rowData.getId();
         selectPattern(patId, false);
-        System.out.println(rowData.toString());
+        //System.out.println(rowData.toString());
     }
 
     private void autoSelectNextPattern(boolean playSound) {
@@ -310,7 +310,7 @@ public class GrammarReadWindowTab extends SimpleFormBase {
         TFMTTNGData tng = this.getDataModel().getSelectedTNG();
         if (tng == null) return;
         for (TFMTTNGPatternData pItem: tng.getGrammarPattern()) {
-            System.out.println(pItem);
+            //System.out.println(pItem);
             GrammarPatternTableViewItem showItem = new GrammarPatternTableViewItem(
                 pItem.getId().toString(),
                 pItem.getTitle(),

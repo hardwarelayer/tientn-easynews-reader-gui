@@ -279,40 +279,6 @@ public class WordMatch2WindowTab extends SimpleStackedFormBase {
         bxLastShownContent.setAlignment(CENTER);
 
         this.addBodyPane(new VBox(bxShownContent, gpMainArea, bxLastShownContent), 1, 1);
-
-/*
-        VBox bxNextShownContent = new VBox(lblNextShownKanji);
-        bxNextShownContent.prefWidthProperty().bind(getPrimaryStage().widthProperty().multiply(0.25));
-        bxNextShownContent.setAlignment(CENTER);
-*/
-
-/*
-        HBox hbxKanjiSupplementalBox= new HBox(bxNextShownContent, bxShownContent, bxLastShownContent);
-        //hbxKanjiSupplementalBox.setAlignment(CENTER);
-        this.addBodyPane(hbxKanjiSupplementalBox, 0, 2);
-
-        VBox bxPlaceHolderBar = new VBox(new Label("..."));
-        bxPlaceHolderBar.setAlignment(CENTER);
-        bxPlaceHolderBar.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.25));
-        this.addBodyPane(bxPlaceHolderBar, 0, 3);
-
-        lblBottomKanji = new Label("...");
-        lblBottomInfo = new Label("...");
-        lblBottomLastInfo = new Label("...");
-        lblBottomRemind = new Label("...");
-        lblBottomKanji.prefWidthProperty().bind(getPrimaryStage().widthProperty().multiply(0.08));
-        lblBottomInfo.prefWidthProperty().bind(getPrimaryStage().widthProperty().multiply(0.08));
-        lblBottomLastInfo.prefWidthProperty().bind(getPrimaryStage().widthProperty().multiply(0.08));
-        lblBottomRemind.prefWidthProperty().bind(getPrimaryStage().widthProperty().multiply(0.76));
-        lblBottomInfo.setId("auto-kanji-min-bottom-info-label");
-        lblBottomLastInfo.setId("auto-kanji-min-bottom-info-label");
-
-        HBox bxBottomHBar = new HBox(lblBottomKanji, lblBottomInfo, lblBottomLastInfo, lblBottomRemind);
-        bxBottomHBar.setSpacing(2);
-        VBox bxBottomVBar = new VBox(bxBottomHBar);
-        bxBottomVBar.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.11));
-        this.addBodyPane(bxBottomVBar, 0, 4);
-*/
     }
 
     private void createTableViewColumn(final TableView<DictKanjiTableViewItem> tblView, final String title, final double width)
@@ -548,6 +514,13 @@ public class WordMatch2WindowTab extends SimpleStackedFormBase {
                     lblShownHv.setText("");
                     lblShownMeaning.setText("");
                 }
+            }
+            else if (this.lstSelectedButtons.size() == 1) {
+                this.lstSelectedButtons.get(0).setDisable(false);
+                this.lstSelectedButtons.clear();
+                this.lstSelectedButtons.add(btnObj);
+                btnObj.setDisable(true);
+                lblShownKanji.setText(btnObj.getText());
             }
             return;
         }

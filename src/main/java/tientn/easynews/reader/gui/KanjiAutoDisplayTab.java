@@ -492,7 +492,10 @@ public class KanjiAutoDisplayTab extends SimpleStackedFormBase {
         this.iMaxWordDisplaySteps = Integer.valueOf(this.tfMaxWordDisplaySteps.getText());
 
         int iSelectedItem = tvKanjiForDisplay.getSelectionModel().getSelectedIndex();
-        if (this.iStartAnchor >= 0) iSelectedItem = this.iStartAnchor;
+        if (this.iStartAnchor >= 0) {
+            if (iSelectedItem < this.iStartAnchor || iSelectedItem > this.iEndAnchor)
+                iSelectedItem = this.iStartAnchor;
+        }
         if (iSelectedItem != -1 && iSelectedItem < tvKanjiForDisplay.getItems().size()) {
             iCurrentKanjiOnDisplay = iSelectedItem; //start auto display from here
         }

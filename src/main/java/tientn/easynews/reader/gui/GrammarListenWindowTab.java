@@ -315,7 +315,7 @@ public class GrammarListenWindowTab extends SimpleFormBase {
 
         final String patId = rowData.getId();
         selectPattern(patId, true);
-        System.out.println(rowData.toString());
+        //System.out.println(rowData.toString());
     }
 
     private void autoSelectNextPattern(boolean playSound) {
@@ -345,10 +345,10 @@ public class GrammarListenWindowTab extends SimpleFormBase {
         try {
             Thread thread = new Thread();
             media = new Media("file:///" + fullFileName);
-            System.out.println(media.getDuration().toSeconds());
+            //System.out.println(media.getDuration().toSeconds());
 
             thread.setName("grammar_play_thread"+patternId+sentenceId);
-            System.out.println(thread.getName());
+            //System.out.println(thread.getName());
 
             //why I declare the mediaPlayer outside?
             //because Java GB will destroy this object right after the function, but actually, it is used in other thread
@@ -456,7 +456,7 @@ System.out.println("Sentence: " + s.getSentence() + " MP3:" + sRet);
         this.currentRnLSentenceId = s.getId().toString();
         if (this.currentRnLSentenceId != null && playSound) {
             final String sRet = playMP3(this.selectedPatternId.toString(), this.currentRnLSentenceId);
-System.out.println("Sentence: " + s.getSentence() + " MP3:" + sRet);
+//System.out.println("Sentence: " + s.getSentence() + " MP3:" + sRet);
         }
 
         StringBuilder sb = new StringBuilder();
@@ -646,7 +646,7 @@ System.out.println("Sentence: " + s.getSentence() + " MP3:" + sRet);
 
         GrammarPatternTableViewItem rowData = tvGrammarPattern.getSelectionModel().getSelectedItem();
         if (rowData == null) return;
-        System.out.println(rowData.toString());
+        //System.out.println(rowData.toString());
         if (this.getDataModel().moveTNGItemToTail(rowData.getId()) )
             reloadPatternList();
     }
