@@ -744,6 +744,12 @@ public class ArticleReadWindowTab extends SimpleFormBase {
         //always refresh this
         lblJCoinAmount.setText(String.valueOf(this.getDataModel().getJCoin()));
 
+        currentTNA = this.getDataModel().getSelectedTNA();
+        if (currentTNA != null) {
+            refreshData();
+        }
+
+/*
         if (this.getDataModel().isNeedRefresh()) {
 
             //unset it
@@ -755,6 +761,7 @@ public class ArticleReadWindowTab extends SimpleFormBase {
 
             refreshData();
         }
+*/
     }
 
 }
