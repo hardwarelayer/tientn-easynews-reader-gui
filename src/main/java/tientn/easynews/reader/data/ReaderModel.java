@@ -78,11 +78,18 @@ public class ReaderModel {
 
   @Getter @Setter private int jCoin = 0;
 
+  //for transfering between auto-kanji-show and wordmatchs
+  @Getter @Setter private boolean transfering;
+  @Getter @Setter private int transferSortOrder = 0;
+  @Getter @Setter private int transferStartIdx = 0;
+  @Getter @Setter private int transferEndIdx = 0;
+
   public ReaderModel() {
     initData();
 
     needRefresh = false;
     testStarted = false;
+    transfering = false;
   }
 
   private void initData() {

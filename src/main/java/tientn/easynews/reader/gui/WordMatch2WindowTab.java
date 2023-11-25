@@ -725,8 +725,16 @@ public class WordMatch2WindowTab extends SimpleStackedFormBase {
     public void onShow() {
         //always refresh this
         if (this.isGameOn) return;
+
         processLoadKanjisFromTNA();
         this.btnStopGame.setDisable(true);
+        if (this.getDataModel().isTransfering() && this.getDataModel().isNeedRefresh()) {
+            iStartAnchor = this.getDataModel().getTransferStartIdx();
+            iEndAnchor = this.getDataModel().getTransferEndIdx();
+            lblStartAnchor.setText(String.valueOf(iStartAnchor));
+            lblEndAnchor.setText(String.valueOf(iEndAnchor));
+            startGame();
+        }
     }
 
 

@@ -29,6 +29,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.OverrunStyle;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Tooltip;
 import javafx.animation.Timeline;
@@ -108,6 +109,7 @@ public class KanjiAutoDisplayTab extends SimpleStackedFormBase {
     private TableView<DictKanjiTableViewItem> tvKanjiForDisplay;
 
     private Button btnStartAutoDisplay;
+    private Button btnPauseAutoDisplay;
     private Button btnStopAutoDisplay;
 
     Timeline kjBlinkTimeline = null;
@@ -118,14 +120,21 @@ public class KanjiAutoDisplayTab extends SimpleStackedFormBase {
     private int iStartAnchor = -1, iEndAnchor = -1;
 
     private boolean isAutoDisplaying = false;
+    private boolean isPausingDisplay = false;
 
     private static final String START_BTN_LABEL = "Start";
     private static final String STOP_BTN_LABEL = "Stop";
+    private static final String PAUSE_BTN_LABEL = "||";
+    private static final String UNPAUSE_BTN_LABEL = ">";
 
     private TFMTTNAData currentTNA = null;
 
-    public KanjiAutoDisplayTab(final int width, final int height, Desktop desktop, Stage primStage, ReaderModel model) {
+    private MainTabbedPane parentPane;
+
+    public KanjiAutoDisplayTab(final int width, final int height, Desktop desktop, Stage primStage, ReaderModel model, MainTabbedPane parentPane) {
         super(width, height, desktop, primStage, model);
+
+        this.parentPane = parentPane;
 
         this.getTopBodyLabel().setId("auto-kanji-top-kanji-label");
         this.getMidBodyLabel().setId("auto-kanji-middle-kanji-label");
@@ -214,6 +223,13 @@ public class KanjiAutoDisplayTab extends SimpleStackedFormBase {
         };
         btnStopAutoDisplay = createButton(STOP_BTN_LABEL, fncStopAutoDisplay);
 
+        EventHandler<ActionEvent> fncPauseAutoDisplay = new EventHandler<ActionEvent>() {
+            @Override public void handle(ActionEvent e) {
+                pauseAutoDisplay();
+            }
+        };
+        btnPauseAutoDisplay = createButton(PAUSE_BTN_LABEL, fncPauseAutoDisplay);
+
         tvKanjiForDisplay = createTableView(0, 1);
         tvKanjiForDisplay.setId("auto-kanji-loaded-kanji-column");
         createTableViewColumn(tvKanjiForDisplay, "Id", 0.05);
@@ -230,8 +246,14 @@ public class KanjiAutoDisplayTab extends SimpleStackedFormBase {
         articleCM.getItems().add(acmMi1);
         MenuItem acmMi2 = new MenuItem("Set End Anchor");
         articleCM.getItems().add(acmMi2);
+        SeparatorMenuItem sep = new SeparatorMenuItem();
+        articleCM.getItems().add(sep);
         MenuItem acmMi3 = new MenuItem("Clear Anchors");
         articleCM.getItems().add(acmMi3);
+        SeparatorMenuItem sep2 = new SeparatorMenuItem();
+        articleCM.getItems().add(sep2);
+        MenuItem acmMi4 = new MenuItem("Transfer to WordMatch2");
+        articleCM.getItems().add(acmMi4);
         acmMi1.setOnAction((ActionEvent event) -> {
             this.setStartAnchor();
         });
@@ -240,6 +262,9 @@ public class KanjiAutoDisplayTab extends SimpleStackedFormBase {
         });
         acmMi3.setOnAction((ActionEvent event) -> {
             this.clearAnchors();
+        });
+        acmMi4.setOnAction((ActionEvent event) -> {
+            this.transferToWordMatch2();
         });
         tvKanjiForDisplay.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
             @Override
@@ -268,6 +293,7 @@ public class KanjiAutoDisplayTab extends SimpleStackedFormBase {
             new Label("Display Steps:"), tfMaxWordDisplaySteps,
             new Label("Start Anchor:"), lblStartAnchor,
             new Label("End Anchor:"), lblEndAnchor, 
+            btnPauseAutoDisplay,
             btnStopAutoDisplay,
             cbSortKanjiByRelation,
             cbMinimalAutoDisplay);
@@ -485,6 +511,19 @@ public class KanjiAutoDisplayTab extends SimpleStackedFormBase {
         lblEndAnchor.setText("");
     }
 
+    private void transferToWordMatch2() {
+        if (this.currentTNA == null) return;
+        if (iStartAnchor >= 0 && iEndAnchor > iStartAnchor) {
+            this.getDataModel().setTransfering(true);
+            this.getDataModel().setTransferSortOrder(0);
+            this.getDataModel().setTransferStartIdx(iStartAnchor);
+            this.getDataModel().setTransferEndIdx(iEndAnchor);
+            this.getDataModel().setCurrentWorkMode(JBGConstants.TEST_WORD_IN_ARTICLE);
+            this.getDataModel().setNeedRefresh(true);
+            this.parentPane.switchToTab(3);
+        }
+    }
+
     private void startAutoDisplay() {
 
         if (this.isAutoDisplaying || this.currentTNA == null) return;
@@ -513,9 +552,22 @@ public class KanjiAutoDisplayTab extends SimpleStackedFormBase {
         kjBlinkTimeline.play();
 
         this.btnStartAutoDisplay.setDisable(true);
+        this.btnPauseAutoDisplay.setDisable(false);
         this.btnStopAutoDisplay.setDisable(false);
 
         this.isAutoDisplaying = true;
+        this.isPausingDisplay = false;
+    }
+
+    private void pauseAutoDisplay() {
+
+        if (!this.isAutoDisplaying) return;
+
+        this.isPausingDisplay = !this.isPausingDisplay;
+        if (this.isPausingDisplay)
+            this.btnPauseAutoDisplay.setText(UNPAUSE_BTN_LABEL);
+        else
+            this.btnPauseAutoDisplay.setText(PAUSE_BTN_LABEL);
     }
 
     private void stopAutoDisplay() {
@@ -525,6 +577,7 @@ public class KanjiAutoDisplayTab extends SimpleStackedFormBase {
         if (this.kjBlinkTimeline != null) kjBlinkTimeline.stop();
         iCurrentDisplayStep = 0;
         this.btnStartAutoDisplay.setDisable(false);
+        this.btnPauseAutoDisplay.setDisable(true);
         this.btnStopAutoDisplay.setDisable(true);
 
         clearFields();
@@ -535,7 +588,8 @@ public class KanjiAutoDisplayTab extends SimpleStackedFormBase {
     private void fncEventKeyFrame(final int step) {
         if (step == 0) {
             if (this.iCurrentDisplayStep < this.iMaxWordDisplaySteps) {
-                this.iCurrentDisplayStep++;
+                if (!this.isPausingDisplay)
+                    this.iCurrentDisplayStep++;
             }
             else {
                 if (this.iStartAnchor >= 0 && this.iEndAnchor > this.iStartAnchor) {
