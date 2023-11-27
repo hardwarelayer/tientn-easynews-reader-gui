@@ -582,6 +582,7 @@ public class KanjiAutoDisplayTab extends SimpleStackedFormBase {
 
         clearFields();
 
+        this.isPausingDisplay = false;
         this.isAutoDisplaying = false;
     }
 
