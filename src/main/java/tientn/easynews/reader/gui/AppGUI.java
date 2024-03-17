@@ -49,8 +49,11 @@ import lombok.Getter;
 import lombok.Setter;
 
 import tientn.easynews.reader.data.JBGConstants;
+import tientn.easynews.game.data.Constants;
 
+import tientn.easynews.game.data.GameModel;
 import tientn.easynews.reader.data.ReaderModel;
+
 import tientn.easynews.reader.gui.base.TabPaneBase;
 import tientn.easynews.reader.gui.base.TabbedAppBase;
 import tientn.easynews.reader.gui.base.GridPaneBase;
@@ -58,6 +61,7 @@ import tientn.easynews.reader.gui.base.GridPaneBase;
 public final class AppGUI extends TabbedAppBase {
  
     @Getter private ReaderModel dataModel;
+   @Getter private GameModel gameModel;
 
     public static void main(String[] args) {
         launch(args);
@@ -69,9 +73,10 @@ public final class AppGUI extends TabbedAppBase {
         setDefaultArgs("Article Learn&Read - (c) Tran Ngoc Tien 2021", JBGConstants.MIN_WIDTH, JBGConstants.MIN_HEIGHT);
 
         this.dataModel = new ReaderModel();
+        this.gameModel = new GameModel();
         //System.out.println(this.dataModel.toString());
 
-        MainTabbedPane tabPane = new MainTabbedPane(getDesktop(), primaryStage, this.dataModel);
+        MainTabbedPane tabPane = new MainTabbedPane(getDesktop(), primaryStage, this.dataModel, this.gameModel);
         tabPane.initTabs();
 
         return tabPane;

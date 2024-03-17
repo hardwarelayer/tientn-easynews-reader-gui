@@ -619,7 +619,7 @@ public class KanjiAutoDisplayTab extends SimpleStackedFormBase {
                     if (sMinDispRemind.length() + kanji.length() >= JBGConstants.AUTODISP_REMIND_CHARS_LIMIT) {
                       sMinDispRemind = sMinDispRemind.substring(0, JBGConstants.AUTODISP_REMIND_CHARS_LIMIT-kanji.length());
                     }
-                    sMinDispRemind = kanji + sMinDispRemind;
+                    sMinDispRemind = kanji + " " + sMinDispRemind;
                     this.lblBottomRemind.setText(sMinDispRemind);
                     lblBottomLastInfo.setText(lblBottomInfo.getText());
                 }

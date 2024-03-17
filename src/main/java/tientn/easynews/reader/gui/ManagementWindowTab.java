@@ -741,9 +741,9 @@ public class ManagementWindowTab extends GridPaneBase {
 
         boolean grammarFeature = this.showQuestionWithCustomOptions("Choose feature", "Read or Listen", "Do you want to read or listen", "Read", "Listen");
         if (grammarFeature)
-            this.parentPane.switchToTab(5);
-        else
             this.parentPane.switchToTab(6);
+        else
+            this.parentPane.switchToTab(7);
     }
 
     private void createStatusTableViewColumn(final String title, final double width)

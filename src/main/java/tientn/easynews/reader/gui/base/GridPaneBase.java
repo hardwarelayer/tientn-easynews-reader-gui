@@ -114,6 +114,19 @@ public class GridPaneBase extends GridPane {
         Optional<ButtonType> result = alert.showAndWait();
     }
 
+    protected void showMessageWithStyle(final String title, final String msg, final String cssFile) {
+        Alert alert = new Alert(AlertType.INFORMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(msg);
+
+        DialogPane dialogPane = alert.getDialogPane();
+        dialogPane.getStylesheets().add(
+                getClass().getResource("/css/"+cssFile).toExternalForm());
+
+        Optional<ButtonType> result = alert.showAndWait();
+    }
+
     protected boolean showQuestion(final String title, final String header, final String msg) {
         Alert alert = new Alert(AlertType.CONFIRMATION);
         alert.setTitle(title);
@@ -123,6 +136,24 @@ public class GridPaneBase extends GridPane {
         DialogPane dialogPane = alert.getDialogPane();
         dialogPane.getStylesheets().add(
                 getClass().getResource("/css/dialog.css").toExternalForm());
+
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.get() == ButtonType.OK){
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    protected boolean showQuestionWithStyle(final String title, final String msg, final String cssFile) {
+        Alert alert = new Alert(AlertType.CONFIRMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(msg);
+
+        DialogPane dialogPane = alert.getDialogPane();
+        dialogPane.getStylesheets().add(
+                getClass().getResource("/css/"+cssFile).toExternalForm());
 
         Optional<ButtonType> result = alert.showAndWait();
         if (result.get() == ButtonType.OK){

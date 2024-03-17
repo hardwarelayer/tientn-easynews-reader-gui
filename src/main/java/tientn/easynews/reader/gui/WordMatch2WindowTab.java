@@ -457,7 +457,7 @@ public class WordMatch2WindowTab extends SimpleStackedFormBase {
     }
 
     private void fncLoadNext() {
-        int iLoaded = this.loadNewKanjiButtons();
+        int iLoaded = this.loadFromSelectedKanjis();
         if (iLoaded < 1) {
             stopGame();
         }
@@ -533,7 +533,7 @@ public class WordMatch2WindowTab extends SimpleStackedFormBase {
         this.lstSelectedButtons.add(btnObj);
     }
 
-    private int loadNewKanjiButtons() {
+    private int loadFromSelectedKanjis() {
 
         if (this.iStartAnchor >= 0 && this.iEndAnchor > this.iStartAnchor) {
             //only loop inside anchors
@@ -549,6 +549,7 @@ public class WordMatch2WindowTab extends SimpleStackedFormBase {
 
         List<DictKanjiTableViewItem> lstBuffer = new ArrayList<DictKanjiTableViewItem>();
         for (int i = 0; i < (int) (this.iTotalButtons/this.iTotalKanjiRepeat); i++) {
+            //fill the repeated times
             for (int rep = 0; rep < this.iTotalKanjiRepeat; rep++) {
                 if (lstBuffer.size() >= this.iTotalButtons) break;
                 lstBuffer.add(tvKanjiForDisplay.getItems().get(this.iCurrentKanjiOnDisplay));
@@ -628,7 +629,7 @@ public class WordMatch2WindowTab extends SimpleStackedFormBase {
 
         this.iTotalHiddenButtons = 0;
 
-        loadNewKanjiButtons();
+        loadFromSelectedKanjis();
 
         this.btnStartGame.setDisable(true);
         this.btnStopGame.setDisable(false);

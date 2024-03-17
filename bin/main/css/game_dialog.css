@@ -1,0 +1,16 @@
+.dialog-pane {
+  -fx-font-size: 12pt; 
+  -fx-font-family: Arial;    
+}
+
+.dialog-pane > .content.label {
+    -fx-padding: 0.5em 0.5em 0.5em 0.5em;
+    -fx-background-color: lightyellow;
+    -fx-font-size: 20.0px;
+    -fx-font-family: Arial;    
+}
+
+#ok-btn {
+    -fx-font-size: 10pt; 
+    -fx-font-family: Arial;
+}

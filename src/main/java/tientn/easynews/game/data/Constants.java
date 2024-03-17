@@ -1,75 +1,107 @@
-package tientn.easynews.reader.data;
+package tientn.easynews.game.data;
 
-//import com.google.common.collect.ImmutableMap; //google Guava (already in triplea's build.gradle)
 import java.util.Map;
 import static java.util.Map.entry;
+import lombok.Getter;
+import lombok.Setter;
 
-public interface JBGConstants {
-  enum Tile {
-      GRASS, GRASS_STONE, GRASS_BAGS, CLOUD, HORZ_TREE, SKY_BG, SEA_BG, DESERT_BG, EMPTY, FIELDS,
-      TREE, TREE_CHOMP, TREE_DEAD, MIDDLE_ROAD_H, MIDDLE_ROAD_CROSS, SAVANA, HILL, T17, VILLAGE2, VILLAGE1,
-      ROAD_H, ROAD_V, ROAD_HV_DOWN, ROAD_HV_UP, ROAD_VH_RIGHT, ROAD_VH_LEFT, ROAD_CROSS, DESERT_FENCE_BG, GRASS_FENCE_BG, T29,
-      APARTMENT_TOP, GOV_BLD_TOP, GEN_FACTORY_TOP, SCI_BLD_TOP, COMBINI_TOP, O_FACTORY_TOP, E_FACTORY_TOP, T37, T38, T39,
-      APARTMENT_BASE, GOV_BLD_BASE, GEN_FACTORY_BASE, SCI_BLD_BASE, COMBINI_BASE, O_FACTORY_BASE, E_FACTORY_BASE, T47, T48, T49,
-      FACTORY11_TOP, FACTORY12_TOP, FACTORY21_TOP, FACTORY22_TOP, BUSS_1, BUSS_2, HOSP_1, HOSP_2, MARK_1, MARK_2,
-      FACTORY11_BASE, FACTORY12_BASE, FACTORY21_BASE, FACTORY22_BASE, BUNKER, BUSS_4, HOSP_3, HOSP_4, MARK_3, MARK_4,
-      INFANTRY, TANK, APC, ARTY, FLAK, MECH_INFANTRY, ELITE_INFANTRY, MARINE, FIGHTER, BOMBER,
-      T80, T81, T82, T83, T84, T85, T86, T87, T88, T89,
-      CARSET_GO_RIGHT_4, CARSET_GO_RIGHT_3, CARSET_GO_RIGHT_2, CARSET_GO_RIGHT_1, CARSET_GO_LEFT_4, CARSET_GO_LEFT_3, CARSET_GO_LEFT_2, CARSET_GO_LEFT_1, BUILD_ICONS_1, T99
-  };
+public interface Constants {
 
+  final int GAME_TICK_PER_DAY = 4;
+
+  final int CITY_DEFAULT_SECURITY_LEVEL = 4;
+
+  static final String CITY_TALK_LOGICS = "talk_logics";
+  static final String CITY_REACT_TRIGGER_PROMPT = "prompt";
+  static final String CITY_REACT_TRIGGER_CONFIRM = "confirm";
+  static final String CITY_REACT_TRIGGER_CONDITION = "condition";
+  static final String CITY_REACT_TRIGGER_COMPLETE = "complete";
+
+  static final String CITY_BUILDER_ACTION_TYPE = "builder";
+  static final String CITY_POP_ACTION_TYPE = "pop";
+
+  static final String CITY_BUILDING_COST = "cost";
+  static final String CITY_BUILDING_PRODUCE = "produce";
+
+  static final String CITY_BUILDING_PRODUCE_TYPE1 = "pop";
+  static final String CITY_BUILDING_PRODUCE_TYPE2 = "brick";
+  static final String CITY_BUILDING_PRODUCE_TYPE3 = "tool";
+  static final String CITY_BUILDING_PRODUCE_TYPE4 = "steel";
+
+  static final String CITY_BUILDING_REACTION = "reaction";
+  static final String CITY_BUILDING_REACT_TYPE = "builder";
+  static final String CITY_BUILDING_REACT_TRIGGER_BUILD = "build";
+  static final String CITY_BUILDING_REACT_TRIGGER_REMOVE = "remove";
+
+  static final String CITY_POP_REACT_TRIGGER_INCREASE = "value_increase";
+  static final String CITY_POP_REACT_TRIGGER_DECREASE = "value_decrease";
+
+  static final int CITY_LAND_BARE_STORAGE_CAP = 4;
+  static final int BLOCK_PER_LAND_UNIT = 4;
+  static final String CITY_BUILD_BLOCK_NAME = "land_block";
+  static final String CITY_BUILD_TIME_NAME = "time";
+
+  static final String CITY_BASIC_MATERIAL_1 = "food";
+  static final String CITY_BASIC_MATERIAL_2 = "wood";
+  static final String CITY_BASIC_MATERIAL_3 = "iron";
+  static final String CITY_BASIC_MATERIAL_4 = "stone";
+  static final String CITY_BASIC_MATERIAL_5 = "clay";
+  static final String[] basicCityMaterials = {CITY_BASIC_MATERIAL_1, CITY_BASIC_MATERIAL_2, CITY_BASIC_MATERIAL_3, CITY_BASIC_MATERIAL_4, CITY_BASIC_MATERIAL_5};
+
+  static final String CITY_BUILDING_HOUSE_TYPE = "house";
+  static final String CITY_BUILDING_HOUSE_CITIZEN_NAME = "citizen house";
+  static final int CITY_BUILDING_HOUSE_CITIZEN_CAP = 4;
+
+  static final String CITY_BASIC_INFO_POP = "Population";
+  static final String CITY_BASIC_INFO_FREE_SPACE = "Free spaces";
+  static final String CITY_BASIC_INFO_SECURITY = "Security";
+
+  public class QtyWithCap {
+    @Getter @Setter private int qty;
+    @Getter @Setter private int cap;
+    public QtyWithCap(final int qty, final int cap) {
+      this.qty = qty;
+      this.cap = cap;
+    }
+    @Override
+    public String toString() {
+      return new StringBuilder(
+        String.valueOf(this.qty) + "/" + 
+        String.valueOf(this.cap)
+        ).toString();
+    }
+  }
+
+  public class GameEvent {
+    @Getter @Setter private String city;
+    @Getter @Setter private String type;
+    @Getter @Setter private String trigger;
+    @Getter @Setter private String react;
+    @Getter @Setter private String msg;
+    public GameEvent(final String city, final String type, final String trigger, final String react, final String msg) {
+      this.city = city;
+      this.type = type;
+      this.trigger = trigger;
+      this.react = react;
+      this.msg = msg;
+    }
+    @Override
+    public String toString() {
+      return new StringBuilder(
+        String.valueOf(this.city) + "|" + 
+        String.valueOf(this.type) + "|" + 
+        String.valueOf(this.trigger) + "|" + 
+        String.valueOf(this.react) + "|" + 
+        String.valueOf(this.msg)
+        ).toString();
+    }
+  }
   final int TILE_WIDTH = 32; // tile width
   final int TILE_HEIGHT = 32; // tile height
   final int MAP_HORZ_TILES = 20;
   final int MAP_VERT_TILES = 18;
   final int TILESET_COLS = 10; //size of Tile enum array, theory X
   final int TILESET_ROWS = 10; //size of Tile enum array, theory Y
-
-  static final Map<Integer, JBGConstants.Tile> ECO_BUILD_MAP_ROW_TOP = Map.ofEntries(
-    entry(0, JBGConstants.Tile.APARTMENT_TOP),
-    entry(1, JBGConstants.Tile.APARTMENT_TOP),
-    entry(2, JBGConstants.Tile.APARTMENT_TOP),
-    entry(3, JBGConstants.Tile.APARTMENT_TOP),
-    entry(4, JBGConstants.Tile.GOV_BLD_TOP),
-    entry(5, JBGConstants.Tile.GOV_BLD_TOP),
-    entry(6, JBGConstants.Tile.COMBINI_TOP),
-    entry(7, JBGConstants.Tile.COMBINI_TOP),
-    entry(8, JBGConstants.Tile.GEN_FACTORY_TOP),
-    entry(9, JBGConstants.Tile.GEN_FACTORY_TOP),
-    entry(10, JBGConstants.Tile.GEN_FACTORY_TOP),
-    entry(11, JBGConstants.Tile.GEN_FACTORY_TOP),
-    entry(12, JBGConstants.Tile.E_FACTORY_TOP),
-    entry(13, JBGConstants.Tile.E_FACTORY_TOP),
-    entry(14, JBGConstants.Tile.E_FACTORY_TOP),
-    entry(15, JBGConstants.Tile.E_FACTORY_TOP),
-    entry(16, JBGConstants.Tile.O_FACTORY_TOP),
-    entry(17, JBGConstants.Tile.O_FACTORY_TOP),
-    entry(18, JBGConstants.Tile.O_FACTORY_TOP),
-    entry(19, JBGConstants.Tile.O_FACTORY_TOP)
-    );
-
-  static final Map<Integer, JBGConstants.Tile> ECO_BUILD_MAP_ROW_BOTTOM = Map.ofEntries(
-    entry(0, JBGConstants.Tile.APARTMENT_BASE),
-    entry(1, JBGConstants.Tile.APARTMENT_BASE),
-    entry(2, JBGConstants.Tile.APARTMENT_BASE),
-    entry(3, JBGConstants.Tile.APARTMENT_BASE),
-    entry(4, JBGConstants.Tile.GOV_BLD_BASE),
-    entry(5, JBGConstants.Tile.GOV_BLD_BASE),
-    entry(6, JBGConstants.Tile.COMBINI_BASE),
-    entry(7, JBGConstants.Tile.COMBINI_BASE),
-    entry(8, JBGConstants.Tile.GEN_FACTORY_BASE),
-    entry(9, JBGConstants.Tile.GEN_FACTORY_BASE),
-    entry(10, JBGConstants.Tile.GEN_FACTORY_BASE),
-    entry(11, JBGConstants.Tile.GEN_FACTORY_BASE),
-    entry(12, JBGConstants.Tile.E_FACTORY_BASE),
-    entry(13, JBGConstants.Tile.E_FACTORY_BASE),
-    entry(14, JBGConstants.Tile.E_FACTORY_BASE),
-    entry(15, JBGConstants.Tile.E_FACTORY_BASE),
-    entry(16, JBGConstants.Tile.O_FACTORY_BASE),
-    entry(17, JBGConstants.Tile.O_FACTORY_BASE),
-    entry(18, JBGConstants.Tile.O_FACTORY_BASE),
-    entry(19, JBGConstants.Tile.O_FACTORY_BASE)
-    );
 
   static final Map<Integer, String> ECO_BUILD_NAMES = Map.ofEntries(
     entry(0, "Apartment"),
@@ -92,53 +124,6 @@ public interface JBGConstants {
     entry(17, "Region Bank"),
     entry(18, "Central Bank"),
     entry(19, "Custom House")
-    );
-
-
-  static final Map<Integer, JBGConstants.Tile> RES_BUILD_MAP_ROW_TOP = Map.ofEntries(
-    entry(0, JBGConstants.Tile.SCI_BLD_TOP),
-    entry(1, JBGConstants.Tile.SCI_BLD_TOP),
-    entry(2, JBGConstants.Tile.SCI_BLD_TOP),
-    entry(3, JBGConstants.Tile.SCI_BLD_TOP),
-    entry(4, JBGConstants.Tile.SCI_BLD_TOP),
-    entry(5, JBGConstants.Tile.SCI_BLD_TOP),
-    entry(6, JBGConstants.Tile.SCI_BLD_TOP),
-    entry(7, JBGConstants.Tile.SCI_BLD_TOP),
-    entry(8, JBGConstants.Tile.SCI_BLD_TOP),
-    entry(9, JBGConstants.Tile.SCI_BLD_TOP),
-    entry(10, JBGConstants.Tile.SCI_BLD_TOP),
-    entry(11, JBGConstants.Tile.SCI_BLD_TOP),
-    entry(12, JBGConstants.Tile.SCI_BLD_TOP),
-    entry(13, JBGConstants.Tile.SCI_BLD_TOP),
-    entry(14, JBGConstants.Tile.SCI_BLD_TOP),
-    entry(15, JBGConstants.Tile.SCI_BLD_TOP),
-    entry(16, JBGConstants.Tile.SCI_BLD_TOP),
-    entry(17, JBGConstants.Tile.SCI_BLD_TOP),
-    entry(18, JBGConstants.Tile.SCI_BLD_TOP),
-    entry(19, JBGConstants.Tile.SCI_BLD_TOP)
-    );
-
-  static final Map<Integer, JBGConstants.Tile> RES_BUILD_MAP_ROW_BOTTOM = Map.ofEntries(
-    entry(0, JBGConstants.Tile.SCI_BLD_BASE),
-    entry(1, JBGConstants.Tile.SCI_BLD_BASE),
-    entry(2, JBGConstants.Tile.SCI_BLD_BASE),
-    entry(3, JBGConstants.Tile.SCI_BLD_BASE),
-    entry(4, JBGConstants.Tile.SCI_BLD_BASE),
-    entry(5, JBGConstants.Tile.SCI_BLD_BASE),
-    entry(6, JBGConstants.Tile.SCI_BLD_BASE),
-    entry(7, JBGConstants.Tile.SCI_BLD_BASE),
-    entry(8, JBGConstants.Tile.SCI_BLD_BASE),
-    entry(9, JBGConstants.Tile.SCI_BLD_BASE),
-    entry(10, JBGConstants.Tile.SCI_BLD_BASE),
-    entry(11, JBGConstants.Tile.SCI_BLD_BASE),
-    entry(12, JBGConstants.Tile.SCI_BLD_BASE),
-    entry(13, JBGConstants.Tile.SCI_BLD_BASE),
-    entry(14, JBGConstants.Tile.SCI_BLD_BASE),
-    entry(15, JBGConstants.Tile.SCI_BLD_BASE),
-    entry(16, JBGConstants.Tile.SCI_BLD_BASE),
-    entry(17, JBGConstants.Tile.SCI_BLD_BASE),
-    entry(18, JBGConstants.Tile.SCI_BLD_BASE),
-    entry(19, JBGConstants.Tile.SCI_BLD_BASE)
     );
 
   static final Map<Integer, String> RES_BUILD_NAMES = Map.ofEntries(
@@ -164,12 +149,9 @@ public interface JBGConstants {
     entry(19, "Army University")
     );
 
-  static final String KANJI_SOURCE_EXTENSION = ".csv";
-  static final String KJ_EXTENSION = ".kj";
-  static final String TFMT_EXTENSION = ".tfmt";
-  static final String TNA_EXTENSION = ".tna";
-  static final String TNG_EXTENSION = ".tng";
-  static final String TFMT_SAVE_EXTENSION = ".twork";
+  static final String TTG_EXTENSION = ".ttg";
+  static final String DIALOG_OK = "TTG_OK";
+  static final String DIALOG_CANCEL = "TTG_CANCEL";
 
   static final int KANJI_TOTAL_SUBSET_SIZE = 20;
   static final int KANJI_MIN_TEST_CORRECT = 10;

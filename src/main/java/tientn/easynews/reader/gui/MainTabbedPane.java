@@ -51,15 +51,19 @@ import lombok.Getter;
 import lombok.Setter;
 
 import tientn.easynews.reader.data.JBGConstants;
+import tientn.easynews.game.data.Constants;
 
 import tientn.easynews.reader.data.ReaderModel;
+import tientn.easynews.game.data.GameModel;
+
 import tientn.easynews.reader.gui.base.TabPaneBase;
 import tientn.easynews.reader.gui.base.TabbedAppBase;
 import tientn.easynews.reader.gui.base.GridPaneBase;
 
 public final class MainTabbedPane extends TabPaneBase {
- 
+
     @Getter private ReaderModel dataModel;
+    @Getter private GameModel gameModel;
     @Getter protected Stage primaryStage = null;
     @Getter protected Desktop desktop = null;
 
@@ -71,14 +75,16 @@ public final class MainTabbedPane extends TabPaneBase {
     KanjiAutoDisplayTab paneArticleAutoDisplay;
     GrammarReadWindowTab paneGrammarRead;
     GrammarListenWindowTab paneGrammarListen;
-    TableViewTab tblViewTab;
     KanjiDictionaryTab kanjiDictTab;
+    GameViewTab paneGame;
+    TableViewTab tblViewTab;
 
     private int iLastShownTab = 0, iCurrentShownTab = 0;
 
-    public MainTabbedPane(Desktop desktop, Stage primStage, final ReaderModel model) {
+    public MainTabbedPane(Desktop desktop, Stage primStage, final ReaderModel model, final GameModel gm) {
         super();
         this.dataModel = model;
+        this.gameModel = gm;
         this.primaryStage = primStage;
         this.desktop = desktop;
     }
@@ -110,6 +116,9 @@ public final class MainTabbedPane extends TabPaneBase {
         case 7:
             paneGrammarListen.onShow();
             break;
+        case 10:
+            paneGame.onShow();
+            break;
         }
         iLastShownTab = iCurrentShownTab;
         iCurrentShownTab = tabIdx;
@@ -140,6 +149,9 @@ public final class MainTabbedPane extends TabPaneBase {
                 break;
             case 7:
                 paneGrammarListen.onStopShow();
+                break;
+            case 10:
+                paneGame.onStopShow();
                 break;
             }
         }
@@ -194,6 +206,7 @@ public final class MainTabbedPane extends TabPaneBase {
         kanjiDictTab = new KanjiDictionaryTab(JBGConstants.MIN_WIDTH, JBGConstants.MIN_HEIGHT, getDesktop(), primaryStage, this.dataModel);
 
         tblViewTab = new TableViewTab("TableView", getDesktop(), primaryStage);
+        paneGame = new GameViewTab("TextGame", getDesktop(), primaryStage, this.gameModel);
 
         this.addPaneAsTab("Management", paneManagement);
         this.addSimpleFormAsTab("ArticleWords", paneTNAWordBuilder);
@@ -204,6 +217,7 @@ public final class MainTabbedPane extends TabPaneBase {
         this.addSimpleFormAsTab("GrammarRead", paneGrammarRead);
         this.addSimpleFormAsTab("GrammarListen", paneGrammarListen);
         this.addSimpleStackedFormAsTab("KanjiDict", kanjiDictTab);
+        this.addPaneAsTab("Game", paneGame);
         this.addPaneAsTab("Underworks", tblViewTab);
 
     }

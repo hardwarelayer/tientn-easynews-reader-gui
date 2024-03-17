@@ -1,0 +1,428 @@
+.root {
+  -fx-base: #bfe7ff; 
+  -fx-accent: #0096c9 ;
+  -fx-default-button: #abd8ed ;
+  -fx-focus-color: #039ed3;
+  -fx-faint-focus-color: #039ed322;
+  -fx-focused-text-base-color : ladder(
+          -fx-selection-bar,
+          -fx-light-text-color 45%,
+          -fx-dark-text-color 46%,
+          -fx-dark-text-color 59%,
+          -fx-mid-text-color 60%
+      );
+  -fx-focused-mark-color : -fx-focused-text-base-color ;  
+
+  -fx-font-size: 12pt; 
+  -fx-font-family: Courier New;
+}
+
+#management-status-list {
+  -fx-font-size: 8pt; 
+  -fx-font-family: Courier New;
+}
+
+#management-kanji-list {
+  -fx-font-size: 12pt; 
+  -fx-font-family: Courier New;
+}
+
+#management-article-list {
+  -fx-font-size: 12pt; 
+  -fx-font-family: Courier New;
+}
+
+.button {
+  -fx-background-color: 
+        #FFFFFF,
+        rgba(0,0,0,0.05),
+        linear-gradient(#dcca8a, #c7a740),
+        linear-gradient(#f9f2d6 0%, #f4e5bc 20%, #e6c75d 80%, #e2c045 100%),
+        linear-gradient(#f6ebbe, #e6c34d);
+  -fx-background-radius: 50;
+  -fx-background-insets: 0,9 9 8 9,9,10,11;
+  -fx-text-fill: #654b00;
+  -fx-font-weight: normal;
+  -fx-font-size: 14px;
+  -fx-padding: 10 20 10 20;
+    -fx-effect: innershadow( three-pass-box , rgba(0,0,0,0.1) , 2, 0.0 , 0 , 1);
+}
+
+.button:hover {
+  -fx-background-color: 
+      linear-gradient(#ffd65b, #e68400),
+      linear-gradient(#ffef84, #f2ba44),
+      linear-gradient(#ffea6a, #efaa22),
+      linear-gradient(#ffe657 0%, #f8c202 50%, #eea10b 100%),
+      linear-gradient(from 0% 0% to 15% 50%, rgba(255,255,255,0.9), rgba(255,255,255,0));
+  -fx-background-radius: 50;
+  -fx-background-insets: 0,9 9 8 9,9,10,11;
+  -fx-text-fill: #654b00;
+  -fx-font-weight: bold;
+  -fx-font-size: 14px;
+  -fx-padding: 10 20 10 20;
+    -fx-effect: innershadow( three-pass-box , rgba(0,0,0,0.1) , 2, 0.0 , 0 , 1);
+}
+
+.grid-pane {
+  -fx-font-size: 12pt; 
+  -fx-font-family: Courier New;  
+}
+
+.simple-form {
+  -fx-font-size: 12pt; 
+  -fx-font-family: Courier New;  
+}
+
+.tab-pane {
+  -fx-font-size: 10pt; 
+  -fx-font-family: Arial;    
+}
+
+.vbox {
+  -fx-border-color: blue; 
+  -fx-padding: 4; 
+  -fx-spacing: 4; 
+  -fx-border-width: 2px;
+}
+
+#kanji-column {
+ -fx-font-size: 19pt; 
+ -fx-font-family: Verdana;
+}
+#hiragana-column {
+ -fx-font-size: 14pt; 
+ -fx-font-family: Verdana;
+}
+#hv-column {
+ -fx-font-size: 12pt; 
+ -fx-font-family: Verdana;
+}
+#meaning-column {
+ -fx-font-size: 12pt; 
+ -fx-font-family: Verdana;
+ -fx-text-wrap: true;
+}
+
+#wordmatch-top-kanji-label {
+ -fx-font-size: 140pt; 
+ -fx-font-family: Courier;
+ -fx-font-weight: bold;
+ -fx-background-color: transparent;
+ -fx-text-fill: #000d1a;
+ -fx-opacity: 0.5;
+}
+
+#wordmatch-middle-kanji-label {
+ -fx-font-size: 150pt; 
+ -fx-font-family: Courier;
+ -fx-font-weight: bold;
+ -fx-background-color: transparent;
+ -fx-text-fill: #000d1a;
+ -fx-opacity: 0.4;
+}
+
+#wordmatch-bottom-kanji-label {
+ -fx-font-size: 200pt; 
+ -fx-font-family: "HanziPen TC", "BiauKai", "Courier";
+ -fx-font-weight: normal;
+ -fx-background-color: transparent;
+ -fx-text-fill: #000d1a;
+ -fx-opacity: 0.5;
+ -fx-border: solid 3px black;
+}
+
+#wordmatch-kanji-test {
+ -fx-font-size: 22pt; 
+ -fx-font-family: Verdana;
+ -fx-background-color: transparent;
+ -fx-text-fill: #000d1a;
+ -fx-text-alignment: center;
+ -fx-effect: dropshadow( one-pass-box, yellow, 8, 0.0, 2, 0);
+}
+#wordmatch-hiragana-test {
+ -fx-font-family: Verdana;
+ -fx-font-size: 16pt; 
+}
+#wordmatch-hv-test,
+#wordmatch-viet-test {
+ -fx-font-size: 10pt; 
+ -fx-font-family: Verdana;
+}
+
+#wordmatch-kanji-sneekpeek {
+ -fx-font-size: 22pt; 
+ -fx-font-family: Verdana;
+ -fx-background-color: transparent;
+ -fx-text-fill: red;
+ -fx-text-alignment: center;
+ -fx-effect: dropshadow( one-pass-box, black, 8, 0.0, 2, 0);
+}
+#wordmatch-hiragana-sneekpeek {
+ -fx-font-family: Verdana;
+ -fx-font-size: 16pt; 
+}
+#wordmatch-hv-sneekpeek,
+#wordmatch-viet-sneekpeek {
+ -fx-font-size: 10pt; 
+ -fx-font-family: Verdana;
+}
+
+
+#wordmatch-coin-amount {
+  -fx-font-weight: bold;
+  -fx-background-color: blue;
+  -fx-text-fill: yellow; 
+  -fx-font-family: Courier New;
+  -fx-background-radius: 10px;
+}
+
+#wordmatch-bonus-amount {
+  -fx-font-weight: bold;
+  -fx-background-color: white;
+  -fx-text-fill: green; 
+  -fx-font-family: Arial;
+  -fx-background-radius: 8px;
+}
+
+#wordmatch-search-key {
+  -fx-font-weight: bold;
+  -fx-background-color: lightgreen;
+  -fx-text-fill: white; 
+  -fx-font-family: Courier New;
+  -fx-background-radius: 8px;
+}
+
+/* The main scrollbar CSS class of ListView */
+.wordmatch-scroll-bar .scroll-bar:horizontal ,
+.wordmatch-scroll-bar .scroll-bar:vertical{
+    -fx-background-color:transparent;
+ 
+}
+ 
+/* The increment and decrement button CSS class of scrollbar */
+.wordmatch-scroll-bar > .virtual-flow > .scroll-bar,
+.wordmatch-scroll-bar > .virtual-flow > .scroll-bar .decrement-arrow,
+.wordmatch-scroll-bar > .virtual-flow > .scroll-bar .increment-arrow,
+.wordmatch-scroll-bar > .virtual-flow > .scroll-bar .decrement-button,
+.wordmatch-scroll-bar > .virtual-flow > .scroll-bar .increment-button,
+.wordmatch-scroll-bar .increment-button,
+.wordmatch-scroll-bar .decrement-button {
+  -fx-background-color:transparent;
+  -fx-border-color:derive(gray,80%);
+  -fx-pref-width: 8;
+  -fx-pref-height: 8;
+}
+ 
+/* The main scrollbar **track** CSS class  */
+.wordmatch-scroll-bar .scroll-bar:horizontal .track ,
+.wordmatch-scroll-bar .scroll-bar:vertical .track{
+   -fx-background-color: transparent;
+   -fx-border-color:derive(gray,80%);
+   -fx-background-radius: 0em;
+}
+ 
+/* The main scrollbar **thumb** CSS class which we drag every time (movable) */
+.wordmatch-scroll-bar .scroll-bar:horizontal .thumb,
+.wordmatch-scroll-bar .scroll-bar:vertical .thumb {
+  -fx-background-color:derive(black,90%);
+  -fx-background-insets: 0, 0, 0;
+  -fx-background-radius: 0em;
+}
+
+.wordmatch-scroll-bar .scroll-bar:horizontal:hover .track ,
+.wordmatch-scroll-bar .scroll-bar:horizontal:pressed .track ,
+.wordmatch-scroll-bar .scroll-bar:vertical:hover .track,
+.wordmatch-scroll-bar .scroll-bar:vertical:pressed .track{
+     -fx-background-color: derive(#434343,20%);
+ 
+   -fx-opacity: 0.2;
+   -fx-background-radius: 0em;
+ 
+}
+ 
+/* The main scrollbar **thumb** CSS class on event of "hover" and "pressed" */
+.wordmatch-scroll-bar .scroll-bar .thumb:hover,
+.wordmatch-scroll-bar .scroll-bar .thumb:pressed{
+    -fx-background-color: derive(black,50%);
+}
+ 
+.wordmatch-scroll-bar .increment-button:hover,
+.wordmatch-scroll-bar .decrement-button:hover {
+  -fx-background-color:derive(gray,100%);
+  -fx-border-color:derive(gray,80%);  
+  -fx-padding:10px;
+}
+
+.wordmatch-scroll-bar .pretty-scroll-bar .decrement-arrow,
+.wordmatch-scroll-bar .pretty-scroll-bar .increment-arrow {
+    -fx-pref-width: 8;
+    -fx-pref-height: 8;
+}
+
+
+/* ------------------------ ArticleWord -------------------------*/
+#build-word-ja-content {
+  -fx-font-size: 40pt; 
+  -fx-font-family: Arial;
+  text-area-background: white;
+  -fx-text-fill: black;
+}
+
+#article-build-word-sentence-list {
+  -fx-font-size: 13pt; 
+  -fx-font-family: Verdana;
+}
+
+#build-word-ja-content .content {
+    -fx-background-color: white;
+}
+
+#build-word-en-content {
+  -fx-font-size: 9pt; 
+  -fx-font-family: Verdana;  
+  text-area-background: #9A8B4F;
+  -fx-text-fill: white;
+}
+#build-word-en-content .content {
+    -fx-background-color: text-area-background ;
+}
+
+#build-word-list {
+  -fx-font-size: 15pt; 
+  -fx-font-family: Verdana;
+}
+
+#build-word-kanji,
+#build-word-hiragana,
+#build-word-hanviet,
+#build-word-meaning {
+  -fx-font-size: 12pt; 
+  -fx-font-family: Verdana;
+}
+
+#build-word-detail-kanji {
+  -fx-font-size: 40pt; 
+  -fx-text-fill: darkred;
+  -fx-font-family: Arial;
+}
+
+#build-word-kanji-meaning {
+  -fx-font-size: 9pt; 
+  -fx-font-family: Verdana;
+  text-area-background: #ffffcc;
+}
+#build-word-kanji-meaning .content {
+  -fx-background-color: text-area-background ;
+}
+
+/* Article read */
+#read-article-content {
+  -fx-font-size: 17pt; 
+  -fx-font-family: Verdana;
+  text-area-background: #EFE1CE;
+  -fx-text-fill: black;
+  -fx-highlight-fill: #ADFF2F; 
+  -fx-highlight-text-fill: #B22222;
+}
+
+#read-article-content .content {
+    -fx-background-color: text-area-background ;
+}
+
+#read-article-sentence-input {
+  -fx-font-size: 16pt; 
+  -fx-font-family: Verdana;
+  text-area-background: lightgray;
+  -fx-text-fill: black;
+}
+
+#kanji-content-view,
+#dict-kanji-content-view {
+  -fx-font-size: 12pt; 
+  -fx-font-family: Verdana;
+  text-area-background: gray;
+  -fx-text-fill: black;
+}
+
+#read-article-kanji-test-input {
+  -fx-font-size: 16pt; 
+  -fx-font-family: Verdana;
+  text-area-background: gray;
+  -fx-text-fill: black;
+}
+
+#read-article-sentence-input .content {
+    -fx-background-color: text-area-background ;
+}
+
+#read-article-coin-amount {
+  -fx-font-weight: bold;
+  -fx-background-color: blue;
+  -fx-text-fill: yellow; 
+  -fx-font-family: Courier New;
+  -fx-background-radius: 15px;
+}
+
+#read-article-sentence-value {
+  -fx-font-weight: bold;
+  -fx-background-color: yellow;
+  -fx-text-fill: black; 
+  -fx-font-family: Courier New;
+  -fx-background-radius: 10px;
+}
+
+#read-grammar-sentence-value {
+  -fx-font-weight: bold;
+  -fx-background-color: yellow;
+  -fx-text-fill: black; 
+  -fx-font-family: Courier New;
+  -fx-background-radius: 10px;
+}
+
+#read-grammar-coin-amount {
+  -fx-font-weight: bold;
+  -fx-background-color: blue;
+  -fx-text-fill: yellow; 
+  -fx-font-family: Courier New;
+  -fx-background-radius: 15px;
+}
+
+#read-grammar-content {
+  -fx-font-size: 17pt; 
+  -fx-font-family: Verdana;
+  text-area-background: #EFE1CE;
+  -fx-text-fill: black;
+  -fx-highlight-fill: #ADFF2F; 
+  -fx-highlight-text-fill: #B22222;
+}
+
+#read-grammar-content .content {
+    -fx-background-color: text-area-background ;
+}
+
+#read-grammar-sentence-input {
+  -fx-font-size: 16pt; 
+  -fx-font-family: Verdana;
+  text-area-background: lightgray;
+  -fx-text-fill: black;
+}
+
+#read-grammar-sentence-input .content {
+    -fx-background-color: text-area-background;
+}
+
+#grammar-read-pattern-list {
+  -fx-font-size: 9pt; 
+  -fx-font-family: Verdana;
+}
+
+
+#grammar-read-pattern-preview {
+  -fx-font-family: "Courier New";
+  -fx-font-size: 9pt;
+  -fx-text-fill: darkred;
+  -fx-text-alignment: center;
+  -fx-background-color: lightgray;
+  -fx-border-color: blue;
+}
