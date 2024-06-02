@@ -14,17 +14,24 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text; 
 import javafx.scene.paint.Color;
 import javafx.scene.effect.DropShadow;
+import javafx.scene.image.PixelWriter;
 import javafx.scene.input.MouseEvent;
 import javafx.event.EventHandler;
 import javafx.event.ActionEvent;
 import javafx.scene.control.OverrunStyle;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Menu;
+import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Tooltip;
 import javafx.scene.input.MouseButton;
+
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.ArcType;
 
 import javafx.animation.Timeline;
 import javafx.animation.KeyFrame;
@@ -46,6 +53,7 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.Locale;
+import java.util.Random;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.application.Platform;
@@ -55,6 +63,7 @@ import javafx.geometry.Pos;
 import javafx.geometry.VPos;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.StackPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TableRow;
@@ -93,10 +102,13 @@ public class GameViewTab extends GridPaneBase {
     Label lblClockTicking, lblGameDay;
     String currentCityName = "";
     DefCity currentCityDef = null;
+    Canvas mapCanvas;
 
     Timeline tlMainTimeline = null;
 
     ContextMenu currentContextMenu = null;
+    Menu cmiAdmin = null;
+    Menu acmAdminProduce = null;
 
     TableView<CityInfoTVItem> tvCityInfo;
     TableView<CityInfoTVItem> tvCityInventory;
@@ -128,7 +140,7 @@ public class GameViewTab extends GridPaneBase {
 
     private void createFormElements() {
 
-        Label label = new Label("Selected City:");
+        Label label = new Label(Constants.GUI_LABEL_SELECTED_CITY);
         this.lblClockTicking = new Label("");
         this.lblGameDay = new Label("");
         this.currentCityName = "Test";
@@ -150,7 +162,15 @@ public class GameViewTab extends GridPaneBase {
         };
         Button btnLoadGame = createButton("Load", fncLoadGameClick);
 
-        HBox hbControlCommands = new HBox(btnNewGame, btnLoadGame);
+        EventHandler<ActionEvent> fncSaveGameClick = new EventHandler<ActionEvent>() {
+            @Override public void handle(ActionEvent e) {
+                //label.setText("Accepted");
+                processGameSaveEvent();
+            }
+        };
+        Button btnSaveGame = createButton("Save", fncSaveGameClick);
+
+        HBox hbControlCommands = new HBox(btnNewGame, btnSaveGame, btnLoadGame);
         HBox hbControlInfo = new HBox(label, this.lblSelectedCityName, 
             new Label("Game Day:"), this.lblGameDay,
             this.lblClockTicking);
@@ -158,23 +178,42 @@ public class GameViewTab extends GridPaneBase {
 
         this.tvCityInfo = createCityInfoTableView();
         this.tvCityInventory = createCityInventoryTableView();
+        this.tvCityBuildQueue = createCityBuildQueueTableView();
         this.tvCityBuilding = createCityBuildingTableView();
         this.tvCityMessage = createCityMessageTableView();
-        this.tvCityBuildQueue = createCityBuildQueueTableView();
         this.tvCityProduction = createCityProductionTableView();
 
-        this.tvCityInfo.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.4));
-        this.tvCityInventory.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.3));
-        this.tvCityBuilding.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.3));
+        this.mapCanvas = new Canvas(850, 250);
+        StackPane canvasContainer = new StackPane(mapCanvas);
+        //canvasContainer.getStyleClass().add("canvas");
+        
+        this.tvCityInfo.setStyle("-fx-font-size: 16px");
+        this.tvCityInventory.setStyle("-fx-font-size: 16px");
+        this.tvCityBuilding.setStyle("-fx-font-size: 16px");
+        this.tvCityMessage.setStyle("-fx-font-size: 16px");
+        this.tvCityBuildQueue.setStyle("-fx-font-size: 16px");
+        this.tvCityProduction.setStyle("-fx-font-size: 16px");
 
-        VBox leftPane = new VBox(tvCityInfo, tvCityInventory, tvCityBuilding);
-        VBox rightPane = new VBox(tvCityBuildQueue, tvCityProduction, tvCityMessage);
+        this.tvCityInfo.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.55));
+        this.tvCityInventory.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.25));
+        this.tvCityBuildQueue.prefHeightProperty().bind(getPrimaryStage().heightProperty().multiply(0.2));
+
+        VBox leftPane = new VBox(tvCityInfo, tvCityInventory, tvCityBuildQueue);
+        GridPane rightMidPane = new GridPane();
+        ColumnConstraints rcol1 = new ColumnConstraints();
+        rcol1.setPercentWidth(50);
+        ColumnConstraints rcol2 = new ColumnConstraints();
+        rcol2.setPercentWidth(50);
+        rightMidPane.getColumnConstraints().addAll(rcol1, rcol2);
+        rightMidPane.add(tvCityBuilding, 0, 0);
+        rightMidPane.add(tvCityProduction, 1, 0);
+        VBox rightPane = new VBox(canvasContainer, rightMidPane, tvCityMessage);
 
         GridPane gpDetail = new GridPane();
         ColumnConstraints col1 = new ColumnConstraints();
-        col1.setPercentWidth(30);
+        col1.setPercentWidth(25);
         ColumnConstraints col2 = new ColumnConstraints();
-        col2.setPercentWidth(70);
+        col2.setPercentWidth(75);
         gpDetail.getColumnConstraints().addAll(col1, col2);
         gpDetail.add(leftPane, 0, 0);
         gpDetail.add(rightPane, 1, 0);
@@ -182,25 +221,127 @@ public class GameViewTab extends GridPaneBase {
         this.add(hbControlPane, 0, 0);
         this.add(gpDetail, 0, 1);
 
+        drawMap(mapCanvas);
+        //GraphicsContext gc = mapCanvas.getGraphicsContext2D();
+        //drawShapes(gc);
+
+        mapCanvas.addEventHandler(MouseEvent.MOUSE_CLICKED, 
+        new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent t) {
+                if(t.getButton() == MouseButton.SECONDARY) {
+                }
+                else if (t.getButton() == MouseButton.PRIMARY) { // && t.getClickCount() > 1) {
+                    processMapClick(t.getX(), t.getY());
+                }
+            }
+        });
+
+        /* 
         tvCityInfo.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent t) {
                 if(t.getButton() == MouseButton.SECONDARY) {
                     processContextMenuShow(tvCityInfo, t.getScreenX(), t.getScreenY());
                 }
+                else if (t.getButton() == MouseButton.PRIMARY) {
+                }
             }
         });
-
+*/
     }
 
+/*
     private void processContextMenuShow(Node anchor, final double dblX, final double dblY) {
         if (this.gameProcessor == null) return;
 
         if (this.currentContextMenu == null) {
             this.currentContextMenu = createContextMenu();
+            this.currentContextMenu.setAutoHide(true);
         }
 
         this.currentContextMenu.show(anchor, dblX, dblY);
+    }
+ */
+
+    private void selectMapTile(final int x, final int y) {
+        selectCity(x, y);
+    }
+
+    private void processMapClick(final double x, final double y) {
+        //System.out.println("X: "+String.valueOf(x) + " Y:" + String.valueOf(y) );
+        int xTile = (int) (x/Constants.TILE_WIDTH);
+        int yTile = (int) (y/Constants.TILE_HEIGHT);
+        //System.out.println("X: "+String.valueOf(xTile) + " Y:" + String.valueOf(yTile) );
+        selectMapTile(xTile, yTile);
+    }
+
+    private void drawCity(GraphicsContext gc, final String type, final int x, final int y) {
+
+        if (type.equals(Constants.GAME_PLAYER1)) {
+            gc.setFill(Color.LIGHTSALMON);
+            gc.fillRoundRect(
+                ((x+1)*Constants.TILE_WIDTH)-((int)(Constants.TILE_WIDTH/2)+(int)(Constants.CITY_ICON_WIDTH/2)),
+                ((y+1)*Constants.TILE_HEIGHT)-((int)(Constants.TILE_HEIGHT/2)+(int)(Constants.CITY_ICON_HEIGHT/2)),
+                Constants.CITY_ICON_WIDTH, Constants.CITY_ICON_HEIGHT, 2, 2);
+        }
+        else {
+            PixelWriter pr = gc.getPixelWriter();
+            pr.setColor(
+                ((x+1)*Constants.TILE_WIDTH)-(int)(Constants.TILE_WIDTH/2),
+                ((y+1)*Constants.TILE_HEIGHT)-(int)(Constants.TILE_HEIGHT/2),
+                Color.GREEN
+            );
+        }
+
+    }
+
+    private void drawMap(Canvas canvas) {
+        GraphicsContext gc = canvas.getGraphicsContext2D();
+        gc.setFill(Color.LIGHTGREEN);
+        gc.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
+        gc.setLineWidth(1.0);
+
+        gc.setStroke(Color.GRAY);
+        for (int col = 0; col < Constants.MAP_HORZ_TILES; col++) {
+            gc.moveTo(col*Constants.TILE_WIDTH, 0);
+            gc.lineTo(col*Constants.TILE_WIDTH, Constants.MAP_HEIGHT);
+            gc.stroke();
+        }
+        for (int row = 0; row < Constants.MAP_VERT_TILES; row++) {
+            gc.moveTo(0, row*Constants.TILE_HEIGHT);
+            gc.lineTo(Constants.MAP_WIDTH, row*Constants.TILE_HEIGHT);
+            gc.stroke();
+        }
+
+        if (this.gameProcessor != null && this.gameProcessor.getGameData().getCurrentCity() != null) {
+            for (City c: this.gameProcessor.getGameData().getCities()) {
+                drawCity(gc, c.getOwner(), c.getX(), c.getY());
+            }
+        }
+    }
+
+    private void drawShapes(GraphicsContext gc) {
+        gc.setFill(Color.GREEN);
+        gc.setStroke(Color.BLUE);
+        gc.setLineWidth(5);
+        gc.strokeLine(40, 10, 10, 40);
+        gc.fillOval(10, 60, 30, 30);
+        gc.strokeOval(60, 60, 30, 30);
+        gc.fillRoundRect(110, 60, 30, 30, 10, 10);
+        gc.strokeRoundRect(160, 60, 30, 30, 10, 10);
+        gc.fillArc(10, 110, 30, 30, 45, 240, ArcType.OPEN);
+        gc.fillArc(60, 110, 30, 30, 45, 240, ArcType.CHORD);
+        gc.fillArc(110, 110, 30, 30, 45, 240, ArcType.ROUND);
+        gc.strokeArc(10, 160, 30, 30, 45, 240, ArcType.OPEN);
+        gc.strokeArc(60, 160, 30, 30, 45, 240, ArcType.CHORD);
+        gc.strokeArc(110, 160, 30, 30, 45, 240, ArcType.ROUND);
+        gc.fillPolygon(new double[]{10, 40, 10, 40},
+                       new double[]{210, 210, 240, 240}, 4);
+        gc.strokePolygon(new double[]{60, 90, 60, 90},
+                         new double[]{210, 210, 240, 240}, 4);
+        gc.strokePolyline(new double[]{110, 140, 110, 140},
+                          new double[]{210, 210, 240, 240}, 4);
     }
 
     private Button createButton(final String sText, final EventHandler<ActionEvent> fncButtonClick) {
@@ -234,48 +375,73 @@ public class GameViewTab extends GridPaneBase {
         ContextMenu cmObj = new ContextMenu();
 
         Menu cmiBuilds = createBuildMenu();
-/*         Menu acmMi1 = new Menu("Build");
-
-        MenuItem sub1 = new MenuItem("house");
-        MenuItem sub2 = new MenuItem("farm");
-        acmMi1.getItems().addAll(sub1, sub2);
- */
         if (cmiBuilds != null)
             cmObj.getItems().add(cmiBuilds);
-        MenuItem acmMi2 = new MenuItem("Administration");
-        cmObj.getItems().add(acmMi2);
+
+        this.cmiAdmin = createAdminMenu();
+        cmObj.getItems().add(cmiAdmin);
         SeparatorMenuItem sep = new SeparatorMenuItem();
         cmObj.getItems().add(sep);
-        MenuItem acmMi3 = new MenuItem("Army");
-        cmObj.getItems().add(acmMi3);
+        Menu cmiMil = createMillitaryMenu();
+        if (cmiMil != null)
+            cmObj.getItems().add(cmiMil);
         SeparatorMenuItem sep2 = new SeparatorMenuItem();
         cmObj.getItems().add(sep2);
-        MenuItem acmMi4 = new MenuItem("Transfer to WordMatch2");
-        cmObj.getItems().add(acmMi4);
-/*
-        acmMi1.setOnAction((ActionEvent event) -> {
-            this.setStartAnchor();
+
+        cmObj.addEventFilter(MouseEvent.MOUSE_RELEASED, new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                if (event.getButton() == MouseButton.SECONDARY) {
+                    ContextMenu mnu = (ContextMenu) event.getSource();
+                    int iCount = mnu.getItems().size();
+                    for (int i = 0; i < iCount; i++) {
+                        if (mnu.getItems().get(i) instanceof SeparatorMenuItem)
+                            continue;
+
+                        if (mnu.getItems().get(i) instanceof MenuItem) {
+                            Menu m = (Menu) mnu.getItems().get(i);
+                            System.out.println("this  is a Menu: " + m.getText());
+                            if (m.getItems().size() > 0) {
+                                for (int iSub = 0; iSub < m.getItems().size(); iSub++) {
+                                    System.out.println("    " + m.getItems().get(iSub).getText());
+                                }
+                            }
+                        }
+                    }
+                    event.consume();
+                }
+            }
         });
-        acmMi2.setOnAction((ActionEvent event) -> {
-            this.setEndAnchor();
-        });
-        acmMi3.setOnAction((ActionEvent event) -> {
-            this.clearAnchors();
-        });
-        acmMi4.setOnAction((ActionEvent event) -> {
-            this.transferToWordMatch2();
-        });
- */
+
         return cmObj;
+    }
+
+    private void updateContextMenuProduceCommands() {
+        List<String> lstProduceable = this.gameProcessor.getProduceableBuilding(this.gameProcessor.getGameData().getCurrentCity());
+        if (lstProduceable.size() > 0 && this.cmiAdmin != null) {
+            if (this.acmAdminProduce == null) {
+                Menu mnuProduce = createMenuAdminProduceBuilding();
+                if (mnuProduce != null && this.cmiAdmin != null) {
+                    this.cmiAdmin.getItems().add(mnuProduce);
+                    this.acmAdminProduce = mnuProduce;
+                }
+            }
+            else {
+                if (this.acmAdminProduce.getItems().size() != lstProduceable.size()) {
+                    //recreate
+                    createMenuAdminProduceBuilding();
+                }
+            }
+        }
     }
 
     private Menu createBuildMenu() {
         if (this.gameProcessor == null) return null;
 
-        Menu acmMi1 = new Menu("Build");
+        Menu acmMi1 = new Menu(transWord(Constants.GUI_LABEL_CONSTRUCTION));
 
         for (DefBuilding bd : this.gameProcessor.getGameData().getDefBuildingItems()) {
-            MenuItem sub1 = new MenuItem(bd.getName());
+            MenuItem sub1 = new MenuItem(transWord(bd.getName()));
 
             sub1.setOnAction((ActionEvent event) -> {
                 this.processBuildCommand(bd.getName());
@@ -284,6 +450,73 @@ public class GameViewTab extends GridPaneBase {
             acmMi1.getItems().add(sub1);
         }
         return acmMi1;
+    }
+
+    private Menu createMillitaryMenu() {
+        if (this.gameProcessor == null) return null;
+
+        Menu acmMi1 = new Menu(transWord(Constants.GUI_LABEL_MILLITARY));
+        MenuItem sub1 = new MenuItem(transWord(Constants.GUI_LABEL_MIL_PATROL));
+
+        sub1.setOnAction((ActionEvent event) -> {
+            this.processMilCommand(Constants.GUI_LABEL_MIL_PATROL);
+        });
+        acmMi1.getItems().add(sub1);
+        return acmMi1;
+    }
+
+    private Menu createAdminMenu() {
+        if (this.gameProcessor == null) return null;
+
+        Menu acmAdmin = new Menu(transWord(Constants.GUI_LABEL_ADMINISTRATION));
+        if (this.acmAdminProduce == null) {
+            Menu mnuProduce = createMenuAdminProduceBuilding();
+            if (mnuProduce != null) {
+                acmAdmin.getItems().add(mnuProduce);
+                this.acmAdminProduce = mnuProduce;
+            }
+        }
+        return acmAdmin;
+    }
+
+    private Menu createMenuAdminProduceBuilding() {
+        Menu mnu = null;
+        if (this.acmAdminProduce == null)
+          mnu = new Menu(transWord(Constants.GUI_LABEL_ADMIN_PRODUCE));
+        else
+          mnu = this.acmAdminProduce;
+        
+        mnu.getItems().clear();
+
+        List<String> lstProduceable = this.gameProcessor.getProduceableBuilding(this.gameProcessor.getGameData().getCurrentCity());
+        if (lstProduceable.size() < 1) {
+            return null;
+        }
+        for (String sBldName: lstProduceable) {
+            MenuItem sub1 = new MenuItem(sBldName);
+            sub1.setOnAction((ActionEvent event) -> {
+                this.processAdminBuildingProduceCommand(sBldName);
+            });
+            mnu.getItems().add(sub1);
+        }
+        return mnu;
+    }
+
+    private void processAdminBuildingProduceCommand(final String sBldName) {
+        if (this.gameProcessor == null) return;
+
+        DefBuilding bldDef = getDefBuilding(sBldName);
+        if (bldDef == null) return;
+
+        DefReaction react = getBuildingDefReact(bldDef, Constants.CITY_BUILDING_PRODUCE);
+        if (react != null) {
+            String msg = String.format("%s\n%s", 
+                react.getReact().getConfirm().getPrompt(),
+                getBuildingProduceConsumeString(this.gameProcessor.getGameData().getCurrentCity(), bldDef)
+            );
+            showMessage("Start building produce", "Produce", msg);
+        }
+        this.gameProcessor.addProduceQueueToBuilding(this.gameProcessor.getGameData().getCurrentCity(), sBldName);
     }
 
     private DefBuilding getDefBuilding(final String name) {
@@ -303,8 +536,46 @@ public class GameViewTab extends GridPaneBase {
         return false;
     }
 
+    private String getBuildingProduceConsumeString(City curCity, DefBuilding bld) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(transWord("Consume"));
+        sb.append(":");
+        for (DefBuildingConsume bldCons: bld.getConsumeLst()) {
+            if (bldCons.getQuantity() < 1) continue; //skip it
+
+            sb.append(" ");
+            sb.append(transWord(bldCons.getType()));
+            sb.append(": ");
+            sb.append(String.valueOf(bldCons.getQuantity()*Constants.CITY_BUILDING_PRODUCE_DEFAULT_ORDER_QTY));
+            sb.append("/");
+            sb.append(String.valueOf(curCity.getInvQty(bldCons.getType())));
+        }
+        return sb.toString();
+    }
+
+    private String getBuildingCostString(City curCity, DefBuilding bld) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(transWord("Cost"));
+        sb.append(":");
+        for (DefBuildingCostType bldCost: bld.getCostLst()) {
+            if (bldCost.getQuantity() < 1) continue; //skip it
+
+            sb.append(" ");
+            sb.append(transWord(bldCost.getType()));
+            sb.append(": ");
+            sb.append(String.valueOf(bldCost.getQuantity()));
+            sb.append("/");
+            if (bldCost.getType().equals(Constants.CITY_BUILD_BLOCK_NAME))
+                sb.append(String.valueOf(curCity.getFreeLandBlock()));
+            else if (bldCost.getType().equals(Constants.CITY_BUILD_TIME_NAME)) 
+                sb.append(String.valueOf(bldCost.getQuantity()));
+            else
+                sb.append(String.valueOf(curCity.getInvQty(bldCost.getType())));
+        }
+        return sb.toString();
+    }
+
     private void processCityLogics(final String logic, final String subLogic, final DefBuilding bld) {
-      
         if (logic.equals(Constants.CITY_BUILDER_ACTION_TYPE)) {
             DefReaction defReact = this.gameProcessor.getGameData().getTalkLogicReact(
                 Constants.CITY_BUILDER_ACTION_TYPE, subLogic);
@@ -331,6 +602,7 @@ public class GameViewTab extends GridPaneBase {
             int iTimeForThis = 0;
             boolean bEnoughResource = true;
             for (DefBuildingCostType bldCost: bld.getCostLst()) {
+                if (bldCost.getQuantity() < 1) continue; //skip it
                 System.out.println("Cost:");
                 System.out.println(" type:"+bldCost.getType());
                 System.out.println(" qty:"+String.valueOf(bldCost.getQuantity()));
@@ -364,17 +636,23 @@ public class GameViewTab extends GridPaneBase {
                 }
             }
             if (!bEnoughResource) {
-                showMessageWithStyle("Cannot build!", defReact.getReact().getConfirm().getCondition(), "game_dialog.css");  
+                showMessageWithStyle("Cannot build!", 
+                    String.format("%s\n%s", 
+                        defReact.getReact().getConfirm().getCondition(), 
+                        this.getBuildingCostString(curCity, bld)),
+                    "game_dialog.css");  
                 return;
             }
             else {
                 if (!showQuestionWithStyle("Are you sure to spend resources?", 
-                    defReact.getReact().getConfirm().getCondition(), 
+                    String.format("%s\n%s", 
+                        defReact.getReact().getConfirm().getCondition(), 
+                        this.getBuildingCostString(curCity, bld)),
                     "game_dialog.css")) {
                         return;
                      }
                 CityBuildQueueItem bldItem = new CityBuildQueueItem(
-                    bld.getType(), bld.getName(), iLandBlockForThis, 0, iTimeForThis, 
+                    bld.getType(), bld.getName(), iLandBlockForThis, 0, iTimeForThis,
                     bld, this.gameProcessor.getGameTimeBySecond());
 
                 if (bld.getCostLst() == null) {
@@ -399,6 +677,15 @@ public class GameViewTab extends GridPaneBase {
 
     }
 
+    private DefReaction getBuildingDefReact(DefBuilding bldDef, final String trigger) {
+        for (DefReaction react: bldDef.getReaction()) {
+            if (react.getTrigger().equals(trigger)) {
+                return react;
+            }
+        }
+        return null;
+    }
+
     private void processBuildCommand(final String buildingName) {
         DefBuilding objBuildDef = getDefBuilding(buildingName);
         if (objBuildDef == null) return;
@@ -407,39 +694,9 @@ public class GameViewTab extends GridPaneBase {
             Constants.CITY_BUILDER_ACTION_TYPE,
             Constants.CITY_BUILDING_REACT_TRIGGER_BUILD, 
             objBuildDef);
+    }
 
-/*
-        for ()
- String type;
- String name;
- List<String> value;
- DefTalkLogicValueRange valueRange;
- List<String> requireClass;
- List<String> bonusClass;
- List<DefBuildingCostType> costLst;
- List<DefBuildingProduce> produceLst;
- List<DefReaction> reaction;
-
-
- Constants.CITY_TALK_LOGICS = "talk_logics";
- Constants.CITY_REACT_TRIGGER_PROMPT = "prompt";
- Constants.CITY_REACT_TRIGGER_CONFIRM = "confirm";
- Constants.CITY_REACT_TRIGGER_CONDITION = "condition";
- Constants.CITY_REACT_TRIGGER_COMPLETE = "complete";
-
- Constants.CITY_BUILDER_ACTION_TYPE = "builder";
- Constants.CITY_POP_ACTION_TYPE = "pop";
-
- Constants.CITY_BUILDING_COST = "cost";
- Constants.CITY_BUILDING_PRODUCE = "produce";
-
- Constants.CITY_BUILDING_REACTION = "reaction";
- Constants.CITY_BUILDING_REACT_TYPE = "builder";
- Constants.CITY_BUILDING_REACT_TRIGGER_BUILD = "build";
- Constants.CITY_BUILDING_REACT_TRIGGER_REMOVE = "remove";
-
- */
-
+    private void processMilCommand(final String cmdName) {
     }
 
     private void processTableViewDblClick(TableViewItem rowData) {
@@ -449,7 +706,7 @@ public class GameViewTab extends GridPaneBase {
           System.out.println("label is null");
     }
 
-    private TableView<TableViewItem> createTableView() {
+    private TableView<TableViewItem> createProduceTableView() {
         TableView<TableViewItem> tvObj = new TableView<>();
         tvObj.setRowFactory(tv -> {
             TableRow<TableViewItem> row = new TableRow<>();
@@ -496,6 +753,13 @@ public class GameViewTab extends GridPaneBase {
           System.out.println("label is null");
     }
 
+    private String transWord(final String word) {
+        if (this.gameProcessor == null) return word;
+        String sTrans = this.gameProcessor.getGameData().getTranslations().get(word);
+        if (sTrans == null || sTrans.isEmpty()) return word;
+        return sTrans;
+    }
+
     private void updateCityInfoTV(TableView<CityInfoTVItem> tvObj) {
         if (this.gameProcessor == null) return;
         City curCity = this.gameProcessor.getGameData().getCurrentCity();
@@ -504,20 +768,34 @@ public class GameViewTab extends GridPaneBase {
         String sPop = String.valueOf(curCity.getPop());
         String sFreeSpaces = String.valueOf(curCity.getFreeLandBlock());
         String sSecurity = String.valueOf(curCity.getSecurity());
+        String sHappiness = String.valueOf(curCity.getHappiness());
+        String sDefense = String.valueOf(curCity.getDefense());
         for (CityInfoTVItem cInf: tvObj.getItems()) {
-            if (cInf.getItemGroup().equals(Constants.CITY_BASIC_INFO_POP)) {
+            if (cInf.getItemGroup().equals(transWord(Constants.CITY_BASIC_INFO_POP))) {
                 String sValue = cInf.getValue();
                 if (!sPop.equals(sValue)) {
                     cInf.setValue(sPop);
                 }
             }
-            if (cInf.getItemGroup().equals(Constants.CITY_BASIC_INFO_SECURITY)) {
+            if (cInf.getItemGroup().equals(transWord(Constants.CITY_BASIC_INFO_SECURITY))) {
                 String sValue = cInf.getValue();
                 if (!sSecurity.equals(sValue)) {
                     cInf.setValue(sSecurity);
                 }
             }
-            if (cInf.getItemGroup().isEmpty() && cInf.getItem().equals(Constants.CITY_BASIC_INFO_FREE_SPACE)) {
+            if (cInf.getItemGroup().equals(transWord(Constants.CITY_BASIC_INFO_HAPPINESS))) {
+                String sValue = cInf.getValue();
+                if (!sHappiness.equals(sValue)) {
+                    cInf.setValue(sHappiness);
+                }
+            }
+            if (cInf.getItemGroup().equals(transWord(Constants.CITY_BASIC_INFO_DEFENSE))) {
+                String sValue = cInf.getValue();
+                if (!sDefense.equals(sValue)) {
+                    cInf.setValue(sDefense);
+                }
+            }    
+            if (cInf.getItemGroup().isEmpty() && cInf.getItem().equals(transWord(Constants.CITY_BASIC_INFO_FREE_SPACE))) {
                 String sValue = cInf.getValue();
                 if (!sFreeSpaces.equals(sValue)) {
                     cInf.setValue(sFreeSpaces);
@@ -532,25 +810,29 @@ public class GameViewTab extends GridPaneBase {
         City curCity = this.gameProcessor.getGameData().getCurrentCity();
         if (curCity == null) return;
 
-        tvObj.getItems().add(new CityInfoTVItem("Owner", "", String.valueOf(curCity.getOwner())));
-        tvObj.getItems().add(new CityInfoTVItem("Level", "", String.valueOf(curCity.getLevel())));
-        tvObj.getItems().add(new CityInfoTVItem(Constants.CITY_BASIC_INFO_POP, "", String.valueOf(curCity.getPop())));
-        tvObj.getItems().add(new CityInfoTVItem("Troop", "", String.valueOf(curCity.getTroop())));
-        tvObj.getItems().add(new CityInfoTVItem(Constants.CITY_BASIC_INFO_SECURITY, "", String.valueOf(curCity.getSecurity())));
+        tvObj.getItems().clear();
 
-        tvObj.getItems().add(new CityInfoTVItem("Capability", "", ""));
+        tvObj.getItems().add(new CityInfoTVItem(transWord(Constants.CITY_BASIC_INFO_OWNER), "", String.valueOf(curCity.getOwner())));
+        tvObj.getItems().add(new CityInfoTVItem(transWord(Constants.CITY_BASIC_INFO_LEVEL), "", String.valueOf(curCity.getLevel())));
+        tvObj.getItems().add(new CityInfoTVItem(transWord(Constants.CITY_BASIC_INFO_POP), "", String.valueOf(curCity.getPop())));
+        tvObj.getItems().add(new CityInfoTVItem(transWord(Constants.CITY_BASIC_INFO_TROOP), "", String.valueOf(curCity.getTroop())));
+        tvObj.getItems().add(new CityInfoTVItem(transWord(Constants.CITY_BASIC_INFO_SECURITY), "", String.valueOf(curCity.getSecurity())));
+        tvObj.getItems().add(new CityInfoTVItem(transWord(Constants.CITY_BASIC_INFO_HAPPINESS), "", String.valueOf(curCity.getHappiness())));
+        tvObj.getItems().add(new CityInfoTVItem(transWord(Constants.CITY_BASIC_INFO_DEFENSE), "", String.valueOf(curCity.getDefense())));
+
+        tvObj.getItems().add(new CityInfoTVItem(transWord(Constants.CITY_BASIC_INFO_CAPABILITY), "", ""));
         DefCityCapability cap = curCity.getDef().getCapability();
-        tvObj.getItems().add(new CityInfoTVItem("", "Land", String.valueOf(cap.getLand())));
-        tvObj.getItems().add(new CityInfoTVItem("", Constants.CITY_BASIC_INFO_FREE_SPACE, String.valueOf(curCity.getFreeLandBlock())));
-        tvObj.getItems().add(new CityInfoTVItem("", "Farm", String.valueOf(cap.getFarm())));
-        tvObj.getItems().add(new CityInfoTVItem("", "Iron", String.valueOf(cap.getIron())));
-        tvObj.getItems().add(new CityInfoTVItem("", "Stone", String.valueOf(cap.getStone())));
-        tvObj.getItems().add(new CityInfoTVItem("", "Clay", String.valueOf(cap.getClay())));
-        tvObj.getItems().add(new CityInfoTVItem("", "Water", String.valueOf(cap.getWater())));
+        tvObj.getItems().add(new CityInfoTVItem("", transWord(Constants.CITY_BASIC_INFO_CAP_LAND), String.valueOf(cap.getLand())));
+        tvObj.getItems().add(new CityInfoTVItem("", transWord(Constants.CITY_BASIC_INFO_FREE_SPACE), String.valueOf(curCity.getFreeLandBlock())));
+        tvObj.getItems().add(new CityInfoTVItem("", transWord(Constants.CITY_BASIC_INFO_CAP_FARM), String.valueOf(cap.getFarm())));
+        tvObj.getItems().add(new CityInfoTVItem("", transWord(Constants.CITY_BASIC_INFO_CAP_IRON), String.valueOf(cap.getIron())));
+        tvObj.getItems().add(new CityInfoTVItem("", transWord(Constants.CITY_BASIC_INFO_CAP_STONE), String.valueOf(cap.getStone())));
+        tvObj.getItems().add(new CityInfoTVItem("", transWord(Constants.CITY_BASIC_INFO_CAP_CLAY), String.valueOf(cap.getClay())));
+        tvObj.getItems().add(new CityInfoTVItem("", transWord(Constants.CITY_BASIC_INFO_CAP_WATER), String.valueOf(cap.getWater())));
 
-        tvObj.getItems().add(new CityInfoTVItem("Coordinate", 
-            String.valueOf(curCity.getDef().getX()), 
-            String.valueOf(curCity.getDef().getY())));
+        tvObj.getItems().add(new CityInfoTVItem(transWord(Constants.CITY_BASIC_INFO_COORDINATE), 
+            String.valueOf(curCity.getX()), 
+            String.valueOf(curCity.getY())));
     }
 
     private TableView<CityInfoTVItem> createCityInfoTableView() {
@@ -664,17 +946,22 @@ public class GameViewTab extends GridPaneBase {
         tcol2.setCellValueFactory(new PropertyValueFactory<>("name"));
         TableColumn<CityBuildingTVItem, String> tcol3 = new TableColumn<>("Qty");
         tcol3.setCellValueFactory(new PropertyValueFactory<>("qty"));
+        TableColumn<CityBuildingTVItem, String> tcol4 = new TableColumn<>("Status");
+        tcol4.setCellValueFactory(new PropertyValueFactory<>("status"));
 
-        tcol1.prefWidthProperty().bind(tvObj.widthProperty().multiply(0.3));
-        tcol2.prefWidthProperty().bind(tvObj.widthProperty().multiply(0.3));
-        tcol3.prefWidthProperty().bind(tvObj.widthProperty().multiply(0.3));
+        tcol1.prefWidthProperty().bind(tvObj.widthProperty().multiply(0.25));
+        tcol2.prefWidthProperty().bind(tvObj.widthProperty().multiply(0.25));
+        tcol3.prefWidthProperty().bind(tvObj.widthProperty().multiply(0.25));
+        tcol4.prefWidthProperty().bind(tvObj.widthProperty().multiply(0.25));
         tcol1.setResizable(false);
         tcol2.setResizable(false);
         tcol3.setResizable(false);
+        tcol4.setResizable(false);
 
         tvObj.getColumns().add(tcol1);
         tvObj.getColumns().add(tcol2);
         tvObj.getColumns().add(tcol3);
+        tvObj.getColumns().add(tcol4);
 
         //when empty
         tvObj.setPlaceholder(new Label("No data"));
@@ -689,7 +976,29 @@ public class GameViewTab extends GridPaneBase {
     private void fillCityInventoryListTV(TableView<CityInfoTVItem> tvObj) {
         if (this.gameProcessor == null) return;
         City curCity = this.gameProcessor.getGameData().getCurrentCity();
-        if (curCity == null) return;
+        if (curCity == null) {
+            tvObj.getItems().clear();
+            return;
+        }
+
+        //because the city can be changed, so this list may contains items that 
+        //not in the new city's inventory
+        List<CityInfoTVItem> removalItems = new ArrayList<CityInfoTVItem>();
+        for (CityInfoTVItem tvItem: tvObj.getItems()) {
+            //current city has this item?
+            boolean cityHasItem = false;
+            for (CityInventoryItem invItem: curCity.getInventoryItem()) {
+                if (transWord(tvItem.getItem()).equals(transWord(invItem.getName()))) {
+                    cityHasItem = true;
+                    break;
+                }
+            }
+            if (!cityHasItem) removalItems.add(tvItem);
+        }
+        if (removalItems.size() > 0) {
+            for (CityInfoTVItem itm: removalItems)
+                tvObj.getItems().remove(itm);
+        }
 
         for (CityInventoryItem invItem: curCity.getInventoryItem()) {
             Constants.QtyWithCap qtyCap = curCity.getInventoryItemWithCap(invItem.getName());
@@ -697,7 +1006,7 @@ public class GameViewTab extends GridPaneBase {
             String sQtyWCap = qtyCap.toString();
             boolean foundItem = false;
             for (CityInfoTVItem tvItem: tvObj.getItems()) {
-                if (tvItem.getItem().equals(invItem.getName())) {
+                if (transWord(tvItem.getItem()).equals(transWord(invItem.getName()))) {
                     if (!tvItem.getValue().equals(sQtyWCap))
                         tvItem.setValue(sQtyWCap);
                     foundItem = true;
@@ -706,7 +1015,7 @@ public class GameViewTab extends GridPaneBase {
             }
             if (!foundItem) {
                 //add new
-                tvObj.getItems().add(new CityInfoTVItem("", invItem.getName(), sQtyWCap));
+                tvObj.getItems().add(new CityInfoTVItem("", transWord(invItem.getName()), sQtyWCap));
             }
         }
         tvObj.refresh();
@@ -715,12 +1024,29 @@ public class GameViewTab extends GridPaneBase {
     private void fillCityBuildingTV(TableView<CityBuildingTVItem> tvObj) {
         if (this.gameProcessor == null) return;
         City curCity = this.gameProcessor.getGameData().getCurrentCity();
-        if (curCity == null) return;
+        if (curCity == null) {
+            tvObj.getItems().clear();
+            return;
+        }
+
+        if (curCity.getBuildingItem().size() < 1) {
+            tvObj.getItems().clear();
+            return;
+        }
 
         for (CityBuilding bldItem: curCity.getBuildingItem()) {
             boolean foundItem = false;
             for (CityBuildingTVItem tvItem: tvObj.getItems()) {
-                if (tvItem.getName().equals(bldItem.getName())) {
+                if (transWord(tvItem.getName()).equals(transWord(bldItem.getName()))) {
+                    if (bldItem.isActiveProduce()) {
+                        if (bldItem.getQueueLst().size() > 0) {
+                            tvItem.setStatus(String.format("%s %d", 
+                            transWord(Constants.CITY_BUILDING_STATUS_PRODUCE), bldItem.getQueueLst().size()*bldItem.getQty()));
+                        }
+                        else {
+                            tvItem.setStatus(Constants.CITY_BUILDING_STATUS_IDLING);
+                        }
+                    }
                     if (tvItem.getQty() != bldItem.getQty())
                       tvItem.setQty(bldItem.getQty());
                     foundItem = true;
@@ -729,7 +1055,8 @@ public class GameViewTab extends GridPaneBase {
             }
             if (!foundItem) {
                 //add new
-                tvObj.getItems().add(new CityBuildingTVItem(bldItem.getType(), bldItem.getName(), bldItem.getQty()));
+                tvObj.getItems().add(new CityBuildingTVItem(transWord(bldItem.getType()), 
+                    transWord(bldItem.getName()), bldItem.getQty()));
             }
         }
         tvObj.refresh();
@@ -744,13 +1071,13 @@ public class GameViewTab extends GridPaneBase {
 
     private void fillCityBuildQueue(TableView<CityBuildQueueTVItem> tvObj) {
 
+        tvObj.getItems().clear();
         City curCity = this.gameProcessor.getGameData().getCurrentCity();
         if (curCity == null) return;
 
-        tvObj.getItems().clear();
         for (CityBuildQueueItem buildQueueItem: curCity.getBuildQueue()) {
             tvObj.getItems().add(
-                new CityBuildQueueTVItem("Building", buildQueueItem.getItemName(), 
+                new CityBuildQueueTVItem(transWord(Constants.GUI_LABEL_BUILDING), transWord(buildQueueItem.getItemName()), 
                     new StringBuilder(buildQueueItem.getDayCount() +"/"+buildQueueItem.getDayTotal()).toString())
                 );
         }
@@ -818,7 +1145,7 @@ public class GameViewTab extends GridPaneBase {
             });
             return row ;
         });
-    
+
         TableColumn<CityProductionTVItem, String> tcol1 = new TableColumn<>("Item");
         tcol1.setCellValueFactory(new PropertyValueFactory<>("buildingName"));
         TableColumn<CityProductionTVItem, String> tcol2 = new TableColumn<>("");
@@ -894,29 +1221,33 @@ public class GameViewTab extends GridPaneBase {
         if (defR != null) {
             if (e.getReact() == null) {
                 //simple event, contains message directly
-                sMsg = e.getMsg();
+                sMsg = String.format("%s %s", transWord(e.getMsg()), defR.getReact().getMessage());
             }
             else {
                 if (e.getReact().equals(Constants.CITY_REACT_TRIGGER_COMPLETE))
                   sMsg = defR.getReact().getConfirm().getComplete();
             }
         }
+        else {
+            System.out.println("Cannot find getDefReactionByTriggerName " + e.getTrigger());
+        }
         return sMsg;
     }
 
     private void fillCityMessageTV(TableView<CityMessageTVItem> tvObj) {
-        if (this.gameProcessor.getLstEvents().size() > 0) {
-            List<Constants.GameEvent> lstRm = new ArrayList<Constants.GameEvent>();
-            for (Constants.GameEvent ge: this.gameProcessor.getLstEvents()) {
-                if (ge.getCity().equals(this.gameProcessor.getGameData().getCurrentCity().getName())) {
-                    tvObj.getItems().add(
-                        new CityMessageTVItem(ge.getType(), ge.getTrigger(), getEventMessage(ge)));
-                    lstRm.add(ge);
-                }
+        if (this.gameProcessor.getLstEvents().size() < 1) {
+            //tvObj.getItems().clear();
+        }
+        List<Constants.GameEvent> lstRm = new ArrayList<Constants.GameEvent>();
+        for (Constants.GameEvent ge: this.gameProcessor.getLstEvents()) {
+            if (ge.getCity().equals(this.gameProcessor.getGameData().getCurrentCity().getName())) {
+                tvObj.getItems().add(
+                    new CityMessageTVItem(ge.getType(), ge.getTrigger(), getEventMessage(ge)));
+                lstRm.add(ge);
             }
-            for (Constants.GameEvent e: lstRm) {
-                this.gameProcessor.getLstEvents().remove(e);
-            }
+        }
+        for (Constants.GameEvent e: lstRm) {
+            this.gameProcessor.getLstEvents().remove(e);
         }
     }
 
@@ -977,7 +1308,7 @@ public class GameViewTab extends GridPaneBase {
         File file = fileChooser.showOpenDialog(getPrimaryStage());
         if (file != null) {
             System.out.println("Selected file: " + file.getPath());
-            GameData gameData = this.gameModel.createGameFromTemplate(file.getPath());
+            GameData gameData = this.gameModel.createGameFromTemplate(file);
             if (gameData != null) {
                 doStartGame(gameData);
             }
@@ -1002,6 +1333,14 @@ public class GameViewTab extends GridPaneBase {
             //this.gameModel.loadGameJsonFromFile(file.getPath());
             //openGameFile(file);
         }
+    }
+
+    private void processGameSaveEvent() {
+        if (this.gameProcessor == null || this.gameProcessor.getGameData() == null) return;
+
+        String gmContent = this.gameModel.getJsonDataAsString(this.gameProcessor.getGameData());
+        System.out.println(gmContent);
+        saveGameToFile(this.gameModel.getCurrentGameSaveFile(), gmContent);
     }
 
     private void saveGameToFile(final String fileName, final String content) {
@@ -1047,10 +1386,32 @@ public class GameViewTab extends GridPaneBase {
             this.lblGameDay.setText(sNewGameDay);
             fillCityInventoryListTV(this.tvCityInventory);
             fillCityBuildQueue(this.tvCityBuildQueue);
+            updateContextMenuProduceCommands();
             fillCityMessageTV(this.tvCityMessage);
             fillCityBuildingTV(this.tvCityBuilding);
             updateCityInfoTV(this.tvCityInfo);
         }
+    }
+
+    private void selectCity(final int x, final int y) {
+        City city = this.gameProcessor.getGameData().getCityByLocation(x, y);
+        if (city == null) return;
+
+        this.gameProcessor.getGameData().setCurrentCity(city);
+        this.currentCityDef = this.gameProcessor.getGameData().getCurrentCity().getDef();
+        this.currentCityName = gameProcessor.getGameData().getCurrentCity().getName();
+        this.lblSelectedCityName.setText(this.currentCityName);
+        fillCityInfoTV(this.tvCityInfo); //always fill, not update
+        fillCityInventoryListTV(this.tvCityInventory);
+        fillCityBuildQueue(this.tvCityBuildQueue);
+        fillCityMessageTV(this.tvCityMessage);
+        fillCityBuildingTV(this.tvCityBuilding);
+
+        this.acmAdminProduce = null;
+        this.currentContextMenu = createContextMenu();
+        this.currentContextMenu.setAutoHide(true);
+
+        tvCityInfo.setContextMenu(this.currentContextMenu);
     }
 
     private void doStartGame(GameData gd) {
@@ -1058,12 +1419,11 @@ public class GameViewTab extends GridPaneBase {
 
         this.gameProcessor = new GameProcessor(gd);
 
-        this.currentCityDef = gd.getDefCityItems().get(0);
-        this.gameProcessor.createNewCity(this.currentCityDef);
-        this.currentCityName = gameProcessor.getGameData().getCurrentCity().getName();
-        this.lblSelectedCityName.setText(this.currentCityName);
-        fillCityInfoTV(this.tvCityInfo);
-        fillCityInventoryListTV(this.tvCityInventory);
+        this.gameProcessor.generateCities();
+        City curCity = this.gameProcessor.getGameData().getCurrentCity();
+        selectCity(curCity.getX(), curCity.getY());
+
+        this.drawMap(this.mapCanvas);
 
         if (this.tlMainTimeline == null) {
             this.tlMainTimeline = new Timeline(

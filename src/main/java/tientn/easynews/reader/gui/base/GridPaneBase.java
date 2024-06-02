@@ -22,6 +22,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.DialogPane;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.layout.ColumnConstraints;
+import javafx.scene.layout.Region;
 import javafx.scene.input.KeyCode;
 import javafx.event.EventHandler;
 import javafx.event.ActionEvent;
@@ -111,7 +112,7 @@ public class GridPaneBase extends GridPane {
         dialogPane.getStylesheets().add(
                 getClass().getResource("/css/dialog.css").toExternalForm());
 
-        Optional<ButtonType> result = alert.showAndWait();
+        alert.showAndWait();
     }
 
     protected void showMessageWithStyle(final String title, final String msg, final String cssFile) {
@@ -119,12 +120,14 @@ public class GridPaneBase extends GridPane {
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(msg);
+        alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
+        alert.getDialogPane().setMinWidth(640);
 
         DialogPane dialogPane = alert.getDialogPane();
         dialogPane.getStylesheets().add(
                 getClass().getResource("/css/"+cssFile).toExternalForm());
 
-        Optional<ButtonType> result = alert.showAndWait();
+        alert.showAndWait();
     }
 
     protected boolean showQuestion(final String title, final String header, final String msg) {
@@ -150,11 +153,14 @@ public class GridPaneBase extends GridPane {
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(msg);
+        alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
+        alert.getDialogPane().setMinWidth(640);
 
         DialogPane dialogPane = alert.getDialogPane();
         dialogPane.getStylesheets().add(
                 getClass().getResource("/css/"+cssFile).toExternalForm());
 
+                
         Optional<ButtonType> result = alert.showAndWait();
         if (result.get() == ButtonType.OK){
             return true;

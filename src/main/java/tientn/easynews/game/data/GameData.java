@@ -1,26 +1,9 @@
 package tientn.easynews.game.data;
 
 import java.lang.System;
-import java.util.UUID;
-import java.io.Serializable;
-import java.time.Instant;
-import java.util.Optional;
+import java.util.Dictionary;
 import java.util.List;
-import java.util.Arrays;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.concurrent.ThreadLocalRandom;
-import java.lang.StringBuilder;
-import java.time.Instant;
-import java.util.Calendar;
-import java.text.SimpleDateFormat;
-import java.io.File;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.nio.charset.Charset;
-import java.net.URL;
-
 import com.fasterxml.jackson.annotation.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -28,17 +11,20 @@ import lombok.Setter;
 //Class for exporting / importing TFMT Work Data
 @JsonRootName(value = "game-data")
 public class GameData {
+  @Getter private Dictionary<String, String> translations;
   @Getter private List<DefCity> defCityItems;
   @Getter private List<DefTalkLogic> defTalkLogicItems;
   @Getter private List<DefBuilding> defBuildingItems;
 
-  @Getter private List<City> cities;
+  private List<City> cities;
   @Getter @Setter private City currentCity = null;
 
   @Getter @Setter private String lastWorkDate;
   @Getter @Setter private int totalCities = 0;
 
-  public GameData(final List<DefCity> defCities, final List<DefTalkLogic> defTalkLogics, final List<DefBuilding> defBlds) {
+  public GameData(final Dictionary<String, String> trans, 
+    final List<DefCity> defCities, final List<DefTalkLogic> defTalkLogics, final List<DefBuilding> defBlds) {
+    this.translations = trans;
     this.defCityItems = defCities;
     this.defTalkLogicItems = defTalkLogics;
     this.defBuildingItems = defBlds;
@@ -46,9 +32,11 @@ public class GameData {
     this.cities = new ArrayList<City>();
   }
 
-  public GameData(final List<DefCity> defCities, final List<DefTalkLogic> defTalkLogics, final List<DefBuilding> defBlds,
+  public GameData(final Dictionary<String, String> trans, 
+  final List<DefCity> defCities, final List<DefTalkLogic> defTalkLogics, final List<DefBuilding> defBlds,
     final List<City> cities)
   {
+    this.translations = trans;
     this.defCityItems = defCities;
     this.defTalkLogicItems = defTalkLogics;
     this.defBuildingItems = defBlds;
@@ -56,15 +44,19 @@ public class GameData {
     this.cities = cities;
   }
 
-  public void setData(final List<DefCity> defCities, final List<DefTalkLogic> defTalkLogics, final List<DefBuilding> defBlds) {
+  public void setData(final Dictionary<String, String> trans, 
+    final List<DefCity> defCities, final List<DefTalkLogic> defTalkLogics, final List<DefBuilding> defBlds) {
+    this.translations = trans;
     this.defCityItems = defCities;
     this.defTalkLogicItems = defTalkLogics;
     this.defBuildingItems = defBlds;
   }
 
-  public void setData(final List<DefCity> defCities, final List<DefTalkLogic> defTalkLogics, final List<DefBuilding> defBlds,
+  public void setData(final Dictionary<String, String> trans, 
+    final List<DefCity> defCities, final List<DefTalkLogic> defTalkLogics, final List<DefBuilding> defBlds,
     final List<City> cities)
   {
+    this.translations = trans;
     this.defCityItems = defCities;
     this.defTalkLogicItems = defTalkLogics;
     this.defBuildingItems = defBlds;
@@ -102,4 +94,22 @@ public class GameData {
     this.cities.add(city);
   }
 
+  public List<City> getCities() {
+    return this.cities;
+  }
+
+  public City getCityByLocation(final int x, final int y) {
+    int idx = x+(y*Constants.MAP_HORZ_TILES);
+    City cty = this.cities.get(idx);
+    if (cty.getX() == x && cty.getY() == y)
+      return cty;
+    else {
+      System.out.println("getCityByLocation: scanning");
+      for (City c: this.cities) {
+        if (c.getX() == x && c.getY() == y)
+          return c;
+        }
+    }
+    return null;
+  }
 }

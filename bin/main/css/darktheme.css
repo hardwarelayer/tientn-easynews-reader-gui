@@ -78,3 +78,9 @@
     -fx-border-color: transparent;
     -fx-table-cell-border-color:transparent;
 }
+
+.canvas {
+    -fx-background-color: antiquewhite, white ;
+    -fx-background-insets: 0, 20 ;
+    -fx-padding: 20 ;
+}

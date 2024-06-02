@@ -34,6 +34,10 @@ public class City implements Serializable {
   @Getter @Setter private String owner;
   @Getter @Setter private String name;
   @Getter @Setter private int security;
+  @Getter @Setter private int happiness;
+  @Getter @Setter private int defense;
+  @Getter @Setter private int x;
+  @Getter @Setter private int y;
 
   //city list (with info)
   // city's build queue
@@ -42,8 +46,13 @@ public class City implements Serializable {
   // city's consuming cap
   // city's messages
 
+  private int getBasicInventoryCap() {
+    return this.def.getCapability().getLand()*Constants.CITY_LAND_BARE_STORAGE_CAP;
+  }
+
   public City(final DefCity def, 
-    List<CityBuildQueueItem> builds, List<CityProductionItem> prods) {
+    List<CityBuildQueueItem> builds, List<CityProductionItem> prods,
+    final int x, final int y) {
     this.def = def;
     this.buildQueue = builds;
     this.productionQueue = prods;
@@ -55,7 +64,7 @@ public class City implements Serializable {
     for (int i=0; i<Constants.basicCityMaterials.length; i++) {
       CityInventoryCapability invCap = new CityInventoryCapability(
         Constants.basicCityMaterials[i], 
-        this.def.getCapability().getLand()*Constants.CITY_LAND_BARE_STORAGE_CAP
+        this.getBasicInventoryCap()
       );
       this.inventoryCapability.add(invCap);
 
@@ -68,6 +77,10 @@ public class City implements Serializable {
     this.owner = this.def.getOwner();
     this.name = this.def.getName();
     this.security = Constants.CITY_DEFAULT_SECURITY_LEVEL;
+    this.x = x;
+    this.y = y;
+    this.defense = 0;
+    this.happiness = 0;
   }
 
   public City(final DefCity def, 
@@ -84,13 +97,15 @@ public class City implements Serializable {
     this.owner = this.def.getOwner();
     this.name = this.def.getName();
     this.security = 1;
+    this.defense = 0;
+    this.happiness = 0;
   }
 
   public City(final DefCity def, 
     final int level, final int pop, final int troop, final String owner, final String name,
     List<CityBuildQueueItem> builds, List<CityProductionItem> prods,
     List<CityInventoryCapability> inventoryCaps, List<CityInventoryItem> inventoryItems,
-    final int security) {
+    final int security, final int x, final int y, final int defense, final int happiness) {
     this.def = def;
     this.buildQueue = builds;
     this.productionQueue = prods;
@@ -102,6 +117,16 @@ public class City implements Serializable {
     this.owner = owner;
     this.name = name;
     this.security = security;
+    this.x = x;
+    this.y = y;
+    this.defense = 0;
+    this.happiness = 0;
+  }
+
+  public void resetAllInvCap(final int qty) {
+    for (CityInventoryCapability invCap: this.inventoryCapability) {
+      invCap.setQuantity(getBasicInventoryCap()+qty);
+    }
   }
 
   public int getInvCap(final String name) {

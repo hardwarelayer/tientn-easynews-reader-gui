@@ -25,12 +25,16 @@ public class DefBuilding implements Serializable {
   @Getter @Setter private List<String> requireClass;
   @Getter @Setter private List<String> bonusClass;
   @Getter @Setter private List<DefBuildingCostType> costLst;
+  @Getter @Setter private List<DefBuildingConsume> consumeLst;
   @Getter @Setter private List<DefBuildingProduce> produceLst;
   @Getter @Setter private List<DefReaction> reaction;
 
   public DefBuilding(final String type, final String name, final List<String> value, final DefTalkLogicValueRange vRange, 
     final List<String> requireClass, final List<String> bonusClass, 
-    final List<DefBuildingCostType> costLst, final List<DefBuildingProduce> produceLst, final List<DefReaction> reaction) {
+    final List<DefBuildingCostType> costLst, 
+    final List<DefBuildingConsume> consumeLst, 
+    final List<DefBuildingProduce> produceLst, 
+    final List<DefReaction> reaction) {
     this.type = type;
     this.name = name;
     this.value = value;
@@ -38,6 +42,7 @@ public class DefBuilding implements Serializable {
     this.requireClass = requireClass;
     this.bonusClass = bonusClass;
     this.costLst = costLst;
+    this.consumeLst = consumeLst;
     this.produceLst = produceLst;
     this.reaction = reaction;
   }
@@ -51,6 +56,7 @@ public class DefBuilding implements Serializable {
         this.requireClass,
         this.bonusClass,
         this.costLst,
+        this.consumeLst,
         this.produceLst,
         this.reaction
       );
@@ -68,6 +74,7 @@ public class DefBuilding implements Serializable {
       String.join(",", requireClass) + "|" +
       String.join(",", this.bonusClass) + "|" +
       String.join(",", this.costLst.toString()) + "|" +
+      String.join(",", this.consumeLst.toString()) + "|" +
       String.join(",", this.produceLst.toString()) + "|" +
       String.join(",", this.reaction.toString())
       ).toString();

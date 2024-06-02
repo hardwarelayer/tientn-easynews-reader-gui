@@ -9,7 +9,9 @@ public interface Constants {
 
   final int GAME_TICK_PER_DAY = 4;
 
+  final String DEFAULT_GAME_SAVE_FILE_NAME = "default_save_game_file.ttgs";
   final int CITY_DEFAULT_SECURITY_LEVEL = 4;
+  final int CITY_BUILDING_PRODUCE_DEFAULT_ORDER_QTY = 10;
 
   static final String CITY_TALK_LOGICS = "talk_logics";
   static final String CITY_REACT_TRIGGER_PROMPT = "prompt";
@@ -19,19 +21,30 @@ public interface Constants {
 
   static final String CITY_BUILDER_ACTION_TYPE = "builder";
   static final String CITY_POP_ACTION_TYPE = "pop";
+  static final String CITY_PRODUCE_ACTION_TYPE = "building_produce";
 
   static final String CITY_BUILDING_COST = "cost";
   static final String CITY_BUILDING_PRODUCE = "produce";
+  static final String CITY_BUILDING_STATUS_IDLING = "idle";
+  static final String CITY_BUILDING_STATUS_PRODUCE = "producing";
 
   static final String CITY_BUILDING_PRODUCE_TYPE1 = "pop";
-  static final String CITY_BUILDING_PRODUCE_TYPE2 = "brick";
-  static final String CITY_BUILDING_PRODUCE_TYPE3 = "tool";
-  static final String CITY_BUILDING_PRODUCE_TYPE4 = "steel";
+  static final String CITY_BUILDING_PRODUCE_TYPE2 = "storage";
+  static final String CITY_BUILDING_PRODUCE_TYPE3 = "food";
+  static final String CITY_BUILDING_PRODUCE_TYPE4 = "brick";
+  static final String CITY_BUILDING_PRODUCE_TYPE5 = "tool";
+  static final String CITY_BUILDING_PRODUCE_TYPE6 = "steel";
+  static final String CITY_BUILDING_PRODUCE_TYPE7 = "defense";
+  static final String CITY_BUILDING_PRODUCE_TYPE8 = "weapon";
+  static final String CITY_BUILDING_PRODUCE_TYPE9 = "archer";
+  static final String CITY_BUILDING_PRODUCE_TYPE10 = "footman";
+  static final String CITY_BUILDING_PRODUCE_TYPE11 = "calvary";
 
   static final String CITY_BUILDING_REACTION = "reaction";
   static final String CITY_BUILDING_REACT_TYPE = "builder";
   static final String CITY_BUILDING_REACT_TRIGGER_BUILD = "build";
   static final String CITY_BUILDING_REACT_TRIGGER_REMOVE = "remove";
+  static final String CITY_BUILDING_REACT_TRIGGER_PRODUCE = "lack_material";
 
   static final String CITY_POP_REACT_TRIGGER_INCREASE = "value_increase";
   static final String CITY_POP_REACT_TRIGGER_DECREASE = "value_decrease";
@@ -49,12 +62,45 @@ public interface Constants {
   static final String[] basicCityMaterials = {CITY_BASIC_MATERIAL_1, CITY_BASIC_MATERIAL_2, CITY_BASIC_MATERIAL_3, CITY_BASIC_MATERIAL_4, CITY_BASIC_MATERIAL_5};
 
   static final String CITY_BUILDING_HOUSE_TYPE = "house";
-  static final String CITY_BUILDING_HOUSE_CITIZEN_NAME = "citizen house";
+  static final String CITY_BUILDING_HOUSE_CITIZEN_NAME = "Citizen house";
   static final int CITY_BUILDING_HOUSE_CITIZEN_CAP = 4;
+  static final String CITY_BUILDING_WAREHOUSE_TYPE = "warehouse";
+  static final String CITY_BUILDING_STOCKADE_TYPE = "stockade";
+  static final String CITY_BUILDING_ARMOURY_TYPE = "armoury";
+  static final String CITY_BUILDING_ARCHERY_TYPE = "archery";
+  static final String CITY_BUILDING_BARRACK_TYPE = "barrack";
+  static final String CITY_BUILDING_STABLE_TYPE = "stable";
+  static final String CITY_BUILDING_FARM_TYPE = "farm";
+  static final String CITY_BUILDING_FISHFARM_TYPE = "aquafarm";
+
+  static final String GUI_LABEL_SELECTED_CITY = "Selected City";
+  static final String GUI_LABEL_CONSTRUCTION = "Construction";
+  static final String GUI_LABEL_ADMINISTRATION = "Administration";
+  static final String GUI_LABEL_ADMIN_PRODUCE = "Produce";
+  static final String GUI_LABEL_MILLITARY = "Millitary";
+  static final String GUI_LABEL_MIL_PATROL = "Patrol";
+  static final String GUI_LABEL_BUILDING = "Building";
 
   static final String CITY_BASIC_INFO_POP = "Population";
   static final String CITY_BASIC_INFO_FREE_SPACE = "Free spaces";
   static final String CITY_BASIC_INFO_SECURITY = "Security";
+  static final String CITY_BASIC_INFO_HAPPINESS = "Happiness";
+  static final String CITY_BASIC_INFO_DEFENSE = "Defense";
+  static final String CITY_BASIC_INFO_COORDINATE = "Coordinate";
+  static final String CITY_BASIC_INFO_OWNER = "Owner";
+  static final String CITY_BASIC_INFO_LEVEL = "Level";
+  static final String CITY_BASIC_INFO_TROOP = "Troop";
+  static final String CITY_BASIC_INFO_CAPABILITY = "Capability";
+  static final String CITY_BASIC_INFO_CAP_LAND = "Land";
+  static final String CITY_BASIC_INFO_CAP_FARM = "Farm";
+  static final String CITY_BASIC_INFO_CAP_IRON = "Iron";
+  static final String CITY_BASIC_INFO_CAP_STONE = "Stone";
+  static final String CITY_BASIC_INFO_CAP_CLAY = "Clay";
+  static final String CITY_BASIC_INFO_CAP_WATER = "Water";
+
+  static final String GAME_PLAYER1 = "human1";
+  static final String GAME_PLAYER2 = "bandit";
+  static final String GAME_PLAYER3 = "ai1";
 
   public class QtyWithCap {
     @Getter @Setter private int qty;
@@ -96,12 +142,16 @@ public interface Constants {
         ).toString();
     }
   }
-  final int TILE_WIDTH = 32; // tile width
-  final int TILE_HEIGHT = 32; // tile height
-  final int MAP_HORZ_TILES = 20;
-  final int MAP_VERT_TILES = 18;
+  final int MAP_WIDTH = 850;
+  final int MAP_HEIGHT = 250;
+  final int TILE_WIDTH = 25; // tile width
+  final int TILE_HEIGHT = 25; // tile height
+  final int MAP_HORZ_TILES = 34;
+  final int MAP_VERT_TILES = 10;
   final int TILESET_COLS = 10; //size of Tile enum array, theory X
   final int TILESET_ROWS = 10; //size of Tile enum array, theory Y
+  final int CITY_ICON_WIDTH = 10;
+  final int CITY_ICON_HEIGHT = 10;
 
   static final Map<Integer, String> ECO_BUILD_NAMES = Map.ofEntries(
     entry(0, "Apartment"),

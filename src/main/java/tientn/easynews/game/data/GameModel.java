@@ -5,7 +5,12 @@ import java.util.UUID;
 import java.io.Serializable;
 import java.time.Instant;
 import java.util.Optional;
+import java.util.Set;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -49,6 +54,10 @@ public class GameModel {
   @Getter @Setter private int jCoin = 0;
   @Getter @Setter private String lastWorkDate;
   @Getter private boolean dataLoaded = false;
+  @Getter private String currentGameFilePath;
+  @Getter private String currentGameSaveFile;
+  @Getter private String DEFAULT_GAME_SAVE_FILE_NAME = "current_game.tgs";
+ 
   private static final String DATE_FORMAT_NOW = "yyyy-MM-dd"; // HH:mm:ss";
 
   public GameModel() {
@@ -112,7 +121,6 @@ public class GameModel {
 
   private String getStringFromJson(JSONObject obj, final String fld) {
     String sVal = (String) obj.get(fld);
-    if (sVal == null)  sVal = getTodayString();
     return sVal;
   }
 
@@ -122,9 +130,15 @@ public class GameModel {
     return lVal.intValue();
   }
 
-  public GameData createGameFromTemplate(final String fileName) {
+  @SuppressWarnings("unchecked")
+  public GameData createGameFromTemplate(final File file) {
     if (this.isDataLoaded()) return null;
 
+    String fileName = file.getPath();
+    this.currentGameFilePath = file.getParent();
+    this.currentGameSaveFile = this.currentGameFilePath + "/" + DEFAULT_GAME_SAVE_FILE_NAME;
+System.out.println(this.currentGameSaveFile);
+    Dictionary<String, String> translationItems = new Hashtable<>();
     List<DefCity> defCityItems = new ArrayList<DefCity>();
     List<DefTalkLogic> defTalkLogicItems = new ArrayList<DefTalkLogic>();
     List<DefBuilding> defBuildingItems = new ArrayList<DefBuilding>();
@@ -133,6 +147,7 @@ public class GameModel {
       JSONParser parser = new JSONParser();
       Object obj = parser.parse(new FileReader(fileName));
       JSONObject jsonObject = (JSONObject) obj;
+      JSONObject jsonTranslations = (JSONObject) jsonObject.get("translations");
       JSONArray jsonDefCityList = (JSONArray) jsonObject.get("cities");
       JSONArray jsonDefTalkLogicList = (JSONArray) jsonObject.get("talk_logics");
       JSONArray jsonDefBuildingList = (JSONArray) jsonObject.get("buildings");
@@ -142,6 +157,16 @@ public class GameModel {
 
       if (jsonDefCityList.size() < 1) return null;
       if (jsonDefTalkLogicList.size() < 1) return null;
+
+      Set<String> keys = jsonTranslations.keySet();
+      Iterator<String> wordsIterator = keys.iterator();
+      while(wordsIterator.hasNext()) {
+        String sWord = wordsIterator.next();
+        String sMeaning = getStringFromJson(jsonTranslations, sWord);
+        translationItems.put(
+          sWord, sMeaning
+        );
+      }
 
       for (Object kObj: jsonDefCityList) {
         System.out.println(kObj.toString());
@@ -257,6 +282,7 @@ public class GameModel {
         JSONArray jsonValueList = (JSONArray) jsonMain.get("value");
         JSONObject jsonValueRange = (JSONObject) jsonMain.get("value_range");
         JSONArray jsonCostList = (JSONArray) jsonMain.get("cost");
+        JSONArray jsonConsumeList = (JSONArray) jsonMain.get("consume");
         JSONArray jsonProduceList = (JSONArray) jsonMain.get("produce");
         JSONArray requireClassList = (JSONArray) jsonMain.get("require_class");
         JSONArray bonusClassList = (JSONArray) jsonMain.get("bonus_class");
@@ -286,6 +312,17 @@ public class GameModel {
           DefBuildingCostType bldCostTypeObj = new DefBuildingCostType(
             (String) bldCostTypeCls.get("type"), getIntFromJson(bldCostTypeCls, "quantity"));
           bldCostTypeList.add(bldCostTypeObj);
+        }
+
+        List<DefBuildingConsume> bldConsumeList = new ArrayList<DefBuildingConsume>();
+        for (Object objBldConsume : jsonConsumeList) {
+          JSONObject bldConsumeCls = (JSONObject) objBldConsume;
+          DefBuildingConsume bldConsumeObj = new DefBuildingConsume(
+              (String)bldConsumeCls.get("type"),
+              getIntFromJson(bldConsumeCls, "quantity"),
+              getIntFromJson(bldConsumeCls, "speed")
+            );
+          bldConsumeList.add(bldConsumeObj);
         }
 
         List<DefBuildingProduce> bldProduceList = new ArrayList<DefBuildingProduce>();
@@ -327,6 +364,7 @@ public class GameModel {
           reqList,
           bonusList,
           bldCostTypeList,
+          bldConsumeList,
           bldProduceList,
           reactionList);
 
@@ -338,7 +376,7 @@ public class GameModel {
       if (defCityItems.size() > 0 && 
         defTalkLogicItems.size() > 0 && 
         defBuildingItems.size() > 0) {
-          GameData gmData = new GameData(defCityItems, defTalkLogicItems, defBuildingItems);
+          GameData gmData = new GameData(translationItems, defCityItems, defTalkLogicItems, defBuildingItems);
           return gmData;
       }
 
